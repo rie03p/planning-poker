@@ -1,0 +1,11 @@
+services:
+  devcontainer:
+    build: ./.devcontainer
+    command: sleep infinity
+    volumes:
+      - type: bind
+        source: .
+        target: /workspaces/planning-poker
+        consistency: cached
+    init: true
+

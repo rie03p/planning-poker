@@ -1,0 +1,4 @@
+.pnpm-store
+.env
+node_modules
+.DS_Store
