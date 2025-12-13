@@ -1,7 +1,6 @@
 import {
   Menu,
   Button,
-  Box,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -15,9 +14,9 @@ export type VotingSystemOption = {
 
 const DEFAULT_OPTIONS: VotingSystemOption[] = [
   { id: 'fibonacci', label: 'Fibonacci (0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ?, ☕)' },
-  { id: 'modified-fibonacci', label: 'Modified Fibonacci' },
-  { id: 'tshirts', label: 'T-shirts' },
-  { id: 'powers-of-2', label: 'Powers of 2' },
+  { id: 'modified-fibonacci', label: 'Modified Fibonacci ( 0, ½, 1, 2, 3, 5, 8, 13, 20, 40, 100, ?, ☕ )' },
+  { id: 'tshirts', label: 'T-shirts (XS, S, M, L, XL, ?, ☕ )' },
+  { id: 'powers-of-2', label: 'Powers of 2 ( 0, 1, 2, 4, 8, 16, 32, 64, ?, ☕ )' },
 ]
 
 type Props = {
