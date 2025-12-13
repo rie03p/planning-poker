@@ -3,9 +3,9 @@ main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
 [[durable_objects.bindings]]
-name = "ROOM"
-class_name = "Room"
+name = "GAME"
+class_name = "Game"
 
 [[migrations]]
 tag = "v1"
-new_classes = ["Room"]
+new_classes = ["Game"]

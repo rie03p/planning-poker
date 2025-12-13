@@ -7,11 +7,11 @@ export function Home() {
   const navigate = useNavigate()
   const [votingSystem, setVotingSystem] = useState<string | undefined>(undefined)
 
-  const handleCreateRoom = () => {
-    // TODO: generate room ID properly
-    const newRoomId = 'generated-room-id'
+  const handleCreateGame = () => {
+    // TODO: generate game ID properly
+    const newGameId = 'generated-game-id'
     const q = votingSystem ? `?v=${encodeURIComponent(votingSystem)}` : ''
-    navigate(`/${newRoomId}${q}`)
+    navigate(`/${newGameId}${q}`)
   }
 
   return (
@@ -28,7 +28,7 @@ export function Home() {
           colorScheme="blue"
           size="lg"
           w="full"
-          onClick={handleCreateRoom}
+          onClick={handleCreateGame}
           disabled={!votingSystem}
         >
           Start new game

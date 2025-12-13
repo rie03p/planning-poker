@@ -4,7 +4,7 @@ interface Participant {
   vote: string | null;
 }
 
-interface RoomState {
+interface GameState {
   participants: Map<string, Participant>;
   revealed: boolean;
 }
@@ -15,13 +15,13 @@ interface Message {
   vote?: string;
 }
 
-export class Room {
+export class Game {
   private sessions: Map<string, WebSocket>;
-  private roomState: RoomState;
+  private gameState: GameState;
 
   constructor(state: DurableObjectState) {
     this.sessions = new Map();
-    this.roomState = {
+    this.gameState = {
       participants: new Map(),
       revealed: false,
     };
@@ -76,7 +76,7 @@ export class Room {
   // セッションの切断を処理
   private handleDisconnect(sessionId: string): void {
     this.sessions.delete(sessionId);
-    this.roomState.participants.delete(sessionId);
+    this.gameState.participants.delete(sessionId);
     this.broadcastParticipantUpdate();
   }
 
@@ -99,7 +99,7 @@ export class Room {
   }
 
   private handleJoin(sessionId: string, name: string): void {
-    this.roomState.participants.set(sessionId, {
+    this.gameState.participants.set(sessionId, {
       id: sessionId,
       name,
       vote: null,
@@ -108,7 +108,7 @@ export class Room {
   }
 
   private handleVote(sessionId: string, vote: string): void {
-    const participant = this.roomState.participants.get(sessionId);
+    const participant = this.gameState.participants.get(sessionId);
     if (participant) {
       participant.vote = vote;
       this.broadcastParticipantUpdate();
@@ -117,7 +117,7 @@ export class Room {
 
   // 投票の公開を処理
   private handleReveal(): void {
-    this.roomState.revealed = true;
+    this.gameState.revealed = true;
     this.broadcast({
       type: "votesRevealed",
       participants: this.getParticipantsArray(),
@@ -127,8 +127,8 @@ export class Room {
 
   // 投票のリセットを処理
   private handleReset(): void {
-    this.roomState.revealed = false;
-    this.roomState.participants.forEach((p) => {
+    this.gameState.revealed = false;
+    this.gameState.participants.forEach((p) => {
       p.vote = null;
     });
     this.broadcast({
@@ -143,13 +143,13 @@ export class Room {
     this.broadcast({
       type: "voteUpdated",
       participants: this.getParticipantsArray(),
-      revealed: this.roomState.revealed,
+      revealed: this.gameState.revealed,
     });
   }
 
   // 参加者の配列を取得
   private getParticipantsArray(): Participant[] {
-    return Array.from(this.roomState.participants.values());
+    return Array.from(this.gameState.participants.values());
   }
 
   // 全セッションにメッセージを送信

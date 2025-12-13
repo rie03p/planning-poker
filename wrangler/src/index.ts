@@ -1,21 +1,21 @@
 /// <reference types="@cloudflare/workers-types" />
 
-import { Room } from "./room";
+import { Game } from "./game";
 
 export interface Env {
-  ROOM: DurableObjectNamespace;
+  GAME: DurableObjectNamespace;
 }
 
 export default {
   fetch(request: Request, env: Env) {
     const url = new URL(request.url);
 
-    // /room/:roomId
-    if (url.pathname.startsWith("/room/")) {
-      const roomId = url.pathname.split("/")[2];
+    // /game/:gameId
+    if (url.pathname.startsWith("/game/")) {
+      const gameId = url.pathname.split("/")[2];
 
-      if (!roomId) {
-        return new Response("roomId is required", { status: 400 });
+      if (!gameId) {
+        return new Response("gameId is required", { status: 400 });
       }
 
       // WebSocket 以外は拒否
@@ -28,12 +28,12 @@ export default {
         return new Response("Method Not Allowed", { status: 405 });
       }
 
-      const id = env.ROOM.idFromName(roomId);
-      return env.ROOM.get(id).fetch(request);
+      const id = env.GAME.idFromName(gameId);
+      return env.GAME.get(id).fetch(request);
     }
 
     return new Response("OK");
   },
 };
 
-export { Room };
+export { Game };
