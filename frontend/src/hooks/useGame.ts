@@ -75,7 +75,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     return () => {
       ws.close();
     };
-  }, [gameId, name]);
+  }, [gameId, name, send]);
 
   const vote = useCallback((value: string) => {
     send({ type: 'vote', vote: value });
