@@ -5,6 +5,7 @@ import { useGame } from "../../hooks/useGame"
 import { Box, VStack, HStack, Text, Button } from "@chakra-ui/react"
 import { VoteCard } from "./components/VoteCard"
 import { ParticipantCard } from "./components/ParticipantCard"
+import { ActionArea } from "./components/ActionArea"
 
 const CARDS = ['0', '1', '2', '4', '8', '16', '32', '64', '?', '☕']
 
@@ -59,9 +60,12 @@ export function Game() {
           py={8}
           textAlign="center"
         >
-          <Text fontSize="xl" fontWeight="medium">
-            {myVote ? 'Reveal Cards' : 'Pick your cards!'}
-          </Text>
+          <ActionArea
+            myVote={myVote}
+            revealed={revealed}
+            reveal={reveal}
+            reset={reset}
+          />
         </Box>
 
         {/* Participants Area - Bottom */}
