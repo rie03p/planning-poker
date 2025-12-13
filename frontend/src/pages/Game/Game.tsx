@@ -4,6 +4,7 @@ import { JoinDialog } from './components/JoinDialog'
 import { useGame } from "../../hooks/useGame"
 import { Box, VStack, HStack, Text, Button } from "@chakra-ui/react"
 import { VoteCard } from "./components/VoteCard"
+import { ParticipantCard } from "./components/ParticipantCard"
 
 const CARDS = ['0', '1', '2', '4', '8', '16', '32', '64', '?', '☕']
 
@@ -24,23 +25,31 @@ export function Game() {
 
   const { participants, myVote, vote, revealed, reveal, reset } = game
 
+  const renderParticipants = (list: typeof participants) => (
+    <HStack
+      gap={8}
+      justify="center"
+      flexWrap="wrap"
+      minH="120px"
+      align="center"
+    >
+      {list.map((p) => (
+        <ParticipantCard
+          key={p.id}
+          name={p.name}
+          hasVoted={p.vote !== null}
+        />
+      ))}
+    </HStack>
+  )
+
   return (
     <VStack gap={8} py={8} align="center">
       <VStack gap={3} align="center" justify="center">
         {/* Participants Area - Top */}
-        <HStack gap={8} justify="center" flexWrap="wrap" minH="120px" align="center">
-          {participants.slice(Math.ceil(participants.length / 2)).map((participant) => (
-            <VStack key={participant.id} gap={1}>
-              <Box
-                w="60px"
-                h="80px"
-                bg="gray.200"
-                borderRadius="md"
-              />
-              <Text fontWeight="medium" fontSize="sm">{participant.name}</Text>
-            </VStack>
-          ))}
-        </HStack>
+        {renderParticipants(
+          participants.slice(Math.ceil(participants.length / 2))
+        )}
 
         {/* Action Area */}
         <Box
@@ -56,19 +65,9 @@ export function Game() {
         </Box>
 
         {/* Participants Area - Bottom */}
-        <HStack gap={8} justify="center" flexWrap="wrap" minH="120px" align="center">
-          {participants.slice(0, Math.ceil(participants.length / 2)).map((participant) => (
-            <VStack key={participant.id} gap={1}>
-              <Box
-                w="60px"
-                h="80px"
-                bg="gray.200"
-                borderRadius="md"
-              />
-              <Text fontWeight="medium" fontSize="sm">{participant.name}</Text>
-            </VStack>
-          ))}
-        </HStack>
+        {renderParticipants(
+          participants.slice(0, Math.ceil(participants.length / 2))
+        )} 
       </VStack>
       {/* Card Selection */}
       <VStack gap={4}>
