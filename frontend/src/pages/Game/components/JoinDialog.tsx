@@ -9,6 +9,18 @@ type Props = {
 export function JoinDialog({ isOpen, onJoin }: Props) {
   const [draftName, setDraftName] = useState<string>('')
 
+  const handleJoin = () => {
+    if (draftName.trim()) {
+      onJoin(draftName.trim())
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleJoin()
+    }
+  }
+
   return (
     <Dialog.Root open={isOpen}>
       <Dialog.Backdrop />
@@ -23,6 +35,8 @@ export function JoinDialog({ isOpen, onJoin }: Props) {
               placeholder="Your name"
               value={draftName}
               onChange={(e) => setDraftName(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoFocus
             />
           </Dialog.Body>
 
@@ -31,7 +45,7 @@ export function JoinDialog({ isOpen, onJoin }: Props) {
               w="full"
               colorScheme="blue"
               disabled={!draftName.trim()}
-              onClick={() => onJoin(draftName.trim())}
+              onClick={handleJoin}
             >
               Join game
             </Button>
