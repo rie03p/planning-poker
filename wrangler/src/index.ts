@@ -6,9 +6,19 @@ const ALLOWED_ORIGINS = [
   "https://planning-poker-ba3.pages.dev",
 ];
 
-function isOriginAllowed(origin: string | null): boolean {
-  if (!origin) return false;
-  return ALLOWED_ORIGINS.some(allowed => origin === allowed);
+function getCorsHeaders(origin: string | null): Headers | null {
+  if (!origin) return null;
+
+  if (!ALLOWED_ORIGINS.includes(origin)) {
+    return null;
+  }
+
+  return new Headers({
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400",
+  });
 }
 
 export interface Env {
@@ -17,28 +27,20 @@ export interface Env {
 
 export default {
   fetch(request: Request, env: Env) {
-    // CORS Preflight Request
-    if (request.method === "OPTIONS") {
-      const origin = request.headers.get("Origin");
-      if (isOriginAllowed(origin)) {
-        return new Response(null, {
-          status: 204,
-          headers: {
-            "Access-Control-Allow-Origin": origin!,
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Max-Age": "86400",
-          },
-        });
-      } else {
-        return new Response("Origin not allowed", { status: 403 });
-      }
+    const origin = request.headers.get("Origin");
+    const corsHeaders = getCorsHeaders(origin);
+
+    // Origin NG
+    if (!corsHeaders) {
+      return new Response("Origin not allowed", { status: 403 });
     }
 
-    // Validate Origin
-    const origin = request.headers.get("Origin");
-    if (!isOriginAllowed(origin)) {
-      return new Response("Origin not allowed", { status: 403 });
+    // CORS Preflight
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders,
+      });
     }
 
     const url = new URL(request.url);
@@ -46,18 +48,15 @@ export default {
     // /game/:gameId
     if (url.pathname.startsWith("/game/")) {
       const gameId = url.pathname.split("/")[2];
-
       if (!gameId) {
         return new Response("gameId is required", { status: 400 });
       }
 
-      // WebSocket 以外は拒否
+      // WebSocket only
       if (request.headers.get("Upgrade") !== "websocket") {
         return new Response("Expected WebSocket", { status: 426 });
       }
 
-
-      // GET 以外は拒否
       if (request.method !== "GET") {
         return new Response("Method Not Allowed", { status: 405 });
       }
@@ -66,7 +65,7 @@ export default {
       return env.GAME.get(id).fetch(request);
     }
 
-    return new Response("OK");
+    return new Response("OK", { headers: corsHeaders });
   },
 };
 
