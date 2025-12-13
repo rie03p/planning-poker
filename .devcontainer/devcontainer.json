@@ -56,10 +56,14 @@
       }
     }
   },
-  "forwardPorts": [5173],
+  "forwardPorts": [5173, 8787],
   "portsAttributes": {
     "5173": {
       "label": "Frontend Server",
+      "onAutoForward": "notify"
+    },
+    "8787": {
+      "label": "Backend Server",
       "onAutoForward": "notify"
     }
   }
