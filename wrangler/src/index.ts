@@ -3,7 +3,7 @@
 import { Game } from "./game";
 
 const ALLOWED_ORIGINS = [
-  "https://planning-poker-ba3.pages.dev/",
+  "https://planning-poker-ba3.pages.dev",
 ];
 
 function isOriginAllowed(origin: string | null): boolean {
@@ -35,6 +35,12 @@ export default {
       }
     }
 
+    // Validate Origin
+    const origin = request.headers.get("Origin");
+    if (!isOriginAllowed(origin)) {
+      return new Response("Origin not allowed", { status: 403 });
+    }
+
     const url = new URL(request.url);
 
     // /game/:gameId
@@ -49,6 +55,7 @@ export default {
       if (request.headers.get("Upgrade") !== "websocket") {
         return new Response("Expected WebSocket", { status: 426 });
       }
+
 
       // GET 以外は拒否
       if (request.method !== "GET") {
