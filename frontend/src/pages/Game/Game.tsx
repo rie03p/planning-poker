@@ -1,8 +1,21 @@
+import { useLocalStorage } from "../../hooks/useLocalStorage"
+import { useParams } from "react-router-dom"
+import { JoinDialog } from './components/JoinDialog'
+
 export function Game() {
+  const { gameId } = useParams<{ gameId: string }>()
+  if (!gameId) throw new Error('gameId is required')
+
+  const {
+    value: name,
+    setValue: setName,
+  } = useLocalStorage<string>('planning-poker:name', '')
+
+  // const game = name ? useGame(gameId, name) : null
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 gap-6">
-      <h1 className="text-4xl font-bold text-black">Game Room</h1>
-      {/* Game room content goes here */}
-    </div>
+    <>
+      <JoinDialog isOpen={!name} onJoin={setName} />
+    </>
   )
 }
