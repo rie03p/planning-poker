@@ -1,0 +1,66 @@
+{
+  "name": "Planning Poker Dev Container",
+  "dockerComposeFile": ["../compose.yaml", "compose.yaml"],
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/planning-poker",
+  "postCreateCommand": ".devcontainer/postCreateCommand.sh",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/mise:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "upgradePackages": true
+    }
+  },
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // JavaScript & TypeScript
+        "yoavbls.pretty-ts-errors",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        // Shell
+        "foxundermoon.shell-format",
+        // Utility
+        "eamodio.gitlens",
+        "github.copilot",
+        "gruntfuggly.todo-tree",
+        "streetsidesoftware.code-spell-checker",
+        "mhutchie.git-graph",
+        "oderwat.indent-rainbow",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        // JavaScript & TypeScript
+        "eslint.workingDirectories": [
+          {
+            "mode": "auto"
+          }
+        ],
+        "[javascript][typescript]": {
+          "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+          },
+          "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+          "editor.formatOnSave": true
+        },
+        "eslint.format.enable": true,
+        // Terminal
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.scrollback": 100000,
+        // GitHub Copilot
+        "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+        "github.copilot.chat.localeOverride": "ja",
+        "chat.instructionsFilesLocations": {
+          ".github/instructions": true
+        }
+      }
+    }
+  },
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Frontend Server",
+      "onAutoForward": "notify"
+    }
+  }
+}
