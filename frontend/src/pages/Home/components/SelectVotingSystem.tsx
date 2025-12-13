@@ -54,12 +54,18 @@ export function SelectVotingSystem({
           variant="outline"
           w="full"
           justifyContent="space-between"
+          paddingEnd={2}
+          textAlign="left"
         >
-          <VStack align="start" gap={0}>
+          <VStack align="start" gap={0} flex="1" overflow="hidden" minW={0}>
             <Text fontSize="sm" color="gray.500">
               Voting system
             </Text>
-            <Text fontWeight="semibold">
+            <Text 
+              width="100%"
+              fontWeight="semibold" 
+              truncate
+            >
               {selectedOption.label}
             </Text>
           </VStack>
