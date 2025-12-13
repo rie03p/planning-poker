@@ -8,7 +8,7 @@ const ALLOWED_ORIGINS = [
 
 function isOriginAllowed(origin: string | null): boolean {
   if (!origin) return false;
-  return ALLOWED_ORIGINS.some(allowed => origin === allowed || origin.startsWith(allowed));
+  return ALLOWED_ORIGINS.some(allowed => origin === allowed);
 }
 
 export interface Env {
