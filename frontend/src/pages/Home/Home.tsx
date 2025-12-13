@@ -25,7 +25,7 @@ export function Home() {
         />
 
         <Button
-          colorScheme="blue"
+          colorPalette="blue"
           size="lg"
           w="full"
           onClick={handleCreateGame}

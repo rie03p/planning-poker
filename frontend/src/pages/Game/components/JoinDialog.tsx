@@ -43,7 +43,7 @@ export function JoinDialog({ isOpen, onJoin }: Props) {
           <Dialog.Footer>
             <Button
               w="full"
-              colorScheme="blue"
+              colorPalette="blue"
               disabled={!draftName.trim()}
               onClick={handleJoin}
             >
