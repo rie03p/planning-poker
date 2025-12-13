@@ -2,7 +2,7 @@ import { useLocalStorage } from "../../hooks/useLocalStorage"
 import { useParams } from "react-router-dom"
 import { JoinDialog } from './components/JoinDialog'
 import { useGame } from "../../hooks/useGame"
-import { Box, VStack, HStack, Text, Button } from "@chakra-ui/react"
+import { Box, VStack, HStack, Text } from "@chakra-ui/react"
 import { VoteCard } from "./components/VoteCard"
 import { ParticipantCard } from "./components/ParticipantCard"
 import { ActionArea } from "./components/ActionArea"
