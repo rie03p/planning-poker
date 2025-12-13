@@ -22,6 +22,18 @@ type ClientMessage =
   | { type: 'reveal' }
   | { type: 'reset' }
 
+const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8787';
+
+function toWebSocketUrl(httpUrl: string): string {
+  if (httpUrl.startsWith('https://')) {
+    return httpUrl.replace(/^https:\/\//, 'wss://');
+  }
+  if (httpUrl.startsWith('http://')) {
+    return httpUrl.replace(/^http:\/\//, 'ws://');
+  }
+  throw new Error(`Invalid BACKEND_URL: ${httpUrl}`);
+}
+
 export function useGame(gameId: string, name: string): UseGameReturn {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [myVote, setMyVote] = useState<string | null>(null);
@@ -35,8 +47,8 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   }, [])
 
   useEffect(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//localhost:8787/game/${gameId}`;
+    const wsBase = toWebSocketUrl(BACKEND_URL);
+    const wsUrl = `${wsBase}/game/${gameId}`;
 
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
