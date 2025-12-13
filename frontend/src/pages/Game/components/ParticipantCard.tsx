@@ -3,9 +3,13 @@ import { Box, Text, VStack } from "@chakra-ui/react"
 type Props = {
   name: string
   hasVoted: boolean
+  vote?: string | null
+  revealed?: boolean
 }
 
-export function ParticipantCard({ name, hasVoted }: Props) {
+export function ParticipantCard({ name, hasVoted, vote, revealed }: Props) {
+  const showVote = revealed && vote !== null && vote !== undefined
+
   return (
     <VStack gap={1}>
       <Box
@@ -20,7 +24,11 @@ export function ParticipantCard({ name, hasVoted }: Props) {
         alignItems="center"
         justifyContent="center"
       >
-        {hasVoted && (
+        {showVote ? (
+          <Text fontSize="3xl" fontWeight="bold" color="blue.600" lineHeight="1">
+            {vote}
+          </Text>
+        ) : hasVoted ? (
           <Text
             fontSize="3xl"
             fontWeight="bold"
@@ -29,7 +37,7 @@ export function ParticipantCard({ name, hasVoted }: Props) {
           >
             ✓
           </Text>
-        )}
+        ) : null}
       </Box>
 
       <Text fontWeight="medium" fontSize="sm">
