@@ -1,4 +1,5 @@
 name: Deploy
+
 on:
   push:
     branches:
@@ -9,22 +10,32 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy
+
+    defaults:
+      run:
+        working-directory: wrangler
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v3
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          version: 8
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+          node-version: 24
           cache: 'pnpm'
+          cache-dependency-path: wrangler/pnpm-lock.yaml
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Use pnpm 10.25.0
+        run: corepack prepare pnpm@10.25.0 --activate
+
       - name: Install dependencies
-        run: pnpm install
-      - name: Deploy
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: 'backend'
-          packageManager: 'pnpm'
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy with Wrangler
+        run: pnpm wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
