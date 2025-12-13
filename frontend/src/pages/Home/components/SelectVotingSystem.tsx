@@ -48,7 +48,7 @@ export function SelectVotingSystem({
   }
 
   return (
-    <Menu.Root>
+    <Menu.Root positioning={{ sameWidth: true }}>
       <Menu.Trigger asChild>
         <Button
           variant="outline"
@@ -63,22 +63,23 @@ export function SelectVotingSystem({
               {selectedOption.label}
             </Text>
           </VStack>
-
           <ChevronDown size={16} />
         </Button>
       </Menu.Trigger>
 
-      <Menu.Content>
-        {options.map((opt) => (
-          <Menu.Item
-            key={opt.id}
-            value={opt.id}
-            onClick={() => handleSelect(opt.id)}
-          >
-            {opt.label}
-          </Menu.Item>
-        ))}
-      </Menu.Content>
+      <Menu.Positioner>
+        <Menu.Content maxH="240px" overflowY="auto">
+          {options.map((opt) => (
+            <Menu.Item
+              key={opt.id}
+              value={opt.id}
+              onClick={() => handleSelect(opt.id)}
+            >
+              {opt.label}
+            </Menu.Item>
+          ))}
+        </Menu.Content>
+      </Menu.Positioner>
     </Menu.Root>
   )
 }
