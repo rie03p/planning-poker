@@ -5,7 +5,7 @@ import { SelectVotingSystem } from './components/SelectVotingSystem'
 
 export function Home() {
   const navigate = useNavigate()
-  const [votingSystem, setVotingSystem] = useState<string | undefined>(undefined)
+  const [votingSystem, setVotingSystem] = useState<string>('tshirts')
 
   const handleCreateGame = () => {
     // TODO: generate game ID properly
