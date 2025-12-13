@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom"
 import { JoinDialog } from './components/JoinDialog'
 import { useGame } from "../../hooks/useGame"
 import { Box, VStack, HStack, Text, Button } from "@chakra-ui/react"
-import { Card } from "./components/Card"
+import { VoteCard } from "./components/VoteCard"
 
 const CARDS = ['0', '1', '2', '4', '8', '16', '32', '64', '?', '☕']
 
@@ -81,9 +81,9 @@ export function Game() {
               key={card}
               onClick={() => vote(card)}
             >
-              <Card selected={myVote === card}>
+              <VoteCard selected={myVote === card}>
                 {card}
-              </Card>
+              </VoteCard>
             </Box>
           ))}
         </HStack>
