@@ -7,6 +7,7 @@ import { VoteCard } from "./components/VoteCard"
 import { ParticipantCard } from "./components/ParticipantCard"
 import { ActionArea } from "./components/ActionArea"
 import { getCardsForVotingSystem } from "../../utils/votingSystems"
+import { CopyInviteBox } from "./components/CopyInviteBox"
 
 export function Game() {
   const { gameId } = useParams<{ gameId: string }>()
@@ -55,7 +56,10 @@ export function Game() {
   }
 
   return (
-    <VStack gap={8} py={8} align="center">
+    <VStack gap={8} py={8}>
+      <VStack gap={4} width="100%" align="flex-end" pr={8}>
+        <CopyInviteBox gameId={gameId} />
+      </VStack>
       <VStack gap={3} align="center" justify="center">
         {/* Participants Area - Top */}
         {renderParticipants(
