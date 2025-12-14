@@ -15,6 +15,7 @@ interface UseGameReturn {
   reveal: () => void;
   reset: () => void;
   disconnect: () => void;
+  notFound: boolean;
 }
 
 type ClientMessage =
@@ -40,6 +41,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   const [myVote, setMyVote] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [votingSystem, setVotingSystem] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | null>(null);
 
   const send = useCallback((message: ClientMessage) => {
@@ -47,6 +49,14 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     if (!ws || ws.readyState !== WebSocket.OPEN) return
     ws.send(JSON.stringify(message))
   }, [])
+
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/games/${gameId}/exists`)
+      .then(res => res.json())
+      .then(({ exists }) => {
+        if (!exists) setNotFound(true)
+      })
+  }, [gameId])
 
   useEffect(() => {
     const wsBase = toWebSocketUrl(BACKEND_URL);
@@ -116,5 +126,6 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     reveal,
     reset,
     disconnect,
+    notFound,
   };
 }

@@ -8,6 +8,7 @@ import { ParticipantCard } from "./components/ParticipantCard"
 import { ActionArea } from "./components/ActionArea"
 import { getCardsForVotingSystem } from "../../utils/votingSystems"
 import { CopyInviteBox } from "./components/CopyInviteBox"
+import { NotFound } from "../NotFound"
 
 export function Game() {
   const { gameId } = useParams<{ gameId: string }>()
@@ -24,7 +25,11 @@ export function Game() {
     return <JoinDialog isOpen={true} onJoin={setName} />
   }
 
-  const { participants, myVote, vote, revealed, reveal, reset, votingSystem } = game
+  const { participants, myVote, vote, revealed, reveal, reset, votingSystem, notFound } = game
+
+  if (notFound) {
+    return <NotFound />
+  }
   const cards = getCardsForVotingSystem(votingSystem)
 
   const renderParticipants = (list: typeof participants) => (

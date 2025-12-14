@@ -50,6 +50,34 @@ export default {
       );
     }
 
+    // GET /games/:gameId/exists
+    if (
+      url.pathname.startsWith("/games/") &&
+      url.pathname.endsWith("/exists") &&
+      request.method === "GET"
+    ) {
+      const gameId = url.pathname.split("/")[2];
+      if (!gameId) {
+        return new Response("gameId is required", { status: 400 });
+      }
+
+      const registryId = env.REGISTRY.idFromName("global");
+      const registry = env.REGISTRY.get(registryId);
+
+      const res = await registry.fetch(
+        `http://registry/exists?gameId=${gameId}`
+      );
+      const { exists } = await res.json() as { exists: boolean };
+
+      const h = new Headers(corsHeaders);
+      h.set("Content-Type", "application/json");
+
+      return new Response(JSON.stringify({ exists }), {
+        status: 200,
+        headers: h,
+      });
+    }
+
     // /game/:gameId (WebSocket)
     if (url.pathname.startsWith("/game/")) {
       const gameId = url.pathname.split("/")[2];
