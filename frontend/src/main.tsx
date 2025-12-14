@@ -5,7 +5,13 @@ import App from './App';
 
 const system = createSystem(defaultConfig);
 
-createRoot(document.querySelector('#root')!).render(<StrictMode>
+const root = document.querySelector('#root');
+
+if (!root) {
+  throw new Error('Root element not found');
+}
+
+createRoot(root).render(<StrictMode>
   <ChakraProvider value={system}>
     <App />
   </ChakraProvider>
