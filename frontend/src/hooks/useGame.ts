@@ -56,6 +56,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
       .then(({ exists }) => {
         if (!exists) setNotFound(true)
       })
+      .catch(() => setNotFound(true))
   }, [gameId])
 
   useEffect(() => {
