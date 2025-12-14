@@ -1,26 +1,11 @@
-import {type Env} from './types';
-
-type Participant = {
-  id: string;
-  name: string;
-  vote: string | undefined;
-};
-
-type GameState = {
-  participants: Map<string, Participant>;
-  revealed: boolean;
-};
-
-type Message = {
-  type: string;
-  name?: string;
-  vote?: string;
-};
+import {
+  type GameState, type Message, type Participant, type Env,
+} from './types';
 
 export class Game {
   private readonly sessions = new Map<string, WebSocket>();
   private readonly gameState: GameState = {
-    participants: new Map(),
+    participants: new Map<string, Participant>(),
     revealed: false,
   };
 

@@ -14,5 +14,22 @@ export type CreateGameResponse = {
 
 export type RegistryExistsResponse = {
   exists: boolean;
-  votingSystem?: string;
+  votingSystem: string;
+};
+
+export type Participant = {
+  id: string;
+  name: string;
+  vote: string | undefined;
+};
+
+export type GameState = {
+  participants: Map<string, Participant>;
+  revealed: boolean;
+};
+
+export type Message = {
+  type: string;
+  name?: string;
+  vote?: string;
 };
