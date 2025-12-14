@@ -65,8 +65,12 @@ export class Game {
 
   private setupEventListeners(websocket: WebSocket, sessionId: string) {
     websocket.addEventListener("message", async (event) => {
+      try {
       const data = JSON.parse(event.data as string);
       await this.handleMessage(sessionId, data);
+      } catch (error) {
+        console.error("Error handling message:", error);
+      }
     });
 
     websocket.addEventListener("close", () => {
