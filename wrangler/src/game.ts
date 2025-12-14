@@ -78,15 +78,15 @@ export class Game {
       }
     });
 
-    websocket.addEventListener("close", () => {
-      this.handleDisconnect(sessionId);
+    websocket.addEventListener("close", async () => {
+      await this.handleDisconnect(sessionId);
     });
   }
 
-  private handleDisconnect(sessionId: string) {
+  private async handleDisconnect(sessionId: string) {
     this.sessions.delete(sessionId);
     this.gameState.participants.delete(sessionId);
-    this.broadcastParticipant("participantLeft");
+    await this.broadcastParticipant("participantLeft");
 
     if (this.gameState.participants.size === 0) {
       this.state.storage.setAlarm(Date.now() + 60_000);
@@ -123,28 +123,28 @@ export class Game {
         this.state.storage.deleteAlarm();
         
         // Send votingSystem on join
-        this.broadcastParticipant("joined");
-        this.broadcastParticipant("voteUpdated");
+        await this.broadcastParticipant("joined");
+        await this.broadcastParticipant("voteUpdated");
         break;
 
       case "vote":
         const p = this.gameState.participants.get(sessionId);
         if (p) {
           p.vote = data.vote!;
-          this.broadcastParticipant("voteUpdated");
+          await this.broadcastParticipant("voteUpdated");
         }
         break;
 
       case "reveal":
         this.gameState.revealed = true;
-        this.broadcastParticipant("votesRevealed");
+        await this.broadcastParticipant("votesRevealed");
         break;
 
       case "reset":
         this.gameState.revealed = false;
         this.gameState.participants.forEach((p) => (p.vote = null));
 
-        this.broadcastParticipant("votesReset");
+        await this.broadcastParticipant("votesReset");
         break;
     }
   }
