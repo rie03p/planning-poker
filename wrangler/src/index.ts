@@ -1,7 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { getCorsHeaders } from "./cors";
-import { handleCreateGame } from "./routes/createGame";
 import { handleGameWebSocket } from "./routes/gameWebSocket";
 import { Env } from "./types";
 import { Game } from "./game";
@@ -24,11 +23,6 @@ export default {
     }
 
     const url = new URL(request.url);
-
-    // POST /games
-    if (url.pathname === "/games" && request.method === "POST") {
-      return handleCreateGame(request, corsHeaders);
-    }
 
     // /game/:gameId (WebSocket)
     if (url.pathname.startsWith("/game/")) {
