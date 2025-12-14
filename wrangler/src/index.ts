@@ -51,12 +51,14 @@ export default {
     }
 
     // GET /games/:gameId/exists
+    const pathParts = url.pathname.split('/');
     if (
-      url.pathname.startsWith("/games/") &&
-      url.pathname.endsWith("/exists") &&
-      request.method === "GET"
+      request.method === "GET" &&
+      pathParts.length === 4 &&
+      pathParts[1] === "games" &&
+      pathParts[3] === "exists"
     ) {
-      const gameId = url.pathname.split("/")[2];
+      const gameId = pathParts[2];
       if (!gameId) {
         return new Response("gameId is required", { status: 400 });
       }
