@@ -16,4 +16,8 @@ class_name = "GameRegistry"
 
 [[migrations]]
 tag = "v1"
-new_classes = ["Game", "GameRegistry"]
+new_sqlite_classes = ["Game"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["GameRegistry"]
