@@ -68,6 +68,11 @@ export function Game() {
           borderRadius="3xl"
           px={12}
           py={8}
+          minH="120px"
+          minW="320px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
           textAlign="center"
         >
           <ActionArea
