@@ -8,7 +8,7 @@ type Props = {
 }
 
 export function ParticipantCard({ name, hasVoted, vote, revealed }: Props) {
-  const showVote = revealed && vote !== null && vote !== undefined
+  const showVote = revealed && vote != null
 
   return (
     <VStack gap={1}>
