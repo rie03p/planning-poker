@@ -38,7 +38,7 @@ export default {
 
       await registry.fetch("http://registry/register", {
         method: "POST",
-        body: JSON.stringify({ gameId }),
+        body: JSON.stringify({ gameId, votingSystem }),
       });
 
       const headers = new Headers(corsHeaders);
@@ -64,13 +64,13 @@ export default {
       const res = await registry.fetch(
         `http://registry/exists?gameId=${gameId}`
       );
-      const { exists } = await res.json() as { exists: boolean };
+      const { exists, votingSystem } = await res.json() as { exists: boolean; votingSystem?: string };
 
       if (!exists) {
         return new Response("Game not found", { status: 404 });
       }
 
-      return handleGameWebSocket(request, env, gameId);
+      return handleGameWebSocket(request, env, gameId, votingSystem || "fibonacci");
     }
 
     return new Response("OK", { headers: corsHeaders });

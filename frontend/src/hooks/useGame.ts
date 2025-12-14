@@ -10,6 +10,7 @@ interface UseGameReturn {
   participants: Participant[];
   revealed: boolean;
   myVote: string | null;
+  votingSystem: string | null;
   vote: (value: string) => void;
   reveal: () => void;
   reset: () => void;
@@ -38,6 +39,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [myVote, setMyVote] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
+  const [votingSystem, setVotingSystem] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
   const send = useCallback((message: ClientMessage) => {
@@ -61,6 +63,11 @@ export function useGame(gameId: string, name: string): UseGameReturn {
       const data = JSON.parse(event.data);
       
       switch (data.type) {
+        case 'joined':
+          setVotingSystem(data.votingSystem);
+          setParticipants(data.participants);
+          setRevealed(data.revealed);
+          break;
         case 'participantJoined':
         case 'voteUpdated':
         case 'votesRevealed':
@@ -101,6 +108,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     participants,
     revealed,
     myVote,
+    votingSystem,
     vote,
     reveal,
     reset,

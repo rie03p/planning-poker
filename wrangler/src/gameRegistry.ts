@@ -10,8 +10,8 @@ export class GameRegistry {
 
     // POST /register
     if (url.pathname === "/register" && request.method === "POST") {
-      const { gameId } = await request.json() as { gameId: string };
-      await this.state.storage.put(gameId, true);
+      const { gameId, votingSystem } = await request.json() as { gameId: string; votingSystem: string };
+      await this.state.storage.put(gameId, { votingSystem });
       return new Response("ok");
     }
 
@@ -25,11 +25,14 @@ export class GameRegistry {
     // GET /exists?gameId=xxx
     if (url.pathname === "/exists" && request.method === "GET") {
       const gameId = url.searchParams.get("gameId");
-      const exists = gameId
-        ? await this.state.storage.get(gameId)
-        : false;
+      const data = gameId
+        ? await this.state.storage.get<{ votingSystem: string }>(gameId)
+        : null;
 
-      return new Response(JSON.stringify({ exists }), {
+      return new Response(JSON.stringify({ 
+        exists: !!data,
+        votingSystem: data?.votingSystem 
+      }), {
         headers: { "Content-Type": "application/json" },
       });
     }

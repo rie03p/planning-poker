@@ -6,8 +6,7 @@ import { Box, VStack, HStack, Text } from "@chakra-ui/react"
 import { VoteCard } from "./components/VoteCard"
 import { ParticipantCard } from "./components/ParticipantCard"
 import { ActionArea } from "./components/ActionArea"
-
-const CARDS = ['0', '1', '2', '4', '8', '16', '32', '64', '?', '☕']
+import { getCardsForVotingSystem } from "../../utils/votingSystems"
 
 export function Game() {
   const { gameId } = useParams<{ gameId: string }>()
@@ -24,7 +23,8 @@ export function Game() {
     return <JoinDialog isOpen={true} onJoin={setName} />
   }
 
-  const { participants, myVote, vote, revealed, reveal, reset } = game
+  const { participants, myVote, vote, revealed, reveal, reset, votingSystem } = game
+  const cards = getCardsForVotingSystem(votingSystem)
 
   const renderParticipants = (list: typeof participants) => (
     <HStack
@@ -81,7 +81,7 @@ export function Game() {
           Choose your card 👇
         </Text>
         <HStack gap={2}>
-          {CARDS.map((card) => (
+          {cards && cards.map((card) => (
             <Box
               key={card}
               onClick={() => vote(card)}
