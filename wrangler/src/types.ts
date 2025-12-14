@@ -1,5 +1,6 @@
 export interface Env {
   GAME: DurableObjectNamespace;
+  REGISTRY: DurableObjectNamespace;
 }
 
 export type CreateGameRequest = {

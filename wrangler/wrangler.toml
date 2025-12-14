@@ -10,6 +10,14 @@ port = 8787
 name = "GAME"
 class_name = "Game"
 
+[[durable_objects.bindings]]
+name = "REGISTRY"
+class_name = "GameRegistry"
+
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["Game"]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GameRegistry"]

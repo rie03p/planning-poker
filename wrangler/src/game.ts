@@ -1,3 +1,5 @@
+import { Env } from "./types";
+
 interface Participant {
   id: string;
   name: string;
@@ -16,22 +18,29 @@ interface Message {
 }
 
 export class Game {
-  private sessions: Map<string, WebSocket>;
-  private gameState: GameState;
+  private sessions = new Map<string, WebSocket>();
+  private gameState: GameState = {
+    participants: new Map(),
+    revealed: false,
+  };
   private state: DurableObjectState;
+  private env: Env;
 
-  constructor(state: DurableObjectState) {
+  constructor(state: DurableObjectState, env: Env) {
     this.state = state;
-    this.sessions = new Map();
-    this.gameState = {
-      participants: new Map(),
-      revealed: false,
-    };
+    this.env = env;
   }
 
   async fetch(request: Request) {
     if (request.headers.get("Upgrade") !== "websocket") {
       return new Response("Expected WebSocket", { status: 400 });
+    }
+
+    // store gameId once
+    const url = new URL(request.url);
+    const gameId = url.pathname.split("/")[2];
+    if (gameId) {
+      await this.state.storage.put("gameId", gameId);
     }
 
     const pair = new WebSocketPair();
@@ -45,29 +54,19 @@ export class Game {
     });
   }
 
-  // WebSocket セッションを受け入れる
-  private acceptSession(websocket: WebSocket): void {
+  private acceptSession(websocket: WebSocket) {
     websocket.accept();
 
-    const sessionId = this.generateSessionId();
+    const sessionId = crypto.randomUUID();
     this.sessions.set(sessionId, websocket);
 
     this.setupEventListeners(websocket, sessionId);
   }
 
-  private generateSessionId(): string {
-    return crypto.randomUUID();
-  }
-
-  // Websocket Event Handler
-  private setupEventListeners(websocket: WebSocket, sessionId: string): void {
+  private setupEventListeners(websocket: WebSocket, sessionId: string) {
     websocket.addEventListener("message", async (event) => {
-      try {
-        const data = JSON.parse(event.data as string);
-        await this.handleMessage(sessionId, data);
-      } catch (error) {
-        console.error("Error handling message:", error);
-      }
+      const data = JSON.parse(event.data as string);
+      await this.handleMessage(sessionId, data);
     });
 
     websocket.addEventListener("close", () => {
@@ -75,114 +74,78 @@ export class Game {
     });
   }
 
-  // セッションの切断を処理
-  private handleDisconnect(sessionId: string): void {
+  private handleDisconnect(sessionId: string) {
     this.sessions.delete(sessionId);
     this.gameState.participants.delete(sessionId);
     this.broadcastParticipantUpdate();
-    
+
     if (this.gameState.participants.size === 0) {
-      this.state.storage.deleteAlarm();
-      this.state.storage.setAlarm(Date.now() + 1 * 60 * 1000);
+      this.state.storage.setAlarm(Date.now() + 60_000);
     }
   }
 
-  async alarm(): Promise<void> {
-    if (this.gameState.participants.size === 0) {
-      await this.state.storage.deleteAll();
-      this.sessions.clear();
-    }
+  async alarm() {
+    if (this.gameState.participants.size !== 0) return;
+
+    const gameId = await this.state.storage.get<string>("gameId");
+    if (!gameId) return;
+
+    const registryId = this.env.REGISTRY.idFromName("global");
+    await this.env.REGISTRY.get(registryId).fetch(
+      "http://registry/unregister",
+      {
+        method: "POST",
+        body: JSON.stringify({ gameId }),
+      }
+    );
+
+    await this.state.storage.deleteAll();
+    this.sessions.clear();
   }
 
-  // メッセージを処理
-  private async handleMessage(sessionId: string, data: Message): Promise<void> {
+  private async handleMessage(sessionId: string, data: Message) {
     switch (data.type) {
       case "join":
-        this.handleJoin(sessionId, data.name!);
+        this.gameState.participants.set(sessionId, {
+          id: sessionId,
+          name: data.name!,
+          vote: null,
+        });
+        this.state.storage.deleteAlarm();
+        this.broadcastParticipantUpdate();
         break;
+
       case "vote":
-        this.handleVote(sessionId, data.vote!);
+        const p = this.gameState.participants.get(sessionId);
+        if (p) {
+          p.vote = data.vote!;
+          this.broadcastParticipantUpdate();
+        }
         break;
+
       case "reveal":
-        this.handleReveal();
+        this.gameState.revealed = true;
+        this.broadcastParticipantUpdate();
         break;
+
       case "reset":
-        this.handleReset();
+        this.gameState.revealed = false;
+        this.gameState.participants.forEach((p) => (p.vote = null));
+        this.broadcastParticipantUpdate();
         break;
     }
   }
 
-  private handleJoin(sessionId: string, name: string): void {
-    this.gameState.participants.set(sessionId, {
-      id: sessionId,
-      name,
-      vote: null,
-    });
-    
-    // 参加者が追加されたらアラームをキャンセル
-    this.state.storage.deleteAlarm();
-    
-    this.broadcastParticipantUpdate();
-  }
-
-  private handleVote(sessionId: string, vote: string): void {
-    const participant = this.gameState.participants.get(sessionId);
-    if (participant) {
-      participant.vote = vote;
-      this.broadcastParticipantUpdate();
-    }
-  }
-
-  // 投票の公開を処理
-  private handleReveal(): void {
-    this.gameState.revealed = true;
-    this.broadcast({
-      type: "votesRevealed",
-      participants: this.getParticipantsArray(),
-      revealed: true,
-    });
-  }
-
-  // 投票のリセットを処理
-  private handleReset(): void {
-    this.gameState.revealed = false;
-    this.gameState.participants.forEach((p) => {
-      p.vote = null;
-    });
-    this.broadcast({
-      type: "votesReset",
-      participants: this.getParticipantsArray(),
-      revealed: false,
-    });
-  }
-
-  // 参加者の更新を全員に通知
-  private broadcastParticipantUpdate(): void {
+  private broadcastParticipantUpdate() {
     this.broadcast({
       type: "voteUpdated",
-      participants: this.getParticipantsArray(),
+      participants: Array.from(this.gameState.participants.values()),
       revealed: this.gameState.revealed,
     });
   }
 
-  // 参加者の配列を取得
-  private getParticipantsArray(): Participant[] {
-    return Array.from(this.gameState.participants.values());
-  }
-
-  // 全セッションにメッセージを送信
-  private broadcast(message: any): void {
-    const messageStr = JSON.stringify(message);
-    this.sessions.forEach((websocket) => {
-      this.sendMessage(websocket, messageStr);
-    });
-  }
-
-  private sendMessage(websocket: WebSocket, message: string): void {
-    try {
-      websocket.send(message);
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
+  private broadcast(message: any) {
+    const str = JSON.stringify(message);
+    this.sessions.forEach((ws) => ws.send(str));
   }
 }
