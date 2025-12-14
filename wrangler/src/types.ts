@@ -1,7 +1,7 @@
-export interface Env {
+export type Env = {
   GAME: DurableObjectNamespace;
   REGISTRY: DurableObjectNamespace;
-}
+};
 
 export type CreateGameRequest = {
   votingSystem?: string;

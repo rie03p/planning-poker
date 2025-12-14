@@ -1,4 +1,4 @@
-import { Button, Text } from "@chakra-ui/react"
+import {Button, Text} from '@chakra-ui/react';
 
 export function ActionArea({
   myVote,
@@ -6,25 +6,25 @@ export function ActionArea({
   reveal,
   reset,
 }: {
-  myVote: string | null
-  revealed: boolean
-  reveal: () => void
-  reset: () => void
+  myVote: string | undefined;
+  revealed: boolean;
+  reveal: () => void;
+  reset: () => void;
 }) {
   if (!myVote) {
     return (
-      <Text fontSize="xl" fontWeight="medium">
+      <Text fontSize='xl' fontWeight='medium'>
         Pick your cards!
       </Text>
-    )
+    );
   }
 
   return (
     <Button
-      colorPalette={revealed ? "gray" : "blue"}
+      colorPalette={revealed ? 'gray' : 'blue'}
       onClick={revealed ? reset : reveal}
     >
-      {revealed ? "Start new votes" : "Reveal votes"}
+      {revealed ? 'Start new votes' : 'Reveal votes'}
     </Button>
-  )
+  );
 }

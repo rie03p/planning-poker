@@ -17,4 +17,4 @@ export default {
     'out',
     'public',
   ],
-}
+};

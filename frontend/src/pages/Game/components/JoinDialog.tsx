@@ -1,25 +1,25 @@
-import { useState } from 'react'
-import { Button, Dialog, Input } from '@chakra-ui/react'
+import {useState} from 'react';
+import {Button, Dialog, Input} from '@chakra-ui/react';
 
 type Props = {
-  isOpen: boolean
-  onJoin: (name: string) => void
-}
+  isOpen: boolean;
+  onJoin: (name: string) => void;
+};
 
-export function JoinDialog({ isOpen, onJoin }: Props) {
-  const [draftName, setDraftName] = useState<string>('')
+export function JoinDialog({isOpen, onJoin}: Props) {
+  const [draftName, setDraftName] = useState<string>('');
 
   const handleJoin = () => {
     if (draftName.trim()) {
-      onJoin(draftName.trim())
+      onJoin(draftName.trim());
     }
-  }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleJoin()
+      handleJoin();
     }
-  }
+  };
 
   return (
     <Dialog.Root open={isOpen}>
@@ -32,9 +32,11 @@ export function JoinDialog({ isOpen, onJoin }: Props) {
 
           <Dialog.Body>
             <Input
-              placeholder="Your name"
+              placeholder='Your name'
               value={draftName}
-              onChange={(e) => setDraftName(e.target.value)}
+              onChange={e => {
+                setDraftName(e.target.value);
+              }}
               onKeyDown={handleKeyDown}
               autoFocus
             />
@@ -42,8 +44,8 @@ export function JoinDialog({ isOpen, onJoin }: Props) {
 
           <Dialog.Footer>
             <Button
-              w="full"
-              colorPalette="blue"
+              w='full'
+              colorPalette='blue'
               disabled={!draftName.trim()}
               onClick={handleJoin}
             >
@@ -53,5 +55,5 @@ export function JoinDialog({ isOpen, onJoin }: Props) {
         </Dialog.Content>
       </Dialog.Positioner>
     </Dialog.Root>
-  )
+  );
 }
