@@ -13,7 +13,7 @@ export function ParticipantCard({
   vote,
   revealed = false,
 }: Props) {
-  const showVote = revealed && vote != null;
+  const showVote = revealed && vote !== null && vote !== undefined;
 
   return (
     <VStack gap={1}>
