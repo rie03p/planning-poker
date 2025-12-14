@@ -4,6 +4,7 @@ import { Game } from "./game";
 
 const ALLOWED_ORIGINS = [
   "https://planning-poker-ba3.pages.dev",
+  "http://localhost:5173",
 ];
 
 function getCorsHeaders(origin: string | null): Headers | null {
@@ -26,7 +27,7 @@ export interface Env {
 }
 
 export default {
-  fetch(request: Request, env: Env) {
+  async fetch(request: Request, env: Env) {
     const origin = request.headers.get("Origin");
     const corsHeaders = getCorsHeaders(origin);
 
@@ -44,6 +45,39 @@ export default {
     }
 
     const url = new URL(request.url);
+
+    // POST /games - Create a new game
+    if (url.pathname === "/games" && request.method === "POST") {
+      try {
+        const body = (await request.json()) as { votingSystem?: string };
+        const votingSystem = body.votingSystem || "fibonacci";
+        
+        // Generate a unique game ID
+        const gameId = crypto.randomUUID();
+        
+        const responseHeaders = new Headers(corsHeaders);
+        responseHeaders.set("Content-Type", "application/json");
+        
+        return new Response(
+          JSON.stringify({ gameId, votingSystem }),
+          {
+            status: 201,
+            headers: responseHeaders,
+          }
+        );
+      } catch (error) {
+        const responseHeaders = new Headers(corsHeaders);
+        responseHeaders.set("Content-Type", "application/json");
+        
+        return new Response(
+          JSON.stringify({ error: "Invalid request body" }),
+          {
+            status: 400,
+            headers: responseHeaders,
+          }
+        );
+      }
+    }
 
     // /game/:gameId
     if (url.pathname.startsWith("/game/")) {
