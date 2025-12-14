@@ -39,6 +39,8 @@ export function Game() {
           key={p.id}
           name={p.name}
           hasVoted={p.vote !== null}
+          vote={p.vote}
+          revealed={revealed}
         />
       ))}
     </HStack>
