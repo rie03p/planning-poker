@@ -3,7 +3,8 @@ import { Env } from "../types";
 export async function handleGameWebSocket(
   request: Request,
   env: Env,
-  gameId: string
+  gameId: string,
+  votingSystem: string
 ): Promise<Response> {
   if (request.method !== "GET") {
     return new Response("Method Not Allowed", { status: 405 });
@@ -14,5 +15,8 @@ export async function handleGameWebSocket(
   }
 
   const id = env.GAME.idFromName(gameId);
-  return env.GAME.get(id).fetch(request);
+  const url = new URL(request.url);
+  url.searchParams.set("votingSystem", votingSystem);
+  const newRequest = new Request(url.toString(), request);
+  return env.GAME.get(id).fetch(newRequest);
 }

@@ -36,11 +36,16 @@ export class Game {
       return new Response("Expected WebSocket", { status: 400 });
     }
 
-    // store gameId once
+    // store gameId and votingSystem once
     const url = new URL(request.url);
     const gameId = url.pathname.split("/")[2];
+    const votingSystem = url.searchParams.get("votingSystem") || "fibonacci";
+    
     if (gameId) {
       await this.state.storage.put("gameId", gameId);
+    }
+    if (votingSystem) {
+      await this.state.storage.put("votingSystem", votingSystem);
     }
 
     const pair = new WebSocketPair();
@@ -66,8 +71,8 @@ export class Game {
   private setupEventListeners(websocket: WebSocket, sessionId: string) {
     websocket.addEventListener("message", async (event) => {
       try {
-      const data = JSON.parse(event.data as string);
-      await this.handleMessage(sessionId, data);
+        const data = JSON.parse(event.data as string);
+        await this.handleMessage(sessionId, data);
       } catch (error) {
         console.error("Error handling message:", error);
       }
@@ -116,6 +121,19 @@ export class Game {
           vote: null,
         });
         this.state.storage.deleteAlarm();
+        
+        // Send votingSystem on join
+        const votingSystem = await this.state.storage.get<string>("votingSystem") || "fibonacci";
+        const ws = this.sessions.get(sessionId);
+        if (ws) {
+          ws.send(JSON.stringify({
+            type: "joined",
+            votingSystem,
+            participants: Array.from(this.gameState.participants.values()),
+            revealed: this.gameState.revealed,
+          }));
+        }
+        
         this.broadcastParticipantUpdate();
         break;
 
@@ -150,6 +168,12 @@ export class Game {
 
   private broadcast(message: any) {
     const str = JSON.stringify(message);
-    this.sessions.forEach((ws) => ws.send(str));
+    this.sessions.forEach((ws) => {
+      try {
+        ws.send(str);
+      } catch (e) {
+        console.error("Failed to send message to session", e);
+      }
+    });
   }
 }
