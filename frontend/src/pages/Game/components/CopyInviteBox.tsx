@@ -1,25 +1,41 @@
 import { Button } from "@chakra-ui/react"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 
-export function CopyInviteBox({ gameId }: { gameId: string }) {
+export interface CopyInviteBoxProps {
+  gameId: string;
+}
+
+export function CopyInviteBox({ gameId }: CopyInviteBoxProps) {
   const inviteLink = `${window.location.origin}/${gameId}`
   const [copied, setCopied] = useState(false)
   const timerRef = useRef<number | null>(null)
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(inviteLink)
-
-    setCopied(true)
-
-    if (timerRef.current) {
-      window.clearTimeout(timerRef.current)
+    try {
+      await navigator.clipboard.writeText(inviteLink)
+      setCopied(true)
+    } catch (err) {
+      console.error("Failed to copy: ", err)
+      return
     }
 
-    timerRef.current = window.setTimeout(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
+
+    timerRef.current = setTimeout(() => {
       setCopied(false)
       timerRef.current = null
     }, 1500)
   }
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+    }
+  }, [])
 
   return (
     <Button
