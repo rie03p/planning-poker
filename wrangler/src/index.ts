@@ -1,36 +1,16 @@
 /// <reference types="@cloudflare/workers-types" />
 
+import { getCorsHeaders } from "./cors";
+import { handleGameWebSocket } from "./routes/gameWebSocket";
+import { Env } from "./types";
 import { Game } from "./game";
-
-const ALLOWED_ORIGINS = [
-  "https://planning-poker-ba3.pages.dev",
-];
-
-function getCorsHeaders(origin: string | null): Headers | null {
-  if (!origin) return null;
-
-  if (!ALLOWED_ORIGINS.includes(origin)) {
-    return null;
-  }
-
-  return new Headers({
-    "Access-Control-Allow-Origin": origin,
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Max-Age": "86400",
-  });
-}
-
-export interface Env {
-  GAME: DurableObjectNamespace;
-}
+import { GameRegistry } from "./gameRegistry";
 
 export default {
-  fetch(request: Request, env: Env) {
+  async fetch(request: Request, env: Env) {
     const origin = request.headers.get("Origin");
     const corsHeaders = getCorsHeaders(origin);
 
-    // Origin NG
     if (!corsHeaders) {
       return new Response("Origin not allowed", { status: 403 });
     }
@@ -45,28 +25,56 @@ export default {
 
     const url = new URL(request.url);
 
-    // /game/:gameId
+    // POST /games
+    if (url.pathname === "/games" && request.method === "POST") {
+      const body = await request.json().catch(() => ({})) as { votingSystem?: string };
+      const votingSystem = body.votingSystem ?? "fibonacci";
+
+      const gameId = crypto.randomUUID();
+
+      // register gameId
+      const registryId = env.REGISTRY.idFromName("global");
+      const registry = env.REGISTRY.get(registryId);
+
+      await registry.fetch("http://registry/register", {
+        method: "POST",
+        body: JSON.stringify({ gameId }),
+      });
+
+      const headers = new Headers(corsHeaders);
+      headers.set("Content-Type", "application/json");
+
+      return new Response(
+        JSON.stringify({ gameId, votingSystem }),
+        { status: 201, headers }
+      );
+    }
+
+    // /game/:gameId (WebSocket)
     if (url.pathname.startsWith("/game/")) {
       const gameId = url.pathname.split("/")[2];
       if (!gameId) {
         return new Response("gameId is required", { status: 400 });
       }
 
-      // WebSocket only
-      if (request.headers.get("Upgrade") !== "websocket") {
-        return new Response("Expected WebSocket", { status: 426 });
+      // existence check
+      const registryId = env.REGISTRY.idFromName("global");
+      const registry = env.REGISTRY.get(registryId);
+
+      const res = await registry.fetch(
+        `http://registry/exists?gameId=${gameId}`
+      );
+      const { exists } = await res.json() as { exists: boolean };
+
+      if (!exists) {
+        return new Response("Game not found", { status: 404 });
       }
 
-      if (request.method !== "GET") {
-        return new Response("Method Not Allowed", { status: 405 });
-      }
-
-      const id = env.GAME.idFromName(gameId);
-      return env.GAME.get(id).fetch(request);
+      return handleGameWebSocket(request, env, gameId);
     }
 
     return new Response("OK", { headers: corsHeaders });
   },
 };
 
-export { Game };
+export { Game, GameRegistry };
