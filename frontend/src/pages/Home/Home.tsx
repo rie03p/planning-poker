@@ -26,8 +26,7 @@ export function Home() {
       }
 
       const { gameId } = await response.json()
-      const q = votingSystem ? `?v=${encodeURIComponent(votingSystem)}` : ''
-      navigate(`/${gameId}${q}`)
+      navigate(`/${gameId}`)
     } catch (error) {
       console.error('Error creating game:', error)
       alert('Failed to create game. Please try again.')
