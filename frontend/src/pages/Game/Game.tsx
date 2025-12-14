@@ -46,6 +46,14 @@ export function Game() {
     </HStack>
   )
 
+  const handleVote = (value: string, selected: boolean) => {
+    if (selected) {
+      vote(null)
+    } else {
+      vote(value)
+    }
+  }
+
   return (
     <VStack gap={8} py={8} align="center">
       <VStack gap={3} align="center" justify="center">
@@ -60,6 +68,11 @@ export function Game() {
           borderRadius="3xl"
           px={12}
           py={8}
+          minH="120px"
+          minW="320px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
           textAlign="center"
         >
           <ActionArea
@@ -84,7 +97,7 @@ export function Game() {
           {cards && cards.map((card) => (
             <Box
               key={card}
-              onClick={() => vote(card)}
+              onClick={() => handleVote(card, myVote === card)}
             >
               <VoteCard selected={myVote === card}>
                 {card}

@@ -11,7 +11,7 @@ interface UseGameReturn {
   revealed: boolean;
   myVote: string | null;
   votingSystem: string | null;
-  vote: (value: string) => void;
+  vote: (value: string | null) => void;
   reveal: () => void;
   reset: () => void;
   disconnect: () => void;
@@ -19,7 +19,7 @@ interface UseGameReturn {
 
 type ClientMessage =
   | { type: 'join'; name: string }
-  | { type: 'vote'; vote: string }
+  | { type: 'vote'; vote: string | null }
   | { type: 'reveal' }
   | { type: 'reset' }
 
@@ -71,10 +71,14 @@ export function useGame(gameId: string, name: string): UseGameReturn {
         case 'participantJoined':
         case 'voteUpdated':
         case 'votesRevealed':
-        case 'votesReset':
         case 'participantLeft':
           setParticipants(data.participants);
           setRevealed(data.revealed);
+          break;
+        case 'votesReset':
+          setParticipants(data.participants);
+          setRevealed(data.revealed);
+          setMyVote(null);
           break;
       }
     };
@@ -84,7 +88,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     };
   }, [gameId, name, send]);
 
-  const vote = useCallback((value: string) => {
+  const vote = useCallback((value: string | null) => {
     send({ type: 'vote', vote: value });
     setMyVote(value);
   }, [send]);
@@ -95,7 +99,6 @@ export function useGame(gameId: string, name: string): UseGameReturn {
 
   const reset = useCallback(() => {
     send({ type: 'reset' });
-    setMyVote(null);
   }, [send]);
 
   const disconnect = useCallback(() => {
