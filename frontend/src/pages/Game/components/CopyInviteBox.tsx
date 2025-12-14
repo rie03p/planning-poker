@@ -42,7 +42,6 @@ export function CopyInviteBox({ gameId }: CopyInviteBoxProps) {
       w={160}
       h={50}
       onClick={handleCopy}
-      colorScheme={copied ? "green" : "blue"}
       variant={copied ? "solid" : "outline"}
     >
       {copied ? "Copied!" : "Copy invitation link"}
