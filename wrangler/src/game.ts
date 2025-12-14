@@ -18,8 +18,10 @@ interface Message {
 export class Game {
   private sessions: Map<string, WebSocket>;
   private gameState: GameState;
+  private state: DurableObjectState;
 
   constructor(state: DurableObjectState) {
+    this.state = state;
     this.sessions = new Map();
     this.gameState = {
       participants: new Map(),
@@ -78,6 +80,18 @@ export class Game {
     this.sessions.delete(sessionId);
     this.gameState.participants.delete(sessionId);
     this.broadcastParticipantUpdate();
+    
+    if (this.gameState.participants.size === 0) {
+      this.state.storage.deleteAlarm();
+      this.state.storage.setAlarm(Date.now() + 1 * 60 * 1000);
+    }
+  }
+
+  async alarm(): Promise<void> {
+    if (this.gameState.participants.size === 0) {
+      await this.state.storage.deleteAll();
+      this.sessions.clear();
+    }
   }
 
   // メッセージを処理
@@ -104,6 +118,10 @@ export class Game {
       name,
       vote: null,
     });
+    
+    // 参加者が追加されたらアラームをキャンセル
+    this.state.storage.deleteAlarm();
+    
     this.broadcastParticipantUpdate();
   }
 
