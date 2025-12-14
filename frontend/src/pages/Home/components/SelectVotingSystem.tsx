@@ -3,66 +3,66 @@ import {
   Button,
   Text,
   VStack,
-} from '@chakra-ui/react'
-import { ChevronDown } from 'lucide-react'
-import { useEffect, useState } from 'react'
+} from '@chakra-ui/react';
+import {ChevronDown} from 'lucide-react';
+import {useEffect, useState} from 'react';
 
 export type VotingSystemOption = {
-  id: string
-  label: string
-}
+  id: string;
+  label: string;
+};
 
 const DEFAULT_OPTIONS: VotingSystemOption[] = [
-  { id: 'fibonacci', label: 'Fibonacci (0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ?, ☕)' },
-  { id: 'modified-fibonacci', label: 'Modified Fibonacci ( 0, ½, 1, 2, 3, 5, 8, 13, 20, 40, 100, ?, ☕ )' },
-  { id: 'tshirts', label: 'T-shirts (XS, S, M, L, XL, ?, ☕ )' },
-  { id: 'powers-of-2', label: 'Powers of 2 ( 0, 1, 2, 4, 8, 16, 32, 64, ?, ☕ )' },
-]
+  {id: 'fibonacci', label: 'Fibonacci (0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ?, ☕)'},
+  {id: 'modified-fibonacci', label: 'Modified Fibonacci ( 0, ½, 1, 2, 3, 5, 8, 13, 20, 40, 100, ?, ☕ )'},
+  {id: 'tshirts', label: 'T-shirts (XS, S, M, L, XL, ?, ☕ )'},
+  {id: 'powers-of-2', label: 'Powers of 2 ( 0, 1, 2, 4, 8, 16, 32, 64, ?, ☕ )'},
+];
 
 type Props = {
-  value?: string
-  onChange?: (id: string) => void
-  options?: VotingSystemOption[]
-}
+  value?: string;
+  onChange?: (id: string) => void;
+  options?: VotingSystemOption[];
+};
 
 export function SelectVotingSystem({
   value,
   onChange,
   options = DEFAULT_OPTIONS,
 }: Props) {
-  const [selected, setSelected] = useState(
-    value ?? options[0].id
-  )
+  const [selected, setSelected] = useState(value ?? options[0].id);
 
   useEffect(() => {
-    if (value) setSelected(value)
-  }, [value])
+    if (value) {
+      setSelected(value);
+    }
+  }, [value]);
 
-  const selectedOption =
-    options.find((o) => o.id === selected) ?? options[0]
+  const selectedOption
+    = options.find(o => o.id === selected) ?? options[0];
 
   const handleSelect = (id: string) => {
-    setSelected(id)
-    onChange?.(id)
-  }
+    setSelected(id);
+    onChange?.(id);
+  };
 
   return (
-    <Menu.Root positioning={{ sameWidth: true }}>
+    <Menu.Root positioning={{sameWidth: true}}>
       <Menu.Trigger asChild>
         <Button
-          variant="outline"
-          w="full"
-          justifyContent="space-between"
+          variant='outline'
+          w='full'
+          justifyContent='space-between'
           paddingEnd={2}
-          textAlign="left"
+          textAlign='left'
         >
-          <VStack align="start" gap={0} flex="1" overflow="hidden" minW={0}>
-            <Text fontSize="sm" color="gray.500">
+          <VStack align='start' gap={0} flex='1' overflow='hidden' minW={0}>
+            <Text fontSize='sm' color='gray.500'>
               Voting system
             </Text>
-            <Text 
-              width="100%"
-              fontWeight="semibold" 
+            <Text
+              width='100%'
+              fontWeight='semibold'
               truncate
             >
               {selectedOption.label}
@@ -73,12 +73,14 @@ export function SelectVotingSystem({
       </Menu.Trigger>
 
       <Menu.Positioner>
-        <Menu.Content maxH="240px" overflowY="auto">
-          {options.map((opt) => (
+        <Menu.Content maxH='240px' overflowY='auto'>
+          {options.map(opt => (
             <Menu.Item
               key={opt.id}
               value={opt.id}
-              onClick={() => handleSelect(opt.id)}
+              onClick={() => {
+                handleSelect(opt.id);
+              }}
             >
               {opt.label}
             </Menu.Item>
@@ -86,5 +88,5 @@ export function SelectVotingSystem({
         </Menu.Content>
       </Menu.Positioner>
     </Menu.Root>
-  )
+  );
 }

@@ -1,30 +1,16 @@
-import { Env } from "./types";
-
-interface Participant {
-  id: string;
-  name: string;
-  vote: string | null;
-}
-
-interface GameState {
-  participants: Map<string, Participant>;
-  revealed: boolean;
-}
-
-interface Message {
-  type: string;
-  name?: string;
-  vote?: string;
-}
+import {
+  type GameState, type Message, type Participant, type Env,
+} from './types';
 
 export class Game {
-  private sessions = new Map<string, WebSocket>();
-  private gameState: GameState = {
-    participants: new Map(),
+  private readonly sessions = new Map<string, WebSocket>();
+  private readonly gameState: GameState = {
+    participants: new Map<string, Participant>(),
     revealed: false,
   };
-  private state: DurableObjectState;
-  private env: Env;
+
+  private readonly state: DurableObjectState;
+  private readonly env: Env;
 
   constructor(state: DurableObjectState, env: Env) {
     this.state = state;
@@ -32,20 +18,21 @@ export class Game {
   }
 
   async fetch(request: Request) {
-    if (request.headers.get("Upgrade") !== "websocket") {
-      return new Response("Expected WebSocket", { status: 400 });
+    if (request.headers.get('Upgrade') !== 'websocket') {
+      return new Response('Expected WebSocket', {status: 400});
     }
 
     // store gameId and votingSystem once
     const url = new URL(request.url);
-    const gameId = url.pathname.split("/")[2];
-    const votingSystem = url.searchParams.get("votingSystem") || "fibonacci";
-    
+    const gameId = url.pathname.split('/')[2];
+    const votingSystem = url.searchParams.get('votingSystem') || 'fibonacci';
+
     if (gameId) {
-      await this.state.storage.put("gameId", gameId);
+      await this.state.storage.put('gameId', gameId);
     }
+
     if (votingSystem) {
-      await this.state.storage.put("votingSystem", votingSystem);
+      await this.state.storage.put('votingSystem', votingSystem);
     }
 
     const pair = new WebSocketPair();
@@ -69,16 +56,16 @@ export class Game {
   }
 
   private setupEventListeners(websocket: WebSocket, sessionId: string) {
-    websocket.addEventListener("message", async (event) => {
+    websocket.addEventListener('message', async event => {
       try {
         const data = JSON.parse(event.data as string);
         await this.handleMessage(sessionId, data);
       } catch (error) {
-        console.error("Error handling message:", error);
+        console.error('Error handling message:', error);
       }
     });
 
-    websocket.addEventListener("close", async () => {
+    websocket.addEventListener('close', async () => {
       await this.handleDisconnect(sessionId);
     });
   }
@@ -86,7 +73,7 @@ export class Game {
   private async handleDisconnect(sessionId: string) {
     this.sessions.delete(sessionId);
     this.gameState.participants.delete(sessionId);
-    await this.broadcastParticipant("participantLeft");
+    await this.broadcastParticipant('participantLeft');
 
     if (this.gameState.participants.size === 0) {
       this.state.storage.setAlarm(Date.now() + 60_000);
@@ -94,18 +81,22 @@ export class Game {
   }
 
   async alarm() {
-    if (this.gameState.participants.size !== 0) return;
+    if (this.gameState.participants.size > 0) {
+      return;
+    }
 
-    const gameId = await this.state.storage.get<string>("gameId");
-    if (!gameId) return;
+    const gameId = await this.state.storage.get<string>('gameId');
+    if (!gameId) {
+      return;
+    }
 
-    const registryId = this.env.REGISTRY.idFromName("global");
+    const registryId = this.env.REGISTRY.idFromName('global');
     await this.env.REGISTRY.get(registryId).fetch(
-      "http://registry/unregister",
+      'http://registry/unregister',
       {
-        method: "POST",
-        body: JSON.stringify({ gameId }),
-      }
+        method: 'POST',
+        body: JSON.stringify({gameId}),
+      },
     );
 
     await this.state.storage.deleteAll();
@@ -114,58 +105,65 @@ export class Game {
 
   private async handleMessage(sessionId: string, data: Message) {
     switch (data.type) {
-      case "join":
+      case 'join': {
         this.gameState.participants.set(sessionId, {
           id: sessionId,
           name: data.name!,
-          vote: null,
+          vote: undefined,
         });
         this.state.storage.deleteAlarm();
-        
-        // Send votingSystem on join
-        await this.broadcastParticipant("joined");
-        await this.broadcastParticipant("voteUpdated");
-        break;
 
-      case "vote":
+        // Send votingSystem on join
+        await this.broadcastParticipant('joined');
+        await this.broadcastParticipant('voteUpdated');
+        break;
+      }
+
+      case 'vote': {
         const p = this.gameState.participants.get(sessionId);
         if (p) {
           p.vote = data.vote!;
-          await this.broadcastParticipant("voteUpdated");
+          await this.broadcastParticipant('voteUpdated');
         }
-        break;
 
-      case "reveal":
+        break;
+      }
+
+      case 'reveal': {
         this.gameState.revealed = true;
-        await this.broadcastParticipant("votesRevealed");
+        await this.broadcastParticipant('votesRevealed');
         break;
+      }
 
-      case "reset":
+      case 'reset': {
         this.gameState.revealed = false;
-        this.gameState.participants.forEach((p) => (p.vote = null));
+        for (const p of this.gameState.participants.values()) {
+          p.vote = undefined;
+        }
 
-        await this.broadcastParticipant("votesReset");
+        await this.broadcastParticipant('votesReset');
         break;
+      }
     }
   }
 
   private async broadcastParticipant(type: string) {
     this.broadcast({
-      type: type,
-      votingSystem: type !== "joined" ? undefined : await this.state.storage.get<string>("votingSystem") || "fibonacci",
-      participants: Array.from(this.gameState.participants.values()),
+      type,
+      votingSystem: type === 'joined' ? await this.state.storage.get<string>('votingSystem') || 'fibonacci' : undefined,
+      participants: [...this.gameState.participants.values()],
       revealed: this.gameState.revealed,
     });
   }
 
   private broadcast(message: any) {
-    const str = JSON.stringify(message);
-    this.sessions.forEach((ws) => {
+    const string_ = JSON.stringify(message);
+    for (const ws of this.sessions.values()) {
       try {
-        ws.send(str);
-      } catch (e) {
-        console.error("Failed to send message to session", e);
+        ws.send(string_);
+      } catch (error) {
+        console.error('Failed to send message to session', error);
       }
-    });
+    }
   }
 }
