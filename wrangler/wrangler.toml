@@ -1,6 +1,6 @@
 name = "planning-poker-backend"
 main = "src/index.ts"
-compatibility_date = "2025-01-01"
+compatibility_date = "2025-12-14"
 
 [dev]
 ip = "0.0.0.0"
@@ -16,8 +16,8 @@ class_name = "GameRegistry"
 
 [[migrations]]
 tag = "v1"
-new_sqlite_classes = ["Game"]
+new_classes = ["Game"]
 
 [[migrations]]
-tag = "v1"
-new_sqlite_classes = ["GameRegistry"]
+tag = "v2"
+new_classes = ["GameRegistry"]
