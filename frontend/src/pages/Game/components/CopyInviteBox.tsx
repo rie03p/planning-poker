@@ -8,7 +8,7 @@ export type CopyInviteBoxProps = {
 export function CopyInviteBox({gameId}: CopyInviteBoxProps) {
   const inviteLink = `${globalThis.location.origin}/${gameId}`;
   const [copied, setCopied] = useState(false);
-  const timerRef = useRef<number | undefined>(null);
+  const timerRef = useRef<number | undefined>(undefined);
 
   const handleCopy = async () => {
     try {
@@ -25,7 +25,7 @@ export function CopyInviteBox({gameId}: CopyInviteBoxProps) {
 
     timerRef.current = setTimeout(() => {
       setCopied(false);
-      timerRef.current = null;
+      timerRef.current = undefined;
     }, 1500);
   };
 
