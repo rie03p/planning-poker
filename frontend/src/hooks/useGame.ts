@@ -42,11 +42,11 @@ function toWebSocketUrl(httpUrl: string): string {
 
 export function useGame(gameId: string, name: string): UseGameReturn {
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [myVote, setMyVote] = useState<string | undefined>(null);
+  const [myVote, setMyVote] = useState<string | undefined>(undefined);
   const [revealed, setRevealed] = useState(false);
-  const [votingSystem, setVotingSystem] = useState<string | undefined>(null);
+  const [votingSystem, setVotingSystem] = useState<string | undefined>(undefined);
   const [notFound, setNotFound] = useState<boolean>(false);
-  const wsRef = useRef<WebSocket | undefined>(null);
+  const wsRef = useRef<WebSocket | undefined>(undefined);
 
   const send = useCallback((message: ClientMessage) => {
     const ws = wsRef.current;
@@ -104,7 +104,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
         case 'votesReset': {
           setParticipants(data.participants);
           setRevealed(data.revealed);
-          setMyVote(null);
+          setMyVote(undefined);
           break;
         }
       }

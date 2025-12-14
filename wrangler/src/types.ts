@@ -11,3 +11,8 @@ export type CreateGameResponse = {
   gameId: string;
   votingSystem: string;
 };
+
+export type RegistryExistsResponse = {
+  exists: boolean;
+  votingSystem?: string;
+};

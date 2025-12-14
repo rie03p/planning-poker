@@ -2,12 +2,13 @@
 
 import {getCorsHeaders} from './cors';
 import {handleGameWebSocket} from './routes/gameWebSocket';
-import {type Env} from './types';
+import {type RegistryExistsResponse, type Env} from './types';
+import {fetchJson} from './utils';
 
 export default {
   async fetch(request: Request, env: Env) {
     const origin = request.headers.get('Origin');
-    const corsHeaders = getCorsHeaders(origin);
+    const corsHeaders = getCorsHeaders(origin || undefined);
 
     if (!corsHeaders) {
       return new Response('Origin not allowed', {status: 403});
@@ -65,7 +66,7 @@ export default {
       const registry = env.REGISTRY.get(registryId);
 
       const res = await registry.fetch(`http://registry/exists?gameId=${gameId}`);
-      const {exists} = await res.json();
+      const {exists} = await fetchJson<RegistryExistsResponse>(res);
 
       const h = new Headers(corsHeaders);
       h.set('Content-Type', 'application/json');
@@ -88,7 +89,7 @@ export default {
       const registry = env.REGISTRY.get(registryId);
 
       const res = await registry.fetch(`http://registry/exists?gameId=${gameId}`);
-      const {exists, votingSystem} = await res.json();
+      const {exists, votingSystem} = await fetchJson<RegistryExistsResponse>(res);
 
       if (!exists) {
         return new Response('Game not found', {status: 404});

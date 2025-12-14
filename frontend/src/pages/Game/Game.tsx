@@ -49,7 +49,7 @@ export function Game() {
         <ParticipantCard
           key={p.id}
           name={p.name}
-          hasVoted={p.vote !== null}
+          hasVoted={p.vote !== undefined}
           vote={p.vote}
           revealed={revealed}
         />
@@ -59,7 +59,7 @@ export function Game() {
 
   const handleVote = (value: string, selected: boolean) => {
     if (selected) {
-      vote(null);
+      vote(undefined);
     } else {
       vote(value);
     }

@@ -124,7 +124,7 @@ export class Game {
         this.gameState.participants.set(sessionId, {
           id: sessionId,
           name: data.name!,
-          vote: null,
+          vote: undefined,
         });
         this.state.storage.deleteAlarm();
 
@@ -152,8 +152,8 @@ export class Game {
 
       case 'reset': {
         this.gameState.revealed = false;
-        for (const p of this.gameState.participants) {
-          (p.vote = null);
+        for (const p of this.gameState.participants.values()) {
+          p.vote = undefined;
         }
 
         await this.broadcastParticipant('votesReset');
@@ -173,7 +173,7 @@ export class Game {
 
   private broadcast(message: any) {
     const string_ = JSON.stringify(message);
-    for (const ws of this.sessions) {
+    for (const ws of this.sessions.values()) {
       try {
         ws.send(string_);
       } catch (error) {
