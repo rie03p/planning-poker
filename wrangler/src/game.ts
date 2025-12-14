@@ -86,7 +86,7 @@ export class Game {
   private handleDisconnect(sessionId: string) {
     this.sessions.delete(sessionId);
     this.gameState.participants.delete(sessionId);
-    this.broadcastParticipantUpdate();
+    this.broadcastParticipant("participantLeft");
 
     if (this.gameState.participants.size === 0) {
       this.state.storage.setAlarm(Date.now() + 60_000);
@@ -123,44 +123,36 @@ export class Game {
         this.state.storage.deleteAlarm();
         
         // Send votingSystem on join
-        const votingSystem = await this.state.storage.get<string>("votingSystem") || "fibonacci";
-        const ws = this.sessions.get(sessionId);
-        if (ws) {
-          ws.send(JSON.stringify({
-            type: "joined",
-            votingSystem,
-            participants: Array.from(this.gameState.participants.values()),
-            revealed: this.gameState.revealed,
-          }));
-        }
-        
-        this.broadcastParticipantUpdate();
+        this.broadcastParticipant("joined");
+        this.broadcastParticipant("voteUpdated");
         break;
 
       case "vote":
         const p = this.gameState.participants.get(sessionId);
         if (p) {
           p.vote = data.vote!;
-          this.broadcastParticipantUpdate();
+          this.broadcastParticipant("voteUpdated");
         }
         break;
 
       case "reveal":
         this.gameState.revealed = true;
-        this.broadcastParticipantUpdate();
+        this.broadcastParticipant("votesRevealed");
         break;
 
       case "reset":
         this.gameState.revealed = false;
         this.gameState.participants.forEach((p) => (p.vote = null));
-        this.broadcastParticipantUpdate();
+
+        this.broadcastParticipant("votesReset");
         break;
     }
   }
 
-  private broadcastParticipantUpdate() {
+  private async broadcastParticipant(type: string) {
     this.broadcast({
-      type: "voteUpdated",
+      type: type,
+      votingSystem: type !== "joined" ? undefined : await this.state.storage.get<string>("votingSystem") || "fibonacci",
       participants: Array.from(this.gameState.participants.values()),
       revealed: this.gameState.revealed,
     });

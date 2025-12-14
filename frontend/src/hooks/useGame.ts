@@ -71,10 +71,14 @@ export function useGame(gameId: string, name: string): UseGameReturn {
         case 'participantJoined':
         case 'voteUpdated':
         case 'votesRevealed':
-        case 'votesReset':
         case 'participantLeft':
           setParticipants(data.participants);
           setRevealed(data.revealed);
+          break;
+        case 'votesReset':
+          setParticipants(data.participants);
+          setRevealed(data.revealed);
+          setMyVote(null);
           break;
       }
     };
@@ -95,7 +99,6 @@ export function useGame(gameId: string, name: string): UseGameReturn {
 
   const reset = useCallback(() => {
     send({ type: 'reset' });
-    setMyVote(null);
   }, [send]);
 
   const disconnect = useCallback(() => {
