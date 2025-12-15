@@ -7,7 +7,7 @@ import {
 } from './types';
 import {fetchJson} from './utils';
 
-export default {
+export const worker = {
   async fetch(request: Request, env: Env) {
     const origin = request.headers.get('Origin');
     const corsHeaders = getCorsHeaders(origin || undefined);
@@ -117,6 +117,8 @@ export default {
     return new Response('OK', {headers: corsHeaders});
   },
 };
+
+export default worker;
 
 export {Game} from './game';
 
