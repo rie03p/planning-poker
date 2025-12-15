@@ -18,7 +18,6 @@ export default {
     '@typescript-eslint/no-floating-promises': 'off',
     '@typescript-eslint/parameter-properties': 'off',
     '@typescript-eslint/switch-exhaustiveness-check': 'off',
-    '@typescript-eslint/member-ordering': 'off',
   },
 
   ignores: [

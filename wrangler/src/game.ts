@@ -46,6 +46,29 @@ export class Game {
     });
   }
 
+  async alarm() {
+    if (this.gameState.participants.size > 0) {
+      return;
+    }
+
+    const gameId = await this.state.storage.get<string>('gameId');
+    if (!gameId) {
+      return;
+    }
+
+    const registryId = this.env.REGISTRY.idFromName('global');
+    await this.env.REGISTRY.get(registryId).fetch(
+      'http://registry/unregister',
+      {
+        method: 'POST',
+        body: JSON.stringify({gameId}),
+      },
+    );
+
+    await this.state.storage.deleteAll();
+    this.sessions.clear();
+  }
+
   private acceptSession(websocket: WebSocket) {
     websocket.accept();
 
@@ -78,29 +101,6 @@ export class Game {
     if (this.gameState.participants.size === 0) {
       this.state.storage.setAlarm(Date.now() + 60_000);
     }
-  }
-
-  async alarm() {
-    if (this.gameState.participants.size > 0) {
-      return;
-    }
-
-    const gameId = await this.state.storage.get<string>('gameId');
-    if (!gameId) {
-      return;
-    }
-
-    const registryId = this.env.REGISTRY.idFromName('global');
-    await this.env.REGISTRY.get(registryId).fetch(
-      'http://registry/unregister',
-      {
-        method: 'POST',
-        body: JSON.stringify({gameId}),
-      },
-    );
-
-    await this.state.storage.deleteAll();
-    this.sessions.clear();
   }
 
   private async handleMessage(sessionId: string, data: Message) {
