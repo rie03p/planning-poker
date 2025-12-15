@@ -57,6 +57,35 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     ws.send(JSON.stringify(message));
   }, []);
 
+  const handleMessage = (event: MessageEvent) => {
+    const data = JSON.parse(event.data);
+
+    switch (data.type) {
+      case 'joined': {
+        setVotingSystem(data.votingSystem);
+        setParticipants(data.participants);
+        setRevealed(data.revealed);
+        break;
+      }
+
+      case 'participantJoined':
+      case 'voteUpdated':
+      case 'votesRevealed':
+      case 'participantLeft': {
+        setParticipants(data.participants);
+        setRevealed(data.revealed);
+        break;
+      }
+
+      case 'votesReset': {
+        setParticipants(data.participants);
+        setRevealed(data.revealed);
+        setMyVote(undefined);
+        break;
+      }
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
 
@@ -102,34 +131,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
       send({type: 'join', name});
     });
 
-    ws.onmessage = event => {
-      const data = JSON.parse(event.data);
-
-      switch (data.type) {
-        case 'joined': {
-          setVotingSystem(data.votingSystem);
-          setParticipants(data.participants);
-          setRevealed(data.revealed);
-          break;
-        }
-
-        case 'participantJoined':
-        case 'voteUpdated':
-        case 'votesRevealed':
-        case 'participantLeft': {
-          setParticipants(data.participants);
-          setRevealed(data.revealed);
-          break;
-        }
-
-        case 'votesReset': {
-          setParticipants(data.participants);
-          setRevealed(data.revealed);
-          setMyVote(undefined);
-          break;
-        }
-      }
-    };
+    ws.addEventListener('message', handleMessage);
 
     return () => {
       ws.close();
