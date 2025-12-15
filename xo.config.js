@@ -22,7 +22,6 @@ export default {
     '@typescript-eslint/member-ordering': 'off',
     '@typescript-eslint/triple-slash-reference': 'off',
     '@typescript-eslint/prefer-nullish-coalescing': 'off',
-    'unicorn/prevent-abbreviations': 'off',
     'unicorn/prefer-add-event-listener': 'off',
     'no-warning-comments': 'off',
 

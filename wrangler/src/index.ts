@@ -81,8 +81,8 @@ export const worker = {
       const registryId = env.REGISTRY.idFromName('global');
       const registry = env.REGISTRY.get(registryId);
 
-      const res = await registry.fetch(`http://registry/exists?gameId=${gameId}`);
-      const {exists} = await fetchJson<RegistryExistsResponse>(res);
+      const response = await registry.fetch(`http://registry/exists?gameId=${gameId}`);
+      const {exists} = await fetchJson<RegistryExistsResponse>(response);
 
       const h = new Headers(corsHeaders);
       h.set('Content-Type', 'application/json');
@@ -104,8 +104,8 @@ export const worker = {
       const registryId = env.REGISTRY.idFromName('global');
       const registry = env.REGISTRY.get(registryId);
 
-      const res = await registry.fetch(`http://registry/exists?gameId=${gameId}`);
-      const {exists, votingSystem} = await fetchJson<RegistryExistsResponse>(res);
+      const response = await registry.fetch(`http://registry/exists?gameId=${gameId}`);
+      const {exists, votingSystem} = await fetchJson<RegistryExistsResponse>(response);
 
       if (!exists) {
         return new Response('Game not found', {status: 404});

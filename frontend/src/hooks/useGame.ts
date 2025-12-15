@@ -62,9 +62,9 @@ export function useGame(gameId: string, name: string): UseGameReturn {
 
     const checkExists = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/games/${gameId}/exists`);
+        const response = await fetch(`${BACKEND_URL}/games/${gameId}/exists`);
 
-        if (!res.ok) {
+        if (!response.ok) {
           if (!cancelled) {
             setNotFound(true);
           }
@@ -72,7 +72,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
           return;
         }
 
-        const {exists} = await res.json();
+        const {exists} = await response.json();
 
         if (!exists && !cancelled) {
           setNotFound(true);

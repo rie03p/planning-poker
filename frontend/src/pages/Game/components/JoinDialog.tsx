@@ -15,8 +15,8 @@ export function JoinDialog({isOpen, onJoin}: Props) {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+  const handleKeyDown = (error: React.KeyboardEvent) => {
+    if (error.key === 'Enter') {
       handleJoin();
     }
   };
@@ -34,8 +34,8 @@ export function JoinDialog({isOpen, onJoin}: Props) {
             <Input
               placeholder='Your name'
               value={draftName}
-              onChange={e => {
-                setDraftName(e.target.value);
+              onChange={error => {
+                setDraftName(error.target.value);
               }}
               onKeyDown={handleKeyDown}
               autoFocus
