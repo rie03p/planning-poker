@@ -9,6 +9,7 @@ export default {
     'n/file-extension-in-import': 'off',
     'new-cap': 'off',
     '@typescript-eslint/naming-convention': 'off',
+    'unicorn/filename-case': 'off',
 
     // TODO
     '@typescript-eslint/no-unsafe-argument': 'off',
@@ -24,10 +25,8 @@ export default {
     'no-eq-null': 'off',
     'no-alert': 'off',
     'import-x/no-anonymous-default-export': 'off',
-    'unicorn/filename-case': 'off',
     'unicorn/prevent-abbreviations': 'off',
     'unicorn/prefer-add-event-listener': 'off',
-    'promise/prefer-await-to-then': 'off',
     'no-warning-comments': 'off',
 
   },

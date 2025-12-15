@@ -5,7 +5,6 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import {ChevronDown} from 'lucide-react';
-import {useEffect, useState} from 'react';
 
 export type VotingSystemOption = {
   id: string;
@@ -20,8 +19,8 @@ const DEFAULT_OPTIONS: VotingSystemOption[] = [
 ];
 
 type Props = {
-  value?: string;
-  onChange?: (id: string) => void;
+  value: string;
+  onChange: (id: string) => void;
   options?: VotingSystemOption[];
 };
 
@@ -30,21 +29,8 @@ export function SelectVotingSystem({
   onChange,
   options = DEFAULT_OPTIONS,
 }: Props) {
-  const [selected, setSelected] = useState(value ?? options[0].id);
-
-  useEffect(() => {
-    if (value) {
-      setSelected(value);
-    }
-  }, [value]);
-
   const selectedOption
-    = options.find(o => o.id === selected) ?? options[0];
-
-  const handleSelect = (id: string) => {
-    setSelected(id);
-    onChange?.(id);
-  };
+    = options.find(o => o.id === value) ?? options[0];
 
   return (
     <Menu.Root positioning={{sameWidth: true}}>
@@ -79,7 +65,7 @@ export function SelectVotingSystem({
               key={opt.id}
               value={opt.id}
               onClick={() => {
-                handleSelect(opt.id);
+                onChange(opt.id);
               }}
             >
               {opt.label}

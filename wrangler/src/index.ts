@@ -2,7 +2,9 @@
 
 import {getCorsHeaders} from './cors';
 import {handleGameWebSocket} from './routes/gameWebSocket';
-import {type RegistryExistsResponse, type Env} from './types';
+import {
+  type CreateGameResponse, isCreateGameRequest, type RegistryExistsResponse, type Env,
+} from './types';
 import {fetchJson} from './utils';
 
 export default {
@@ -26,8 +28,17 @@ export default {
 
     // POST /games
     if (url.pathname === '/games' && request.method === 'POST') {
-      const body = await request.json().catch(() => ({})) as {votingSystem?: string};
-      const votingSystem = body.votingSystem ?? 'fibonacci';
+      let votingSystem = 'fibonacci';
+
+      try {
+        const body: unknown = await request.json();
+
+        if (isCreateGameRequest(body) && body.votingSystem) {
+          votingSystem = body.votingSystem;
+        }
+      } catch {
+        // invalid JSON → default votingSystem
+      }
 
       const gameId = crypto.randomUUID();
 
@@ -43,8 +54,13 @@ export default {
       const headers = new Headers(corsHeaders);
       headers.set('Content-Type', 'application/json');
 
+      const response: CreateGameResponse = {
+        gameId,
+        votingSystem,
+      };
+
       return new Response(
-        JSON.stringify({gameId, votingSystem}),
+        JSON.stringify(response),
         {status: 201, headers},
       );
     }

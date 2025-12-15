@@ -58,16 +58,37 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   }, []);
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/games/${gameId}/exists`)
-      .then(async res => res.json())
-      .then(({exists}) => {
-        if (!exists) {
+    let cancelled = false;
+
+    const checkExists = async () => {
+      try {
+        const res = await fetch(`${BACKEND_URL}/games/${gameId}/exists`);
+
+        if (!res.ok) {
+          if (!cancelled) {
+            setNotFound(true);
+          }
+
+          return;
+        }
+
+        const {exists} = await res.json();
+
+        if (!exists && !cancelled) {
           setNotFound(true);
         }
-      })
-      .catch(() => {
-        setNotFound(true);
-      });
+      } catch {
+        if (!cancelled) {
+          setNotFound(true);
+        }
+      }
+    };
+
+    checkExists();
+
+    return () => {
+      cancelled = true;
+    };
   }, [gameId]);
 
   useEffect(() => {
