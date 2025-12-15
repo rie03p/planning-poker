@@ -26,7 +26,7 @@ type ClientMessage =
   | {type: 'reveal'}
   | {type: 'reset'};
 
-const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8787';
+const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8787';
 
 function toWebSocketUrl(httpUrl: string): string {
   if (httpUrl.startsWith('https://')) {

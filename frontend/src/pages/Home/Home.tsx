@@ -5,7 +5,7 @@ import {
 } from '@chakra-ui/react';
 import {SelectVotingSystem} from './components/SelectVotingSystem';
 
-const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8787';
+const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8787';
 
 export function Home() {
   const navigate = useNavigate();

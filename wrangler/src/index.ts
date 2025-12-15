@@ -10,7 +10,7 @@ import {fetchJson} from './utils';
 export const worker = {
   async fetch(request: Request, env: Env) {
     const origin = request.headers.get('Origin');
-    const corsHeaders = getCorsHeaders(origin || undefined);
+    const corsHeaders = getCorsHeaders(origin ?? undefined);
 
     if (!corsHeaders) {
       return new Response('Origin not allowed', {status: 403});
@@ -111,7 +111,7 @@ export const worker = {
         return new Response('Game not found', {status: 404});
       }
 
-      return handleGameWebSocket(request, env, gameId, votingSystem || 'fibonacci');
+      return handleGameWebSocket(request, env, gameId, votingSystem ?? 'fibonacci');
     }
 
     return new Response('OK', {headers: corsHeaders});

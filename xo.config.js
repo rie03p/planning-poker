@@ -20,7 +20,6 @@ export default {
     '@typescript-eslint/switch-exhaustiveness-check': 'off',
     '@typescript-eslint/member-ordering': 'off',
     '@typescript-eslint/triple-slash-reference': 'off',
-    '@typescript-eslint/prefer-nullish-coalescing': 'off',
   },
 
   ignores: [

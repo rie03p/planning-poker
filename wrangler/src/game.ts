@@ -25,7 +25,7 @@ export class Game {
     // store gameId and votingSystem once
     const url = new URL(request.url);
     const gameId = url.pathname.split('/')[2];
-    const votingSystem = url.searchParams.get('votingSystem') || 'fibonacci';
+    const votingSystem = url.searchParams.get('votingSystem') ?? 'fibonacci';
 
     if (gameId) {
       await this.state.storage.put('gameId', gameId);
@@ -150,7 +150,7 @@ export class Game {
   private async broadcastParticipant(type: string) {
     this.broadcast({
       type,
-      votingSystem: type === 'joined' ? await this.state.storage.get<string>('votingSystem') || 'fibonacci' : undefined,
+      votingSystem: type === 'joined' ? await this.state.storage.get<string>('votingSystem') ?? 'fibonacci' : undefined,
       participants: [...this.gameState.participants.values()],
       revealed: this.gameState.revealed,
     });
