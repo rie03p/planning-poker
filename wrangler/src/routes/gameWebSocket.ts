@@ -15,8 +15,9 @@ export async function handleGameWebSocket(
   }
 
   const id = env.GAME.idFromName(gameId);
+
   const url = new URL(request.url);
   url.searchParams.set('votingSystem', votingSystem);
-  const newRequest = new Request(url.toString(), request);
-  return env.GAME.get(id).fetch(newRequest);
+
+  return env.GAME.get(id).fetch(new Request(url.toString(), request));
 }
