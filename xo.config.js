@@ -11,7 +11,6 @@ export default {
     '@typescript-eslint/naming-convention': 'off',
     'unicorn/filename-case': 'off',
 
-    // TODO
     '@typescript-eslint/no-unsafe-argument': 'off',
     '@typescript-eslint/no-unsafe-assignment': 'off',
     '@typescript-eslint/no-unsafe-call': 'off',
@@ -22,8 +21,6 @@ export default {
     '@typescript-eslint/member-ordering': 'off',
     '@typescript-eslint/triple-slash-reference': 'off',
     '@typescript-eslint/prefer-nullish-coalescing': 'off',
-    'no-warning-comments': 'off',
-
   },
 
   ignores: [
