@@ -1,5 +1,3 @@
-/// <reference types="@cloudflare/workers-types" />
-
 import {getCorsHeaders} from './cors';
 import {handleGameWebSocket} from './routes/gameWebSocket';
 import {

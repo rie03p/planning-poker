@@ -19,7 +19,6 @@ export default {
     '@typescript-eslint/parameter-properties': 'off',
     '@typescript-eslint/switch-exhaustiveness-check': 'off',
     '@typescript-eslint/member-ordering': 'off',
-    '@typescript-eslint/triple-slash-reference': 'off',
   },
 
   ignores: [
