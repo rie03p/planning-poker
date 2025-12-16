@@ -8,16 +8,11 @@ export default {
     'import-x/extensions': 'off',
     'n/file-extension-in-import': 'off',
     'new-cap': 'off',
-    '@typescript-eslint/naming-convention': 'off',
     'unicorn/filename-case': 'off',
-
-    '@typescript-eslint/no-unsafe-argument': 'off',
+    '@typescript-eslint/naming-convention': 'off',
     '@typescript-eslint/no-unsafe-assignment': 'off',
     '@typescript-eslint/no-unsafe-call': 'off',
-    '@typescript-eslint/no-unsafe-return': 'off',
-    '@typescript-eslint/no-floating-promises': 'off',
-    '@typescript-eslint/parameter-properties': 'off',
-    '@typescript-eslint/switch-exhaustiveness-check': 'off',
+    '@typescript-eslint/no-unsafe-argument': 'off',
   },
 
   ignores: [

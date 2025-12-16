@@ -21,6 +21,10 @@ export function JoinDialog({isOpen, onJoin}: Props) {
     }
   };
 
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDraftName(event.target.value);
+  };
+
   return (
     <Dialog.Root open={isOpen}>
       <Dialog.Backdrop />
@@ -34,9 +38,7 @@ export function JoinDialog({isOpen, onJoin}: Props) {
             <Input
               placeholder='Your name'
               value={draftName}
-              onChange={error => {
-                setDraftName(error.target.value);
-              }}
+              onChange={handleChange}
               onKeyDown={handleKeyDown}
               autoFocus
             />

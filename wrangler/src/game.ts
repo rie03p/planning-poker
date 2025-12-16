@@ -9,13 +9,7 @@ export class Game {
     revealed: false,
   };
 
-  private readonly state: DurableObjectState;
-  private readonly env: Env;
-
-  constructor(state: DurableObjectState, env: Env) {
-    this.state = state;
-    this.env = env;
-  }
+  constructor(private readonly state: DurableObjectState, private readonly env: Env) {}
 
   async fetch(request: Request) {
     if (request.headers.get('Upgrade') !== 'websocket') {
@@ -99,7 +93,7 @@ export class Game {
     await this.broadcastParticipant('participantLeft');
 
     if (this.gameState.participants.size === 0) {
-      this.state.storage.setAlarm(Date.now() + 60_000);
+      await this.state.storage.setAlarm(Date.now() + 60_000);
     }
   }
 
@@ -111,7 +105,7 @@ export class Game {
           name: data.name!,
           vote: undefined,
         });
-        this.state.storage.deleteAlarm();
+        await this.state.storage.deleteAlarm();
 
         // Send votingSystem on join
         await this.broadcastParticipant('joined');
@@ -143,6 +137,10 @@ export class Game {
 
         await this.broadcastParticipant('votesReset');
         break;
+      }
+
+      default: {
+        throw new Error(`Unknown message type: ${data.type}`);
       }
     }
   }

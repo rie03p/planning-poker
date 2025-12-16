@@ -14,8 +14,8 @@ import {CopyInviteBox} from './components/CopyInviteBox';
 
 export function Game() {
   const {gameId} = useParams<{gameId: string}>();
-  if (!gameId) {
-    throw new Error('gameId is required');
+  if (typeof gameId !== 'string') {
+    throw new TypeError('gameId is required');
   }
 
   const {

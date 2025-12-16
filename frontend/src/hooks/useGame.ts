@@ -83,6 +83,10 @@ export function useGame(gameId: string, name: string): UseGameReturn {
         setMyVote(undefined);
         break;
       }
+
+      default: {
+        console.warn(`Unknown message type: ${data.type}`);
+      }
     }
   };
 
@@ -113,7 +117,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
       }
     };
 
-    checkExists();
+    void checkExists();
 
     return () => {
       cancelled = true;
