@@ -13,6 +13,7 @@
     "@chakra-ui/icons": "^2.2.4",
     "@chakra-ui/react": "^3.30.0",
     "@emotion/react": "^11.14.0",
+    "@planning-poker/shared": "workspace:*",
     "lucide-react": "^0.561.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
