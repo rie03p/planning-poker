@@ -53,11 +53,13 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   const handleMessage = (event: MessageEvent) => {
     const rawData = JSON.parse(event.data);
 
-    const {data, success, error} = serverMessageSchema.safeParse(rawData);
-    if (!success) {
-      console.error('Invalid server message:', error);
+    const result = serverMessageSchema.safeParse(rawData);
+    if (!result.success) {
+      console.error('Invalid server message:', result.error);
       return;
     }
+
+    const {data} = result;
 
     switch (data.type) {
       case 'joined': {
@@ -79,7 +81,9 @@ export function useGame(gameId: string, name: string): UseGameReturn {
       }
 
       default: {
-        console.warn('Unknown message type');
+        // Exhaustiveness check
+        const _exhaustiveCheck: never = data;
+        console.warn('Unknown message type:', _exhaustiveCheck);
       }
     }
   };

@@ -105,11 +105,13 @@ export class Game {
   }
 
   private async handleMessage(sessionId: string, rawData: unknown) {
-    const {data, success, error} = clientMessageSchema.safeParse(rawData);
-    if (!success) {
-      console.error('Invalid message:', error);
+    const result = clientMessageSchema.safeParse(rawData);
+    if (!result.success) {
+      console.error('Invalid message:', result.error);
       return;
     }
+
+    const {data} = result;
 
     switch (data.type) {
       case 'join': {
