@@ -9,13 +9,7 @@ export class Game {
     revealed: false,
   };
 
-  private readonly state: DurableObjectState;
-  private readonly env: Env;
-
-  constructor(state: DurableObjectState, env: Env) {
-    this.state = state;
-    this.env = env;
-  }
+  constructor(private readonly state: DurableObjectState, private readonly env: Env) {}
 
   async fetch(request: Request) {
     if (request.headers.get('Upgrade') !== 'websocket') {
@@ -25,7 +19,7 @@ export class Game {
     // store gameId and votingSystem once
     const url = new URL(request.url);
     const gameId = url.pathname.split('/')[2];
-    const votingSystem = url.searchParams.get('votingSystem') || 'fibonacci';
+    const votingSystem = url.searchParams.get('votingSystem') ?? 'fibonacci';
 
     if (gameId) {
       await this.state.storage.put('gameId', gameId);
@@ -44,6 +38,29 @@ export class Game {
       status: 101,
       webSocket: client,
     });
+  }
+
+  async alarm() {
+    if (this.gameState.participants.size > 0) {
+      return;
+    }
+
+    const gameId = await this.state.storage.get<string>('gameId');
+    if (!gameId) {
+      return;
+    }
+
+    const registryId = this.env.REGISTRY.idFromName('global');
+    await this.env.REGISTRY.get(registryId).fetch(
+      'http://registry/unregister',
+      {
+        method: 'POST',
+        body: JSON.stringify({gameId}),
+      },
+    );
+
+    await this.state.storage.deleteAll();
+    this.sessions.clear();
   }
 
   private acceptSession(websocket: WebSocket) {
@@ -76,31 +93,8 @@ export class Game {
     await this.broadcastParticipant('participantLeft');
 
     if (this.gameState.participants.size === 0) {
-      this.state.storage.setAlarm(Date.now() + 60_000);
+      await this.state.storage.setAlarm(Date.now() + 60_000);
     }
-  }
-
-  async alarm() {
-    if (this.gameState.participants.size > 0) {
-      return;
-    }
-
-    const gameId = await this.state.storage.get<string>('gameId');
-    if (!gameId) {
-      return;
-    }
-
-    const registryId = this.env.REGISTRY.idFromName('global');
-    await this.env.REGISTRY.get(registryId).fetch(
-      'http://registry/unregister',
-      {
-        method: 'POST',
-        body: JSON.stringify({gameId}),
-      },
-    );
-
-    await this.state.storage.deleteAll();
-    this.sessions.clear();
   }
 
   private async handleMessage(sessionId: string, data: Message) {
@@ -111,7 +105,7 @@ export class Game {
           name: data.name!,
           vote: undefined,
         });
-        this.state.storage.deleteAlarm();
+        await this.state.storage.deleteAlarm();
 
         // Send votingSystem on join
         await this.broadcastParticipant('joined');
@@ -144,13 +138,17 @@ export class Game {
         await this.broadcastParticipant('votesReset');
         break;
       }
+
+      default: {
+        throw new Error(`Unknown message type: ${data.type}`);
+      }
     }
   }
 
   private async broadcastParticipant(type: string) {
     this.broadcast({
       type,
-      votingSystem: type === 'joined' ? await this.state.storage.get<string>('votingSystem') || 'fibonacci' : undefined,
+      votingSystem: type === 'joined' ? await this.state.storage.get<string>('votingSystem') ?? 'fibonacci' : undefined,
       participants: [...this.gameState.participants.values()],
       revealed: this.gameState.revealed,
     });

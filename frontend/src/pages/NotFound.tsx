@@ -1,9 +1,10 @@
 import {
   Button, Heading, Text, VStack,
 } from '@chakra-ui/react';
+import type {JSX} from 'react';
 import {useNavigate} from 'react-router-dom';
 
-export function NotFound() {
+export function NotFound(): JSX.Element {
   const navigate = useNavigate();
 
   return (
@@ -26,7 +27,9 @@ export function NotFound() {
       </Text>
 
       <Button
-        onClick={() => navigate('/')}
+        onClick={() => {
+          void navigate('/');
+        }}
       >
         Back to Home
       </Button>

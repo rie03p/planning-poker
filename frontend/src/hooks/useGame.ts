@@ -26,7 +26,7 @@ type ClientMessage =
   | {type: 'reveal'}
   | {type: 'reset'};
 
-const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8787';
+const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8787';
 
 function toWebSocketUrl(httpUrl: string): string {
   if (httpUrl.startsWith('https://')) {
@@ -57,17 +57,71 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     ws.send(JSON.stringify(message));
   }, []);
 
+  const handleMessage = (event: MessageEvent) => {
+    const data = JSON.parse(event.data);
+
+    switch (data.type) {
+      case 'joined': {
+        setVotingSystem(data.votingSystem);
+        setParticipants(data.participants);
+        setRevealed(data.revealed);
+        break;
+      }
+
+      case 'participantJoined':
+      case 'voteUpdated':
+      case 'votesRevealed':
+      case 'participantLeft': {
+        setParticipants(data.participants);
+        setRevealed(data.revealed);
+        break;
+      }
+
+      case 'votesReset': {
+        setParticipants(data.participants);
+        setRevealed(data.revealed);
+        setMyVote(undefined);
+        break;
+      }
+
+      default: {
+        console.warn(`Unknown message type: ${data.type}`);
+      }
+    }
+  };
+
   useEffect(() => {
-    fetch(`${BACKEND_URL}/games/${gameId}/exists`)
-      .then(async res => res.json())
-      .then(({exists}) => {
-        if (!exists) {
+    let cancelled = false;
+
+    const checkExists = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/games/${gameId}/exists`);
+
+        if (!response.ok) {
+          if (!cancelled) {
+            setNotFound(true);
+          }
+
+          return;
+        }
+
+        const {exists} = await response.json();
+
+        if (!exists && !cancelled) {
           setNotFound(true);
         }
-      })
-      .catch(() => {
-        setNotFound(true);
-      });
+      } catch {
+        if (!cancelled) {
+          setNotFound(true);
+        }
+      }
+    };
+
+    void checkExists();
+
+    return () => {
+      cancelled = true;
+    };
   }, [gameId]);
 
   useEffect(() => {
@@ -81,34 +135,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
       send({type: 'join', name});
     });
 
-    ws.onmessage = event => {
-      const data = JSON.parse(event.data);
-
-      switch (data.type) {
-        case 'joined': {
-          setVotingSystem(data.votingSystem);
-          setParticipants(data.participants);
-          setRevealed(data.revealed);
-          break;
-        }
-
-        case 'participantJoined':
-        case 'voteUpdated':
-        case 'votesRevealed':
-        case 'participantLeft': {
-          setParticipants(data.participants);
-          setRevealed(data.revealed);
-          break;
-        }
-
-        case 'votesReset': {
-          setParticipants(data.participants);
-          setRevealed(data.revealed);
-          setMyVote(undefined);
-          break;
-        }
-      }
-    };
+    ws.addEventListener('message', handleMessage);
 
     return () => {
       ws.close();

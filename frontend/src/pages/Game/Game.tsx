@@ -14,8 +14,8 @@ import {CopyInviteBox} from './components/CopyInviteBox';
 
 export function Game() {
   const {gameId} = useParams<{gameId: string}>();
-  if (!gameId) {
-    throw new Error('gameId is required');
+  if (typeof gameId !== 'string') {
+    throw new TypeError('gameId is required');
   }
 
   const {
@@ -23,7 +23,7 @@ export function Game() {
     setValue: setName,
   } = useLocalStorage<string>('planning-poker:name', '');
 
-  const game = useGame(gameId, name || '');
+  const game = useGame(gameId, name ?? '');
 
   if (!name) {
     return <JoinDialog isOpen={true} onJoin={setName} />;

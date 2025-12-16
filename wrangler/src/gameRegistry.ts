@@ -1,23 +1,21 @@
 export class GameRegistry {
-  private readonly state: DurableObjectState;
-
-  constructor(state: DurableObjectState) {
-    this.state = state;
-  }
+  constructor(private readonly state: DurableObjectState) {}
 
   async fetch(request: Request) {
     const url = new URL(request.url);
 
     // POST /register
     if (url.pathname === '/register' && request.method === 'POST') {
-      const {gameId, votingSystem} = await request.json();
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const {gameId, votingSystem} = await request.json() as {gameId: string; votingSystem: string};
       await this.state.storage.put(gameId, {votingSystem});
       return new Response('ok');
     }
 
     // POST /unregister
     if (url.pathname === '/unregister' && request.method === 'POST') {
-      const {gameId} = await request.json();
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      const {gameId} = await request.json() as {gameId: string};
       await this.state.storage.delete(gameId);
       return new Response('ok');
     }

@@ -7,6 +7,17 @@ export type CreateGameRequest = {
   votingSystem?: string;
 };
 
+export function isCreateGameRequest(value: unknown): value is CreateGameRequest {
+  return (
+    typeof value === 'object'
+    && value !== null
+    && (
+      !('votingSystem' in value)
+      || typeof (value as any).votingSystem === 'string'
+    )
+  );
+}
+
 export type CreateGameResponse = {
   gameId: string;
   votingSystem: string;
