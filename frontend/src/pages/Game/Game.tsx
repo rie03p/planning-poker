@@ -23,7 +23,7 @@ export function Game() {
     setValue: setName,
   } = useLocalStorage<string>('planning-poker:name', '');
 
-  const game = useGame(gameId, name || '');
+  const game = useGame(gameId, name ?? '');
 
   if (!name) {
     return <JoinDialog isOpen={true} onJoin={setName} />;
