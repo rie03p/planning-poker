@@ -1,9 +1,9 @@
 import {
   type CreateGameResponse,
-  isCreateGameRequest,
+  createGameRequestSchema,
   type RegistryExistsResponse,
-  type Env,
-} from '../types';
+} from '@planning-poker/shared';
+import {type Env} from '../types';
 import {fetchJson} from '../utils';
 
 export async function handleGamesRoute(
@@ -18,8 +18,9 @@ export async function handleGamesRoute(
 
     try {
       const body: unknown = await request.json();
-      if (isCreateGameRequest(body) && body.votingSystem) {
-        votingSystem = body.votingSystem;
+      const result = createGameRequestSchema.safeParse(body);
+      if (result.success && result.data.votingSystem) {
+        votingSystem = result.data.votingSystem;
       }
     } catch {
       // ignore → default

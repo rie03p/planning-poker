@@ -25,6 +25,7 @@
     "noUncheckedSideEffectImports": true,
     "paths": {
       "@/*": ["./src/*"],
+      "@planning-poker/shared": ["../shared/src"]
     }
   },
   "include": ["src"]

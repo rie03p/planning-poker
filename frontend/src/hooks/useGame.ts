@@ -1,12 +1,11 @@
 import {
   useState, useEffect, useRef, useCallback,
 } from 'react';
-
-type Participant = {
-  id: string;
-  name: string;
-  vote: string | undefined;
-};
+import {
+  type Participant,
+  type ClientMessage,
+  serverMessageSchema,
+} from '@planning-poker/shared';
 
 type UseGameReturn = {
   participants: Participant[];
@@ -19,12 +18,6 @@ type UseGameReturn = {
   disconnect: () => void;
   notFound: boolean;
 };
-
-type ClientMessage =
-  | {type: 'join'; name: string}
-  | {type: 'vote'; vote: string | undefined}
-  | {type: 'reveal'}
-  | {type: 'reset'};
 
 const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8787';
 
@@ -58,7 +51,13 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   }, []);
 
   const handleMessage = (event: MessageEvent) => {
-    const data = JSON.parse(event.data);
+    const rawData = JSON.parse(event.data);
+
+    const {data, success, error} = serverMessageSchema.safeParse(rawData);
+    if (!success) {
+      console.error('Invalid server message:', error);
+      return;
+    }
 
     switch (data.type) {
       case 'joined': {
@@ -68,24 +67,19 @@ export function useGame(gameId: string, name: string): UseGameReturn {
         break;
       }
 
-      case 'participantJoined':
-      case 'voteUpdated':
-      case 'votesRevealed':
-      case 'participantLeft': {
+      case 'update': {
         setParticipants(data.participants);
         setRevealed(data.revealed);
         break;
       }
 
-      case 'votesReset': {
-        setParticipants(data.participants);
-        setRevealed(data.revealed);
-        setMyVote(undefined);
+      case 'not-found': {
+        setNotFound(true);
         break;
       }
 
       default: {
-        console.warn(`Unknown message type: ${data.type}`);
+        console.warn('Unknown message type');
       }
     }
   };
@@ -153,6 +147,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
 
   const reset = useCallback(() => {
     send({type: 'reset'});
+    setMyVote(undefined);
   }, [send]);
 
   const disconnect = useCallback(() => {

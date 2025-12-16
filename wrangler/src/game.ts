@@ -1,6 +1,9 @@
 import {
-  type GameState, type Message, type Participant, type Env,
-} from './types';
+  type Participant,
+  clientMessageSchema,
+  serverMessageSchema,
+} from '@planning-poker/shared';
+import {type GameState, type Env} from './types';
 
 export class Game {
   private readonly sessions = new Map<string, WebSocket>();
@@ -90,34 +93,53 @@ export class Game {
   private async handleDisconnect(sessionId: string) {
     this.sessions.delete(sessionId);
     this.gameState.participants.delete(sessionId);
-    await this.broadcastParticipant('participantLeft');
+    this.broadcast({
+      type: 'update',
+      participants: [...this.gameState.participants.values()],
+      revealed: this.gameState.revealed,
+    });
 
     if (this.gameState.participants.size === 0) {
       await this.state.storage.setAlarm(Date.now() + 60_000);
     }
   }
 
-  private async handleMessage(sessionId: string, data: Message) {
+  private async handleMessage(sessionId: string, rawData: unknown) {
+    const {data, success, error} = clientMessageSchema.safeParse(rawData);
+    if (!success) {
+      console.error('Invalid message:', error);
+      return;
+    }
+
     switch (data.type) {
       case 'join': {
         this.gameState.participants.set(sessionId, {
           id: sessionId,
-          name: data.name!,
+          name: data.name,
           vote: undefined,
         });
         await this.state.storage.deleteAlarm();
 
         // Send votingSystem on join
-        await this.broadcastParticipant('joined');
-        await this.broadcastParticipant('voteUpdated');
+        const votingSystem = await this.state.storage.get<string>('votingSystem') ?? 'fibonacci';
+        this.broadcast({
+          type: 'joined',
+          participants: [...this.gameState.participants.values()],
+          revealed: this.gameState.revealed,
+          votingSystem,
+        });
         break;
       }
 
       case 'vote': {
         const p = this.gameState.participants.get(sessionId);
         if (p) {
-          p.vote = data.vote!;
-          await this.broadcastParticipant('voteUpdated');
+          p.vote = data.vote;
+          this.broadcast({
+            type: 'update',
+            participants: [...this.gameState.participants.values()],
+            revealed: this.gameState.revealed,
+          });
         }
 
         break;
@@ -125,7 +147,11 @@ export class Game {
 
       case 'reveal': {
         this.gameState.revealed = true;
-        await this.broadcastParticipant('votesRevealed');
+        this.broadcast({
+          type: 'update',
+          participants: [...this.gameState.participants.values()],
+          revealed: this.gameState.revealed,
+        });
         break;
       }
 
@@ -135,27 +161,24 @@ export class Game {
           p.vote = undefined;
         }
 
-        await this.broadcastParticipant('votesReset');
+        this.broadcast({
+          type: 'update',
+          participants: [...this.gameState.participants.values()],
+          revealed: this.gameState.revealed,
+        });
         break;
-      }
-
-      default: {
-        throw new Error(`Unknown message type: ${data.type}`);
       }
     }
   }
 
-  private async broadcastParticipant(type: string) {
-    this.broadcast({
-      type,
-      votingSystem: type === 'joined' ? await this.state.storage.get<string>('votingSystem') ?? 'fibonacci' : undefined,
-      participants: [...this.gameState.participants.values()],
-      revealed: this.gameState.revealed,
-    });
-  }
+  private broadcast(message: unknown) {
+    const result = serverMessageSchema.safeParse(message);
+    if (!result.success) {
+      console.error('Invalid server message:', result.error);
+      return;
+    }
 
-  private broadcast(message: any) {
-    const string_ = JSON.stringify(message);
+    const string_ = JSON.stringify(result.data);
     for (const ws of this.sessions.values()) {
       try {
         ws.send(string_);

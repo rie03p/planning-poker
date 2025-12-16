@@ -1,7 +1,8 @@
+import {type RegistryExistsResponse} from '@planning-poker/shared';
 import {getCorsHeaders} from './cors';
 import {handleGameWebSocket} from './routes/gameWebSocket';
 import {handleGamesRoute} from './routes/games';
-import {type RegistryExistsResponse, type Env} from './types';
+import {type Env} from './types';
 import {fetchJson} from './utils';
 
 const worker = {

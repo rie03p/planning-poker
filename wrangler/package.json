@@ -8,6 +8,9 @@
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@planning-poker/shared": "workspace:*"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.2025.0",
     "typescript": "^5.9.3",
