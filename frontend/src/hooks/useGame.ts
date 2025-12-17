@@ -75,6 +75,13 @@ export function useGame(gameId: string, name: string): UseGameReturn {
         break;
       }
 
+      case 'reset': {
+        setParticipants(data.participants);
+        setRevealed(false);
+        setMyVote(undefined);
+        break;
+      }
+
       case 'not-found': {
         setNotFound(true);
         break;

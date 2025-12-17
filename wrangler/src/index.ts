@@ -1,9 +1,8 @@
-import {type RegistryExistsResponse} from '@planning-poker/shared';
 import {getCorsHeaders} from './cors';
 import {handleGameWebSocket} from './routes/gameWebSocket';
-import {handleGamesRoute} from './routes/games';
+import {handleCreateGame} from './routes/games/create';
+import {handleGameExists} from './routes/games/exists';
 import {type Env} from './types';
-import {fetchJson} from './utils';
 
 const worker = {
   async fetch(request: Request, env: Env) {
@@ -23,41 +22,25 @@ const worker = {
 
     const url = new URL(request.url);
 
-    // index.ts
-    if (url.pathname.startsWith('/games')) {
-      const response = await handleGamesRoute(
-        request,
-        env,
-        corsHeaders,
-        url,
-      );
-      if (response) {
-        return response;
-      }
+    // POST /games
+    if (url.pathname === '/games' && request.method === 'POST') {
+      return handleCreateGame(request, env, corsHeaders);
     }
 
-    // WebSocket route
+    // GET /games/:gameId/exists
+    const parts = url.pathname.split('/');
+    if (
+      request.method === 'GET'
+      && parts.length === 4
+      && parts[1] === 'games'
+      && parts[3] === 'exists'
+    ) {
+      return handleGameExists(request, env, corsHeaders);
+    }
+
+    // WebSocket /game/:gameId
     if (url.pathname.startsWith('/game/')) {
-      const gameId = url.pathname.split('/')[2];
-      if (!gameId) {
-        return new Response('gameId is required', {status: 400});
-      }
-
-      const registry = env.REGISTRY.get(env.REGISTRY.idFromName('global'));
-
-      const response = await registry.fetch(`http://registry/exists?gameId=${gameId}`);
-      const {exists, votingSystem} = await fetchJson<RegistryExistsResponse>(response);
-
-      if (!exists) {
-        return new Response('Game not found', {status: 404});
-      }
-
-      return handleGameWebSocket(
-        request,
-        env,
-        gameId,
-        votingSystem ?? 'fibonacci',
-      );
+      return handleGameWebSocket(request, env);
     }
 
     return new Response('OK', {headers: corsHeaders});
