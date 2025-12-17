@@ -164,9 +164,8 @@ export class Game {
         }
 
         this.broadcast({
-          type: 'update',
+          type: 'reset',
           participants: [...this.gameState.participants.values()],
-          revealed: this.gameState.revealed,
         });
         break;
       }

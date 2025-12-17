@@ -43,6 +43,10 @@ export const serverMessageSchema = z.discriminatedUnion('type', [
     revealed: z.boolean(),
   }),
   z.object({
+    type: z.literal('reset'),
+    participants: z.array(participantSchema),
+  }),
+  z.object({
     type: z.literal('not-found'),
   }),
 ]);
