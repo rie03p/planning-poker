@@ -68,6 +68,40 @@ describe('GameRegistry', () => {
         {votingSystem: 'tshirt'},
       );
     });
+
+    it('should reject invalid register request - missing gameId', async () => {
+      const request = new Request('http://registry/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          votingSystem: 'fibonacci',
+        }),
+      });
+
+      await expect(registry.fetch(request)).rejects.toThrow();
+    });
+
+    it('should reject invalid register request - missing votingSystem', async () => {
+      const request = new Request('http://registry/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          gameId: 'test-game-123',
+        }),
+      });
+
+      await expect(registry.fetch(request)).rejects.toThrow();
+    });
+
+    it('should reject invalid register request - wrong types', async () => {
+      const request = new Request('http://registry/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          gameId: 123,
+          votingSystem: true,
+        }),
+      });
+
+      await expect(registry.fetch(request)).rejects.toThrow();
+    });
   });
 
   describe('POST /unregister', () => {
@@ -87,6 +121,26 @@ describe('GameRegistry', () => {
       expect(response.status).toBe(200);
       expect(await response.text()).toBe('ok');
       expect(mockState.storage.delete).toHaveBeenCalledWith('test-game-123');
+    });
+
+    it('should reject invalid unregister request - missing gameId', async () => {
+      const request = new Request('http://registry/unregister', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+
+      await expect(registry.fetch(request)).rejects.toThrow();
+    });
+
+    it('should reject invalid unregister request - wrong type', async () => {
+      const request = new Request('http://registry/unregister', {
+        method: 'POST',
+        body: JSON.stringify({
+          gameId: 123,
+        }),
+      });
+
+      await expect(registry.fetch(request)).rejects.toThrow();
     });
   });
 
