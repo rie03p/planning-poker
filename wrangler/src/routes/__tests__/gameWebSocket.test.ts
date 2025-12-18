@@ -1,12 +1,13 @@
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import {
+  describe, it, expect, vi, beforeEach,
+} from 'vitest';
 import {handleGameWebSocket} from '../gameWebSocket';
 import type {Env} from '../../types';
 
 const createMockEnv = (): Env => {
   const mockGameInstance = {
     fetch: vi.fn(async (request: Request) =>
-      new Response('OK', {status: 200}),
-    ),
+      new Response('OK', {status: 200})),
   };
 
   const mockRegistryInstance = {
@@ -14,8 +15,7 @@ const createMockEnv = (): Env => {
       new Response(
         JSON.stringify({exists: true, votingSystem: 'fibonacci'}),
         {headers: {'Content-Type': 'application/json'}},
-      ),
-    ),
+      )),
   };
 
   return {
@@ -78,8 +78,7 @@ describe('handleGameWebSocket', () => {
         new Response(
           JSON.stringify({exists: false, votingSystem: 'fibonacci'}),
           {headers: {'Content-Type': 'application/json'}},
-        ),
-      ),
+        )),
     };
 
     mockEnv.REGISTRY.get = vi.fn(() => mockRegistryInstance) as any;
@@ -98,8 +97,7 @@ describe('handleGameWebSocket', () => {
   it('should forward request to game durable object for existing game', async () => {
     const mockGameInstance = {
       fetch: vi.fn(async () =>
-        new Response('OK', {status: 200}),
-      ),
+        new Response('OK', {status: 200})),
     };
 
     mockEnv.GAME.get = vi.fn(() => mockGameInstance) as any;

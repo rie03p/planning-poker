@@ -1,15 +1,15 @@
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import {
+  describe, it, expect, vi, beforeEach,
+} from 'vitest';
 import {renderHook} from '@testing-library/react';
 import {useGame} from '../useGame';
 
 describe('useGame', () => {
   beforeEach(() => {
-    globalThis.fetch = vi.fn(async () => {
-      return new Response(
-        JSON.stringify({exists: true}),
-        {status: 200},
-      );
-    });
+    globalThis.fetch = vi.fn(async () => new Response(
+      JSON.stringify({exists: true}),
+      {status: 200},
+    ));
   });
 
   it('sends join message on websocket open', () => {
@@ -20,12 +20,9 @@ describe('useGame', () => {
     const ws = getWs();
     ws.emitOpen();
 
-    expect(ws.send).toHaveBeenCalledWith(
-      JSON.stringify({type: 'join', name: 'Alice'}),
-    );
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({type: 'join', name: 'Alice'}));
   });
 });
-
 
 type MockWsInstance = {
   send: ReturnType<typeof vi.fn>;
@@ -46,39 +43,46 @@ function mockWebSocket() {
     send = vi.fn();
     close = vi.fn();
 
-    private listeners: Record<string, ((ev: Event | MessageEvent) => void)[]> = {};
+    private listeners: Record<string, Array<(ev: Event | MessageEvent) => void>> = {};
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     constructor(_url: string) {
       instance = {
         send: this.send,
         close: this.close,
 
         emitOpen: () => {
-          this.listeners.open?.forEach((cb) =>
-            cb(new Event('open')),
-          );
+          if (this.listeners.open) {
+            for (const cb of this.listeners.open) {
+              cb(new Event('open'));
+            }
+          }
         },
 
         emitMessage: (data: unknown) => {
-          this.listeners.message?.forEach((cb) =>
-            cb(new MessageEvent('message', {
-              data: JSON.stringify(data),
-            })),
-          );
+          if (this.listeners.message) {
+            for (const cb of this.listeners.message) {
+              cb(new MessageEvent('message', {
+                data: JSON.stringify(data),
+              }));
+            }
+          }
         },
 
         emitClose: () => {
           this.readyState = 3; // CLOSED
-          this.listeners.close?.forEach((cb) =>
-            cb(new CloseEvent('close')),
-          );
+          if (this.listeners.close) {
+            for (const cb of this.listeners.close) {
+              cb(new CloseEvent('close'));
+            }
+          }
         },
 
         emitError: (error?: unknown) => {
-          this.listeners.error?.forEach((cb) =>
-            cb(new ErrorEvent('error', {error})),
-          );
+          if (this.listeners.error) {
+            for (const cb of this.listeners.error) {
+              cb(new ErrorEvent('error', {error}));
+            }
+          }
         },
       };
     }
@@ -89,9 +93,7 @@ function mockWebSocket() {
     }
 
     removeEventListener(type: string, cb: (ev: Event | MessageEvent) => void) {
-      this.listeners[type] = (this.listeners[type] ?? []).filter(
-        (listener) => listener !== cb,
-      );
+      this.listeners[type] = (this.listeners[type] ?? []).filter(listener => listener !== cb);
     }
   }
 

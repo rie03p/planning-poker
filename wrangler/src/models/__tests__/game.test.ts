@@ -1,4 +1,6 @@
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import {
+  describe, it, expect, vi, beforeEach,
+} from 'vitest';
 import {Game} from '../game';
 
 // Mock DurableObjectState
@@ -17,8 +19,8 @@ const createMockState = () => {
       deleteAll: vi.fn(async () => {
         storage.clear();
       }),
-      setAlarm: vi.fn(async () => {}),
-      deleteAlarm: vi.fn(async () => {}),
+      setAlarm: vi.fn(),
+      deleteAlarm: vi.fn(),
     },
     waitUntil: vi.fn(),
     blockConcurrencyWhile: vi.fn(),
@@ -35,8 +37,7 @@ const createMockEnv = () => ({
     idFromName: vi.fn((name: string) => ({name})),
     get: vi.fn(() => ({
       fetch: vi.fn(async () =>
-        new Response('ok', {status: 200}),
-      ),
+        new Response('ok', {status: 200})),
     })),
   },
 } as any);
