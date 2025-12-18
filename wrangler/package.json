@@ -1,18 +1,24 @@
 {
-  "name": "planning-poker-wrangler",
+  "name": "wrangler",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
+    "build": "wrangler build",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@planning-poker/shared": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.2025.0",
+    "@vitest/coverage-v8": "^4.0.16",
+    "vitest": "^4.0.16",
     "typescript": "^5.9.3",
     "wrangler": "^4.54.0"
   }

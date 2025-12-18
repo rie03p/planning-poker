@@ -1,3 +1,8 @@
+import {
+  registryRegisterRequestSchema,
+  registryUnregisterRequestSchema,
+} from '@planning-poker/shared';
+
 export class GameRegistry {
   constructor(private readonly state: DurableObjectState) {}
 
@@ -6,16 +11,16 @@ export class GameRegistry {
 
     // POST /register
     if (url.pathname === '/register' && request.method === 'POST') {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      const {gameId, votingSystem} = await request.json() as {gameId: string; votingSystem: string};
+      const data: unknown = await request.json();
+      const {gameId, votingSystem} = registryRegisterRequestSchema.parse(data);
       await this.state.storage.put(gameId, {votingSystem});
       return new Response('ok');
     }
 
     // POST /unregister
     if (url.pathname === '/unregister' && request.method === 'POST') {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      const {gameId} = await request.json() as {gameId: string};
+      const data: unknown = await request.json();
+      const {gameId} = registryUnregisterRequestSchema.parse(data);
       await this.state.storage.delete(gameId);
       return new Response('ok');
     }

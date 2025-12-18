@@ -1,6 +1,5 @@
-import {type RegistryExistsResponse} from '@planning-poker/shared';
+import {registryExistsResponseSchema} from '@planning-poker/shared';
 import {type Env} from '../../types';
-import {fetchJson} from '../../utils';
 
 export async function handleGameExists(
   request: Request,
@@ -21,7 +20,8 @@ export async function handleGameExists(
   const registry = env.REGISTRY.get(env.REGISTRY.idFromName('global'));
 
   const response = await registry.fetch(`http://registry/exists?gameId=${gameId}`);
-  const {exists} = await fetchJson<RegistryExistsResponse>(response);
+  const data: unknown = await response.json();
+  const {exists} = registryExistsResponseSchema.parse(data);
 
   const headers = new Headers(corsHeaders);
   headers.set('Content-Type', 'application/json');

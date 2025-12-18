@@ -3,7 +3,7 @@ import {
   clientMessageSchema,
   serverMessageSchema,
 } from '@planning-poker/shared';
-import {type GameState, type Env} from './types';
+import {type GameState, type Env} from '../types';
 
 export class Game {
   private readonly sessions = new Map<string, WebSocket>();

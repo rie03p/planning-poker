@@ -48,5 +48,5 @@ const worker = {
 };
 
 export default worker;
-export {Game} from './game';
-export {GameRegistry} from './gameRegistry';
+export {Game} from './models/game';
+export {GameRegistry} from './models/gameRegistry';

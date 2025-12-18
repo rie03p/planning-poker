@@ -1,6 +1,5 @@
-import {type RegistryExistsResponse} from '@planning-poker/shared';
+import {registryExistsResponseSchema} from '@planning-poker/shared';
 import {type Env} from '../types';
-import {fetchJson} from '../utils';
 
 export async function handleGameWebSocket(
   request: Request,
@@ -23,7 +22,8 @@ export async function handleGameWebSocket(
 
   const registry = env.REGISTRY.get(env.REGISTRY.idFromName('global'));
   const response = await registry.fetch(`http://registry/exists?gameId=${gameId}`);
-  const {exists, votingSystem} = await fetchJson<RegistryExistsResponse>(response);
+  const data: unknown = await response.json();
+  const {exists, votingSystem} = registryExistsResponseSchema.parse(data);
 
   if (!exists) {
     return new Response('Game not found', {status: 404});

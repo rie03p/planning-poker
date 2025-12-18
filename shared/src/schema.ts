@@ -15,6 +15,15 @@ export const registryExistsResponseSchema = z.object({
   votingSystem: z.string(),
 });
 
+export const registryRegisterRequestSchema = z.object({
+  gameId: z.string(),
+  votingSystem: z.string(),
+});
+
+export const registryUnregisterRequestSchema = z.object({
+  gameId: z.string(),
+});
+
 // Game state schemas
 export const participantSchema = z.object({
   id: z.string(),
@@ -55,6 +64,8 @@ export const serverMessageSchema = z.discriminatedUnion('type', [
 export type CreateGameRequest = z.infer<typeof createGameRequestSchema>;
 export type CreateGameResponse = z.infer<typeof createGameResponseSchema>;
 export type RegistryExistsResponse = z.infer<typeof registryExistsResponseSchema>;
+export type RegistryRegisterRequest = z.infer<typeof registryRegisterRequestSchema>;
+export type RegistryUnregisterRequest = z.infer<typeof registryUnregisterRequestSchema>;
 export type Participant = z.infer<typeof participantSchema>;
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
 export type ServerMessage = z.infer<typeof serverMessageSchema>;
