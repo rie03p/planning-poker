@@ -1,4 +1,4 @@
-name: Lint and Test
+name: Lint
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  lint-test:
-    name: Lint and Test
+  lint:
+    name: Lint (xo)
     runs-on: ubuntu-latest
 
     steps:
@@ -24,16 +24,8 @@ jobs:
       - name: Use pnpm 10.25.0
         run: corepack prepare pnpm@10.25.0 --activate
 
-      - name: Install dependencies
+      - name: Install dependencies (root)
         run: pnpm install --frozen-lockfile
 
       - name: Lint
         run: pnpm xo --no-fix
-
-      - name: Run tests with coverage
-        run: pnpm test:coverage
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}

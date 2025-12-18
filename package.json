@@ -5,9 +5,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest",
+    "test": "pnpm --filter frontend test && pnpm --filter wrangler test",
+    "test:coverage": "pnpm --filter frontend test:coverage && pnpm --filter wrangler test:coverage",
+    "test:watch": "pnpm --filter frontend test:watch",
     "test:frontend": "pnpm --filter frontend test",
     "test:wrangler": "pnpm --filter wrangler test",
     "test:coverage:frontend": "pnpm --filter frontend test:coverage",
@@ -24,8 +24,6 @@
   "license": "ISC",
   "packageManager": "pnpm@10.25.0",
   "devDependencies": {
-    "@vitest/coverage-v8": "^4.0.16",
-    "vitest": "^4.0.16",
     "xo": "^1.2.3"
   }
 }
