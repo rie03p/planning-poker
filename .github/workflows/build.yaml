@@ -33,9 +33,6 @@ jobs:
       - name: Build frontend
         run: pnpm build
 
-      - name: Run frontend tests
-        run: pnpm test
-
       - name: Run frontend tests with coverage
         run: pnpm test:coverage
 
@@ -73,9 +70,6 @@ jobs:
 
       - name: Build wrangler
         run: pnpm wrangler build
-
-      - name: Run wrangler tests
-        run: pnpm test
 
       - name: Run wrangler tests with coverage
         run: pnpm test:coverage
