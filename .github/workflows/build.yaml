@@ -6,7 +6,7 @@ on:
 
 jobs:
   frontend-build:
-    name: Frontend build and test
+    name: Frontend
     runs-on: ubuntu-latest
 
     defaults:
@@ -47,7 +47,7 @@ jobs:
           working-directory: frontend
 
   wrangler-build:
-    name: Wrangler build and test
+    name: Wrangler
     runs-on: ubuntu-latest
 
     defaults:
