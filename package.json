@@ -2,22 +2,30 @@
   "name": "planning-poker",
   "version": "1.0.0",
   "description": "",
-	"type": "module",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-		"lint": "xo",
-		"lint:frontend": "xo frontend",
-		"lint:backend": "xo wrangler",
-		"format": "xo --fix",
-		"format:frontend": "xo frontend --fix",
-		"format:backend": "xo wrangler --fix"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:frontend": "pnpm --filter frontend test",
+    "test:wrangler": "pnpm --filter wrangler test",
+    "test:coverage:frontend": "pnpm --filter frontend test:coverage",
+    "test:coverage:wrangler": "pnpm --filter wrangler test:coverage",
+    "lint": "xo",
+    "lint:frontend": "xo frontend",
+    "lint:backend": "xo wrangler",
+    "format": "xo --fix",
+    "format:frontend": "xo frontend --fix",
+    "format:backend": "xo wrangler --fix"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.25.0",
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.16",
+    "vitest": "^4.0.16",
     "xo": "^1.2.3"
   }
 }

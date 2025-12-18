@@ -7,7 +7,10 @@
     "dev": "wrangler dev",
     "build": "wrangler build",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@planning-poker/shared": "workspace:*"
