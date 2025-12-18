@@ -41,7 +41,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: frontend
-          working-directory: frontend
+          files: frontend/coverage/lcov.info
 
   wrangler-build:
     name: Wrangler
@@ -79,4 +79,4 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: wrangler
-          working-directory: wrangler
+          files: wrangler/coverage/lcov.info
