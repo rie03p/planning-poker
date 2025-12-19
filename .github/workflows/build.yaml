@@ -1,4 +1,4 @@
-name: Build and Test
+name: Build
 
 on:
   pull_request:
@@ -8,7 +8,6 @@ jobs:
   frontend-build:
     name: Frontend
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: frontend
@@ -33,20 +32,9 @@ jobs:
       - name: Build frontend
         run: pnpm build
 
-      - name: Run frontend tests with coverage
-        run: pnpm test:coverage
-
-      - name: Upload frontend coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: frontend
-          working-directory: frontend
-
   wrangler-build:
     name: Wrangler
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: wrangler
@@ -70,13 +58,3 @@ jobs:
 
       - name: Build wrangler
         run: pnpm wrangler build
-
-      - name: Run wrangler tests with coverage
-        run: pnpm test:coverage
-
-      - name: Upload wrangler coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: wrangler
-          working-directory: wrangler
