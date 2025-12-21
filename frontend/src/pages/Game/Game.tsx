@@ -1,3 +1,4 @@
+import {useMemo} from 'react';
 import {useParams} from 'react-router-dom';
 import {
   Box, VStack, HStack, Text,
@@ -25,11 +26,25 @@ export function Game() {
 
   const game = useGame(gameId, name ?? '');
 
+  const {
+    participants,
+    myVote,
+    vote,
+    revealed,
+    reveal,
+    reset,
+    votingSystem,
+    notFound,
+  } = game;
+
+  const hasAnyVotes = useMemo(
+    () => participants.some(p => p.vote !== undefined),
+    [participants],
+  );
+
   if (!name) {
     return <JoinDialog isOpen={true} onJoin={setName} />;
   }
-
-  const {participants, myVote, vote, revealed, reveal, reset, votingSystem, notFound} = game;
 
   if (notFound) {
     return <NotFound />;
@@ -88,7 +103,7 @@ export function Game() {
           textAlign='center'
         >
           <ActionArea
-            myVote={myVote}
+            hasAnyVotes={hasAnyVotes}
             revealed={revealed}
             reveal={reveal}
             reset={reset}
