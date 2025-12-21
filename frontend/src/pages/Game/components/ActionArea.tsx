@@ -1,17 +1,17 @@
 import {Button, Text} from '@chakra-ui/react';
 
 export function ActionArea({
-  myVote,
+  hasAnyVotes,
   revealed,
   reveal,
   reset,
 }: {
-  myVote: string | undefined;
+  hasAnyVotes: boolean;
   revealed: boolean;
   reveal: () => void;
   reset: () => void;
 }) {
-  if (!myVote) {
+  if (!hasAnyVotes) {
     return (
       <Text fontSize='xl' fontWeight='medium'>
         Pick your cards!
