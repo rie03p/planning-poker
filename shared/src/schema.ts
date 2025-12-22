@@ -33,7 +33,7 @@ export const participantSchema = z.object({
 
 // WebSocket message schemas
 export const clientMessageSchema = z.discriminatedUnion('type', [
-  z.object({type: z.literal('join'), name: z.string().min(1).max(20).trim()}),
+  z.object({type: z.literal('join'), name: participantSchema.shape.name}),
   z.object({type: z.literal('vote'), vote: z.string().optional()}),
   z.object({type: z.literal('reveal')}),
   z.object({type: z.literal('reset')}),
