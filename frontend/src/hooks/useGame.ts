@@ -5,6 +5,7 @@ import {
   type Participant,
   type ClientMessage,
   serverMessageSchema,
+  clientMessageSchema,
 } from '@planning-poker/shared';
 
 type UseGameReturn = {
@@ -47,7 +48,13 @@ export function useGame(gameId: string, name: string): UseGameReturn {
       return;
     }
 
-    ws.send(JSON.stringify(message));
+    const result = clientMessageSchema.safeParse(message);
+    if (!result.success) {
+      console.error('Invalid client message:', result.error);
+      return;
+    }
+
+    ws.send(JSON.stringify(result.data));
   }, []);
 
   const handleMessage = (event: MessageEvent) => {
