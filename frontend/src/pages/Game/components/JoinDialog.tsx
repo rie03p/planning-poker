@@ -1,5 +1,7 @@
 import {useState} from 'react';
-import {Button, Dialog, Input, Field} from '@chakra-ui/react';
+import {
+  Button, Dialog, Input, Field,
+} from '@chakra-ui/react';
 import {participantSchema} from '@planning-poker/shared';
 
 type Props = {
@@ -58,7 +60,7 @@ export function JoinDialog({isOpen, onJoin}: Props) {
           </Dialog.Header>
 
           <Dialog.Body>
-            <Field.Root invalid={!!error}>
+            <Field.Root invalid={Boolean(error)}>
               <Input
                 placeholder='Your name'
                 value={draftName}
