@@ -1,8 +1,9 @@
-import {useMemo} from 'react';
+import {useMemo, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
 import {
   Box, VStack, HStack, Text,
 } from '@chakra-ui/react';
+import {participantSchema} from '@planning-poker/shared';
 import {useLocalStorage} from '../../hooks/useLocalStorage';
 import {useGame} from '../../hooks/useGame';
 import {getCardsForVotingSystem} from '../../utils/votingSystems';
@@ -23,6 +24,15 @@ export function Game() {
     value: name,
     setValue: setName,
   } = useLocalStorage<string>('planning-poker:name', '');
+
+  useEffect(() => {
+    if (name) {
+      const result = participantSchema.shape.name.safeParse(name);
+      if (!result.success) {
+        setName('');
+      }
+    }
+  }, [name, setName]);
 
   const game = useGame(gameId, name ?? '');
 
