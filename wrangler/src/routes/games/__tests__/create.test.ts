@@ -68,7 +68,7 @@ describe('handleCreateGame', () => {
     't-shirts',
     'modified-fibonacci',
     'powers-of-2',
-  ])('should create game with %s voting system', async (votingSystem) => {
+  ])('should create game with %s voting system', async votingSystem => {
     const request = new Request('http://localhost/games', {
       method: 'POST',
       body: JSON.stringify({votingSystem}),
