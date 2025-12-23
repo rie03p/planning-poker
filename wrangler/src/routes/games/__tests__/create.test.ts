@@ -64,10 +64,14 @@ describe('handleCreateGame', () => {
     });
   });
 
-  it('should create game with specified voting system', async () => {
+  it.each([
+    't-shirts',
+    'modified-fibonacci',
+    'powers-of-2',
+  ])('should create game with %s voting system', async (votingSystem) => {
     const request = new Request('http://localhost/games', {
       method: 'POST',
-      body: JSON.stringify({votingSystem: 't-shirts'}),
+      body: JSON.stringify({votingSystem}),
     });
 
     const response = await handleCreateGame(request, mockEnv, corsHeaders);
@@ -77,41 +81,7 @@ describe('handleCreateGame', () => {
     const data = await response.json();
     expect(data).toEqual({
       gameId: 'test-uuid-1234',
-      votingSystem: 't-shirts',
-    });
-  });
-
-  it('should create game with modified-fibonacci voting system', async () => {
-    const request = new Request('http://localhost/games', {
-      method: 'POST',
-      body: JSON.stringify({votingSystem: 'modified-fibonacci'}),
-    });
-
-    const response = await handleCreateGame(request, mockEnv, corsHeaders);
-
-    expect(response.status).toBe(201);
-
-    const data = await response.json();
-    expect(data).toEqual({
-      gameId: 'test-uuid-1234',
-      votingSystem: 'modified-fibonacci',
-    });
-  });
-
-  it('should create game with powers-of-2 voting system', async () => {
-    const request = new Request('http://localhost/games', {
-      method: 'POST',
-      body: JSON.stringify({votingSystem: 'powers-of-2'}),
-    });
-
-    const response = await handleCreateGame(request, mockEnv, corsHeaders);
-
-    expect(response.status).toBe(201);
-
-    const data = await response.json();
-    expect(data).toEqual({
-      gameId: 'test-uuid-1234',
-      votingSystem: 'powers-of-2',
+      votingSystem,
     });
   });
 
