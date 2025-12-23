@@ -8,6 +8,7 @@ export {
   clientMessageSchema,
   serverMessageSchema,
   votingSystemSchema,
+  VOTING_SYSTEMS,
 } from './schema';
 
 export type {

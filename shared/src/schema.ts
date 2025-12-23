@@ -9,6 +9,13 @@ export const votingSystemSchema = z.enum([
 
 export type VotingSystem = z.infer<typeof votingSystemSchema>;
 
+export const VOTING_SYSTEMS: Record<VotingSystem, string[]> = {
+  'fibonacci': ['0', '1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '?', '☕'],
+  'modified-fibonacci': ['0', '½', '1', '2', '3', '5', '8', '13', '20', '40', '100', '?', '☕'],
+  't-shirts': ['XS', 'S', 'M', 'L', 'XL', '?', '☕'],
+  'powers-of-2': ['0', '1', '2', '4', '8', '16', '32', '64', '?', '☕'],
+};
+
 // API Request/Response schemas
 export const createGameRequestSchema = z.object({
   votingSystem: votingSystemSchema.optional(),
