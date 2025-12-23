@@ -1,23 +1,32 @@
 import {z} from 'zod';
 
+export const votingSystemSchema = z.enum([
+  'fibonacci',
+  'modified-fibonacci',
+  'tshirts',
+  'powers-of-2',
+]);
+
+export type VotingSystem = z.infer<typeof votingSystemSchema>;
+
 // API Request/Response schemas
 export const createGameRequestSchema = z.object({
-  votingSystem: z.string().optional(),
+  votingSystem: votingSystemSchema.optional(),
 });
 
 export const createGameResponseSchema = z.object({
   gameId: z.string(),
-  votingSystem: z.string(),
+  votingSystem: votingSystemSchema,
 });
 
 export const registryExistsResponseSchema = z.object({
   exists: z.boolean(),
-  votingSystem: z.string(),
+  votingSystem: votingSystemSchema,
 });
 
 export const registryRegisterRequestSchema = z.object({
   gameId: z.string(),
-  votingSystem: z.string(),
+  votingSystem: votingSystemSchema,
 });
 
 export const registryUnregisterRequestSchema = z.object({

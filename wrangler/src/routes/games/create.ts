@@ -1,5 +1,6 @@
 import {
   type CreateGameResponse,
+  type VotingSystem,
   createGameRequestSchema,
 } from '@planning-poker/shared';
 import {type Env} from '../../types';
@@ -13,16 +14,18 @@ export async function handleCreateGame(
     return new Response('Method Not Allowed', {status: 405});
   }
 
-  let votingSystem = 'fibonacci';
-
+  let votingSystem: VotingSystem;
   try {
     const body: unknown = await request.json();
     const result = createGameRequestSchema.safeParse(body);
-    if (result.success && result.data.votingSystem) {
-      votingSystem = result.data.votingSystem;
+
+    if (!result.success) {
+      return new Response('Invalid voting system', {status: 400});
     }
+
+    votingSystem = result.data.votingSystem ?? 'fibonacci';
   } catch {
-    // ignore → default
+    return new Response('Invalid JSON', {status: 400});
   }
 
   const gameId = crypto.randomUUID();

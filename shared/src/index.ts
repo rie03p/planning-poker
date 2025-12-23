@@ -7,6 +7,7 @@ export {
   participantSchema,
   clientMessageSchema,
   serverMessageSchema,
+  votingSystemSchema,
 } from './schema';
 
 export type {
@@ -18,4 +19,5 @@ export type {
   Participant,
   ClientMessage,
   ServerMessage,
+  VotingSystem,
 } from './schema';
