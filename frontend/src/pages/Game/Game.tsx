@@ -44,6 +44,7 @@ export function Game() {
     reset,
     votingSystem,
     notFound,
+    roomFull,
   } = game;
 
   const hasAnyVotes = useMemo(
@@ -57,6 +58,19 @@ export function Game() {
 
   if (notFound) {
     return <NotFound />;
+  }
+
+  if (roomFull) {
+    return (
+      <VStack minH="100vh" justify="center" align="center" gap={4}>
+        <Text fontSize="2xl" fontWeight="bold">
+          Room is full
+        </Text>
+        <Text>
+          This room has reached the maximum capacity (20 participants).
+        </Text>
+      </VStack>
+    );
   }
 
   if (!votingSystem) {

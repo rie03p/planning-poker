@@ -10,6 +10,7 @@ export {
   votingSystemSchema,
   votingCardSchema,
   VOTING_SYSTEMS,
+  MAX_PARTICIPANTS,
 } from './schema';
 
 export {

@@ -1,5 +1,7 @@
 import {z} from 'zod';
 
+export const MAX_PARTICIPANTS = 14;
+
 export const votingSystemSchema = z.enum([
   'fibonacci',
   'modified-fibonacci',
@@ -80,6 +82,9 @@ export const serverMessageSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('not-found'),
+  }),
+  z.object({
+    type: z.literal('room-full'),
   }),
 ]);
 

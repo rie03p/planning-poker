@@ -19,6 +19,7 @@ type UseGameReturn = {
   reset: () => void;
   disconnect: () => void;
   notFound: boolean;
+  roomFull: boolean;
 };
 
 const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8787';
@@ -41,6 +42,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   const [revealed, setRevealed] = useState(false);
   const [votingSystem, setVotingSystem] = useState<VotingSystem | undefined>(undefined);
   const [notFound, setNotFound] = useState<boolean>(false);
+  const [roomFull, setRoomFull] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | undefined>(undefined);
 
   const send = useCallback((message: ClientMessage) => {
@@ -92,6 +94,11 @@ export function useGame(gameId: string, name: string): UseGameReturn {
 
       case 'not-found': {
         setNotFound(true);
+        break;
+      }
+
+      case 'room-full': {
+        setRoomFull(true);
         break;
       }
 
@@ -185,5 +192,6 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     reset,
     disconnect,
     notFound,
+    roomFull,
   };
 }

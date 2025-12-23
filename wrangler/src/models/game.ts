@@ -4,6 +4,7 @@ import {
   clientMessageSchema,
   serverMessageSchema,
   getCardsForVotingSystem,
+  MAX_PARTICIPANTS,
 } from '@planning-poker/shared';
 import {type GameState, type Env} from '../types';
 
@@ -103,12 +104,17 @@ export class Game {
 
   private async handleDisconnect(sessionId: string) {
     this.sessions.delete(sessionId);
+    const wasParticipant = this.gameState.participants.has(sessionId);
     this.gameState.participants.delete(sessionId);
-    this.broadcast({
-      type: 'update',
-      participants: [...this.gameState.participants.values()],
-      revealed: this.gameState.revealed,
-    });
+
+    // Only broadcast if the disconnected session was actually a participant
+    if (wasParticipant) {
+      this.broadcast({
+        type: 'update',
+        participants: [...this.gameState.participants.values()],
+        revealed: this.gameState.revealed,
+      });
+    }
 
     if (this.gameState.participants.size === 0) {
       await this.state.storage.setAlarm(Date.now() + 60_000);
@@ -126,6 +132,20 @@ export class Game {
 
     switch (data.type) {
       case 'join': {
+        if (this.gameState.participants.size >= MAX_PARTICIPANTS) {
+          const ws = this.sessions.get(sessionId);
+          if (ws) {
+            try {
+              ws.send(JSON.stringify({type: 'room-full'}));
+              ws.close(1000, 'Room is full');
+            } catch (error) {
+              console.error('Failed to send room-full message', error);
+            }
+          }
+          this.sessions.delete(sessionId);
+          return;
+        }
+
         this.gameState.participants.set(sessionId, {
           id: sessionId,
           name: data.name,
