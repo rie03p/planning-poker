@@ -3,7 +3,7 @@ import {useParams} from 'react-router-dom';
 import {
   Box, VStack, HStack, Text,
 } from '@chakra-ui/react';
-import {getCardsForVotingSystem, participantSchema} from '@planning-poker/shared';
+import {getCardsForVotingSystem, MAX_PARTICIPANTS, participantSchema} from '@planning-poker/shared';
 import {useLocalStorage} from '../../hooks/useLocalStorage';
 import {useGame} from '../../hooks/useGame';
 import {NotFound} from '../NotFound';
@@ -67,7 +67,7 @@ export function Game() {
           Room is full
         </Text>
         <Text>
-          This room has reached the maximum capacity (20 participants).
+          This room has reached the maximum capacity ({MAX_PARTICIPANTS} participants).
         </Text>
       </VStack>
     );

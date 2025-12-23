@@ -246,9 +246,6 @@ describe('Game', () => {
       expect(ws15.send).toHaveBeenCalledWith(JSON.stringify({type: 'room-full'}));
       expect(ws15.close).toHaveBeenCalledWith(1000, 'Room is full');
 
-      // Session should be removed
-      expect(sessions.has('session-15')).toBe(false);
-
       // Participant should not be added
       expect(gameState.participants.has('session-15')).toBe(false);
       expect(gameState.participants.size).toBe(14);

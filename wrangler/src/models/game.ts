@@ -143,7 +143,6 @@ export class Game {
             }
           }
 
-          this.sessions.delete(sessionId);
           return;
         }
 
