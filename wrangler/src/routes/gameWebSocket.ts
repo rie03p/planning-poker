@@ -29,8 +29,12 @@ export async function handleGameWebSocket(
     return new Response('Game not found', {status: 404});
   }
 
+  if (!votingSystem) {
+    return new Response('Voting system not found', {status: 500});
+  }
+
   const id = env.GAME.idFromName(gameId);
-  url.searchParams.set('votingSystem', votingSystem ?? 'fibonacci');
+  url.searchParams.set('votingSystem', votingSystem);
 
   return env.GAME.get(id).fetch(new Request(url.toString(), request));
 }

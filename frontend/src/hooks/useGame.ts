@@ -4,6 +4,7 @@ import {
 import {
   type Participant,
   type ClientMessage,
+  type VotingSystem,
   serverMessageSchema,
   clientMessageSchema,
 } from '@planning-poker/shared';
@@ -12,7 +13,7 @@ type UseGameReturn = {
   participants: Participant[];
   revealed: boolean;
   myVote: string | undefined;
-  votingSystem: string | undefined;
+  votingSystem: VotingSystem | undefined;
   vote: (value: string | undefined) => void;
   reveal: () => void;
   reset: () => void;
@@ -38,7 +39,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [myVote, setMyVote] = useState<string | undefined>(undefined);
   const [revealed, setRevealed] = useState(false);
-  const [votingSystem, setVotingSystem] = useState<string | undefined>(undefined);
+  const [votingSystem, setVotingSystem] = useState<VotingSystem | undefined>(undefined);
   const [notFound, setNotFound] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | undefined>(undefined);
 

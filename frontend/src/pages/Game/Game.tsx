@@ -3,10 +3,9 @@ import {useParams} from 'react-router-dom';
 import {
   Box, VStack, HStack, Text,
 } from '@chakra-ui/react';
-import {participantSchema} from '@planning-poker/shared';
+import {getCardsForVotingSystem, participantSchema} from '@planning-poker/shared';
 import {useLocalStorage} from '../../hooks/useLocalStorage';
 import {useGame} from '../../hooks/useGame';
-import {getCardsForVotingSystem} from '../../utils/votingSystems';
 import {NotFound} from '../NotFound';
 import {JoinDialog} from './components/JoinDialog';
 import {VoteCard} from './components/VoteCard';
@@ -58,6 +57,14 @@ export function Game() {
 
   if (notFound) {
     return <NotFound />;
+  }
+
+  if (!votingSystem) {
+    return (
+      <VStack minH='100vh' justify='center' align='center'>
+        <Text>Connecting...</Text>
+      </VStack>
+    );
   }
 
   const cards = getCardsForVotingSystem(votingSystem);

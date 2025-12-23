@@ -1,7 +1,9 @@
 import {
   type Participant,
+  type VotingSystem,
   clientMessageSchema,
   serverMessageSchema,
+  getCardsForVotingSystem,
 } from '@planning-poker/shared';
 import {type GameState, type Env} from '../types';
 
@@ -75,6 +77,15 @@ export class Game {
     this.setupEventListeners(websocket, sessionId);
   }
 
+  private async getVotingSystem(): Promise<VotingSystem> {
+    const votingSystem = await this.state.storage.get<string>('votingSystem');
+    if (!votingSystem) {
+      throw new Error('Voting system not found in storage');
+    }
+
+    return votingSystem as VotingSystem;
+  }
+
   private setupEventListeners(websocket: WebSocket, sessionId: string) {
     websocket.addEventListener('message', async event => {
       try {
@@ -123,7 +134,7 @@ export class Game {
         await this.state.storage.deleteAlarm();
 
         // Send votingSystem on join
-        const votingSystem = await this.state.storage.get<string>('votingSystem') ?? 'fibonacci';
+        const votingSystem = await this.getVotingSystem();
         this.broadcast({
           type: 'joined',
           participants: [...this.gameState.participants.values()],
@@ -136,6 +147,15 @@ export class Game {
       case 'vote': {
         const p = this.gameState.participants.get(sessionId);
         if (p) {
+          // Validate vote against current voting system
+          const votingSystem = await this.getVotingSystem();
+          const validCards = getCardsForVotingSystem(votingSystem);
+
+          if (data.vote !== undefined && !validCards.includes(data.vote)) {
+            console.error(`Invalid vote "${data.vote}" for voting system "${votingSystem}"`);
+            return;
+          }
+
           p.vote = data.vote;
           this.broadcast({
             type: 'update',

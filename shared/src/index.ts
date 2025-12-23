@@ -8,8 +8,13 @@ export {
   clientMessageSchema,
   serverMessageSchema,
   votingSystemSchema,
+  votingCardSchema,
   VOTING_SYSTEMS,
 } from './schema';
+
+export {
+  getCardsForVotingSystem,
+} from './votingSystems';
 
 export type {
   CreateGameRequest,
