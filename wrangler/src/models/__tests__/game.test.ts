@@ -205,4 +205,93 @@ describe('Game', () => {
       consoleErrorSpy.mockRestore();
     });
   });
+
+  describe('participant limit', () => {
+    it('should reject join when room is full (14 participants)', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {sessions} = (game as any);
+      const {gameState} = (game as any);
+
+      // Add 14 participants to game state and sessions (with individual mocks)
+      for (let i = 0; i < 14; i++) {
+        const sessionId = `session-${i}`;
+        const mockWs = {
+          send: vi.fn(),
+          close: vi.fn(),
+        };
+        sessions.set(sessionId, mockWs);
+        gameState.participants.set(sessionId, {
+          id: sessionId,
+          name: `User ${i}`,
+          vote: undefined,
+        });
+      }
+
+      // Create mock for 15th participant
+      const ws15 = {
+        send: vi.fn(),
+        close: vi.fn(),
+      };
+      sessions.set('session-15', ws15);
+
+      // Try to join the 15th participant
+      await handleMessage('session-15', {
+        type: 'join',
+        name: 'User 15',
+      });
+
+      // Should send room-full message and close connection
+      expect(ws15.send).toHaveBeenCalledWith(JSON.stringify({type: 'room-full'}));
+      expect(ws15.close).toHaveBeenCalledWith(1000, 'Room is full');
+
+      // Participant should not be added
+      expect(gameState.participants.has('session-15')).toBe(false);
+      expect(gameState.participants.size).toBe(14);
+    });
+
+    it('should allow join when under limit', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {sessions} = (game as any);
+      const {gameState} = (game as any);
+
+      // Add 13 participants to game state and sessions (with individual mocks)
+      for (let i = 0; i < 13; i++) {
+        const sessionId = `session-${i}`;
+        const mockWs = {
+          send: vi.fn(),
+          close: vi.fn(),
+        };
+        sessions.set(sessionId, mockWs);
+        gameState.participants.set(sessionId, {
+          id: sessionId,
+          name: `User ${i}`,
+          vote: undefined,
+        });
+      }
+
+      // Try to join the 14th participant (should succeed)
+      const ws14 = {
+        send: vi.fn(),
+        close: vi.fn(),
+      };
+      sessions.set('session-14', ws14);
+
+      await handleMessage('session-14', {
+        type: 'join',
+        name: 'User 14',
+      });
+
+      // Should NOT send room-full message
+      expect(ws14.send).not.toHaveBeenCalledWith(JSON.stringify({type: 'room-full'}));
+      expect(ws14.close).not.toHaveBeenCalled();
+
+      // Participant should be added
+      expect(gameState.participants.has('session-14')).toBe(true);
+      expect(gameState.participants.size).toBe(14);
+    });
+  });
 });

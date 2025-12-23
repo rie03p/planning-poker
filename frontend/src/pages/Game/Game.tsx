@@ -3,7 +3,7 @@ import {useParams} from 'react-router-dom';
 import {
   Box, VStack, HStack, Text,
 } from '@chakra-ui/react';
-import {getCardsForVotingSystem, participantSchema} from '@planning-poker/shared';
+import {getCardsForVotingSystem, MAX_PARTICIPANTS, participantSchema} from '@planning-poker/shared';
 import {useLocalStorage} from '../../hooks/useLocalStorage';
 import {useGame} from '../../hooks/useGame';
 import {NotFound} from '../NotFound';
@@ -44,6 +44,7 @@ export function Game() {
     reset,
     votingSystem,
     notFound,
+    roomFull,
   } = game;
 
   const hasAnyVotes = useMemo(
@@ -57,6 +58,19 @@ export function Game() {
 
   if (notFound) {
     return <NotFound />;
+  }
+
+  if (roomFull) {
+    return (
+      <VStack minH='100vh' justify='center' align='center' gap={4}>
+        <Text fontSize='2xl' fontWeight='bold'>
+          Room is full
+        </Text>
+        <Text>
+          This room has reached the maximum capacity ({MAX_PARTICIPANTS} participants).
+        </Text>
+      </VStack>
+    );
   }
 
   if (!votingSystem) {
