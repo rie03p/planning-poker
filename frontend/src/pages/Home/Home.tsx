@@ -9,7 +9,7 @@ const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL ?? 'http://localhos
 
 export function Home() {
   const navigate = useNavigate();
-  const [votingSystem, setVotingSystem] = useState<string>('tshirts');
+  const [votingSystem, setVotingSystem] = useState<string>('t-shirts');
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
