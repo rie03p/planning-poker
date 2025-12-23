@@ -142,6 +142,7 @@ export class Game {
               console.error('Failed to send room-full message', error);
             }
           }
+
           this.sessions.delete(sessionId);
           return;
         }

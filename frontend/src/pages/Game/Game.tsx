@@ -62,8 +62,8 @@ export function Game() {
 
   if (roomFull) {
     return (
-      <VStack minH="100vh" justify="center" align="center" gap={4}>
-        <Text fontSize="2xl" fontWeight="bold">
+      <VStack minH='100vh' justify='center' align='center' gap={4}>
+        <Text fontSize='2xl' fontWeight='bold'>
           Room is full
         </Text>
         <Text>
