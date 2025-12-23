@@ -3,7 +3,7 @@ import {z} from 'zod';
 export const votingSystemSchema = z.enum([
   'fibonacci',
   'modified-fibonacci',
-  'tshirts',
+  't-shirts',
   'powers-of-2',
 ]);
 

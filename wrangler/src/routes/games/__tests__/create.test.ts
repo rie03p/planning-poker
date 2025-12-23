@@ -67,7 +67,7 @@ describe('handleCreateGame', () => {
   it('should create game with specified voting system', async () => {
     const request = new Request('http://localhost/games', {
       method: 'POST',
-      body: JSON.stringify({votingSystem: 'tshirts'}),
+      body: JSON.stringify({votingSystem: 't-shirts'}),
     });
 
     const response = await handleCreateGame(request, mockEnv, corsHeaders);
@@ -77,7 +77,7 @@ describe('handleCreateGame', () => {
     const data = await response.json();
     expect(data).toEqual({
       gameId: 'test-uuid-1234',
-      votingSystem: 'tshirts',
+      votingSystem: 't-shirts',
     });
   });
 
@@ -151,7 +151,7 @@ describe('handleCreateGame', () => {
 
     const request = new Request('http://localhost/games', {
       method: 'POST',
-      body: JSON.stringify({votingSystem: 'tshirts'}),
+      body: JSON.stringify({votingSystem: 't-shirts'}),
     });
 
     await handleCreateGame(request, mockEnv, corsHeaders);
@@ -163,7 +163,7 @@ describe('handleCreateGame', () => {
         method: 'POST',
         body: JSON.stringify({
           gameId: 'test-uuid-1234',
-          votingSystem: 'tshirts',
+          votingSystem: 't-shirts',
         }),
       },
     );

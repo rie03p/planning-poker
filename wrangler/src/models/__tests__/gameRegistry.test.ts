@@ -56,7 +56,7 @@ describe('GameRegistry', () => {
         method: 'POST',
         body: JSON.stringify({
           gameId: 'test-game-456',
-          votingSystem: 'tshirts',
+          votingSystem: 't-shirts',
         }),
       });
 
@@ -65,7 +65,7 @@ describe('GameRegistry', () => {
       expect(response.status).toBe(200);
       expect(mockState.storage.put).toHaveBeenCalledWith(
         'test-game-456',
-        {votingSystem: 'tshirts'},
+        {votingSystem: 't-shirts'},
       );
     });
 
