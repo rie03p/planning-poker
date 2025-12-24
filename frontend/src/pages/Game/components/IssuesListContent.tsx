@@ -87,7 +87,7 @@ export function IssuesListContent({
               setNewIssueTitle(event.target.value);
             }}
             onKeyDown={event => {
-              if (event.key === 'Enter') {
+              if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
                 handleAddIssue();
               }
             }}
