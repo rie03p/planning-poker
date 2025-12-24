@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {
   Button,
   Input,
@@ -28,15 +28,17 @@ export function IssueDetailDialog({
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
   const [errors, setErrors] = useState<{title?: string; url?: string; description?: string}>({});
+  const prevIssueIdRef = useRef<string | undefined>(undefined);
 
-  useEffect(() => {
+  if (issue?.id !== prevIssueIdRef.current) {
+    prevIssueIdRef.current = issue?.id;
     if (issue) {
       setTitle(issue.title);
       setUrl(issue.url ?? '');
       setDescription(issue.description ?? '');
       setErrors({});
     }
-  }, [issue]);
+  }
 
   const validateFields = () => {
     if (!issue) {
