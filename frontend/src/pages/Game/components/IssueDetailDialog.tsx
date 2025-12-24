@@ -15,7 +15,7 @@ type IssueDetailDialogProps = {
   onClose: () => void;
   bg?: string; // Add bg prop to match Dialog.Content props if needed, though usually handled by theme
   issue: Issue | undefined;
-  onUpdateIssue: (id: string, title?: string, description?: string, url?: string) => void;
+  onUpdateIssue: (issue: Issue) => void;
 };
 
 export function IssueDetailDialog({
@@ -75,7 +75,12 @@ export function IssueDetailDialog({
     }
 
     if (issue) {
-      onUpdateIssue(issue.id, title, description, url);
+      onUpdateIssue({
+        id: issue.id,
+        title,
+        description: description || undefined,
+        url: url || undefined,
+      });
       onClose();
     }
   };

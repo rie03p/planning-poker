@@ -24,7 +24,7 @@ type UseGameReturn = {
   removeIssue: (issueId: string) => void;
   setActiveIssue: (issueId: string) => void;
   voteNextIssue: () => void;
-  updateIssue: (id: string, title?: string, description?: string, url?: string) => void;
+  updateIssue: (issue: Issue) => void;
   disconnect: () => void;
   notFound: boolean;
   roomFull: boolean;
@@ -234,12 +234,10 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     removeIssue,
     setActiveIssue,
     voteNextIssue,
-    updateIssue(id: string, title?: string, description?: string, url?: string) {
+    updateIssue(issue: Issue) {
       send({
         type: 'update-issue',
-        issue: {
-          id, title, description, url,
-        },
+        issue,
       });
     },
     disconnect,

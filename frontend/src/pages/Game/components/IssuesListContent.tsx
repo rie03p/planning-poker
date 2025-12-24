@@ -22,7 +22,7 @@ type IssuesListContentProps = {
   onAddIssue: (title: string) => void;
   onRemoveIssue: (issueId: string) => void;
   onSetActiveIssue: (issueId: string) => void;
-  onUpdateIssue: (id: string, title?: string, description?: string, url?: string) => void;
+  onUpdateIssue: (issue: Issue) => void;
   onClose?: () => void;
 };
 
