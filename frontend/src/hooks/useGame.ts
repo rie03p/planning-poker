@@ -70,65 +70,6 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     ws.send(JSON.stringify(result.data));
   }, []);
 
-  const handleMessage = (event: MessageEvent) => {
-    const rawData = JSON.parse(event.data);
-
-    const result = serverMessageSchema.safeParse(rawData);
-    if (!result.success) {
-      console.error('Invalid server message:', result.error);
-      return;
-    }
-
-    const {data} = result;
-
-    switch (data.type) {
-      case 'joined': {
-        setVotingSystem(data.votingSystem);
-        setParticipants(data.participants);
-        setRevealed(data.revealed);
-        setIssues(data.issues);
-        setActiveIssueId(data.activeIssueId);
-        break;
-      }
-
-      case 'update': {
-        setParticipants(data.participants);
-        setRevealed(data.revealed);
-        setIssues(data.issues);
-        setActiveIssueId(data.activeIssueId);
-        // Sync myVote with the server state
-        const me = data.participants.find(p => p.name === name);
-        setMyVote(me?.vote);
-        break;
-      }
-
-      case 'reset': {
-        setParticipants(data.participants);
-        setRevealed(false);
-        setMyVote(undefined);
-        setIssues(data.issues);
-        setActiveIssueId(data.activeIssueId);
-        break;
-      }
-
-      case 'not-found': {
-        setNotFound(true);
-        break;
-      }
-
-      case 'room-full': {
-        setRoomFull(true);
-        break;
-      }
-
-      default: {
-        // Exhaustiveness check
-        const _exhaustiveCheck: never = data;
-        console.warn('Unknown message type:', _exhaustiveCheck);
-      }
-    }
-  };
-
   useEffect(() => {
     let cancelled = false;
 
@@ -164,6 +105,65 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   }, [gameId]);
 
   useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const rawData = JSON.parse(event.data);
+
+      const result = serverMessageSchema.safeParse(rawData);
+      if (!result.success) {
+        console.error('Invalid server message:', result.error);
+        return;
+      }
+
+      const {data} = result;
+
+      switch (data.type) {
+        case 'joined': {
+          setVotingSystem(data.votingSystem);
+          setParticipants(data.participants);
+          setRevealed(data.revealed);
+          setIssues(data.issues);
+          setActiveIssueId(data.activeIssueId);
+          break;
+        }
+
+        case 'update': {
+          setParticipants(data.participants);
+          setRevealed(data.revealed);
+          setIssues(data.issues);
+          setActiveIssueId(data.activeIssueId);
+          // Sync myVote with the server state
+          const me = data.participants.find(p => p.name === name);
+          setMyVote(me?.vote);
+          break;
+        }
+
+        case 'reset': {
+          setParticipants(data.participants);
+          setRevealed(false);
+          setMyVote(undefined);
+          setIssues(data.issues);
+          setActiveIssueId(data.activeIssueId);
+          break;
+        }
+
+        case 'not-found': {
+          setNotFound(true);
+          break;
+        }
+
+        case 'room-full': {
+          setRoomFull(true);
+          break;
+        }
+
+        default: {
+          // Exhaustiveness check
+          const _exhaustiveCheck: never = data;
+          console.warn('Unknown message type:', _exhaustiveCheck);
+        }
+      }
+    };
+
     const wsBase = toWebSocketUrl(BACKEND_URL);
     const wsUrl = `${wsBase}/game/${gameId}`;
 
