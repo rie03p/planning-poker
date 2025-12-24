@@ -9,6 +9,7 @@ export {
   serverMessageSchema,
   votingSystemSchema,
   votingCardSchema,
+  issueSchema,
   VOTING_SYSTEMS,
   MAX_PARTICIPANTS,
   MAX_ISSUES,

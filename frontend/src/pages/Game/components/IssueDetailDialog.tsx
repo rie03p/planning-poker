@@ -6,8 +6,9 @@ import {
   Text,
   Textarea,
   Dialog,
+  Field,
 } from '@chakra-ui/react';
-import {type Issue} from '@planning-poker/shared';
+import {type Issue, issueSchema} from '@planning-poker/shared';
 
 type IssueDetailDialogProps = {
   isOpen: boolean;
@@ -26,17 +27,52 @@ export function IssueDetailDialog({
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
+  const [errors, setErrors] = useState<{title?: string; url?: string; description?: string}>({});
 
   useEffect(() => {
     if (issue) {
       setTitle(issue.title);
       setUrl(issue.url ?? '');
       setDescription(issue.description ?? '');
+      setErrors({});
     }
   }, [issue]);
 
+  const validateFields = () => {
+    if (!issue) {
+      return false;
+    }
+
+    const result = issueSchema.safeParse({
+      id: issue.id,
+      title,
+      description: description || undefined,
+      url: url || undefined,
+    });
+
+    if (!result.success) {
+      const newErrors: {title?: string; url?: string; description?: string} = {};
+      for (const error of result.error.errors) {
+        const field = error.path[0] as 'title' | 'url' | 'description';
+        if (field === 'title' || field === 'url' || field === 'description') {
+          newErrors[field] = error.message;
+        }
+      }
+
+      setErrors(newErrors);
+      return false;
+    }
+
+    setErrors({});
+    return true;
+  };
+
   const handleSave = () => {
-    if (issue && title.trim()) {
+    if (!validateFields()) {
+      return;
+    }
+
+    if (issue) {
       onUpdateIssue(issue.id, title, description, url);
       onClose();
     }
@@ -62,39 +98,54 @@ export function IssueDetailDialog({
 
           <Dialog.Body>
             <VStack gap={4} align='stretch'>
-              <VStack gap={1} align='stretch'>
-                <Text fontWeight='medium' fontSize='sm'>Title</Text>
+              <Field.Root invalid={errors.title ? true : undefined}>
+                <Field.Label fontWeight='medium' fontSize='sm'>Title</Field.Label>
                 <Input
                   value={title}
                   onChange={event => {
                     setTitle(event.target.value);
+                    if (errors.title) {
+                      setErrors({...errors, title: undefined});
+                    }
                   }}
                   placeholder='Issue title'
                 />
-              </VStack>
+                <Text fontSize='xs' color='gray.500'>{title.length}/100</Text>
+                {errors.title && <Field.ErrorText>{errors.title}</Field.ErrorText>}
+              </Field.Root>
 
-              <VStack gap={1} align='stretch'>
-                <Text fontWeight='medium' fontSize='sm'>Link</Text>
+              <Field.Root invalid={errors.url ? true : undefined}>
+                <Field.Label fontWeight='medium' fontSize='sm'>Link</Field.Label>
                 <Input
                   value={url}
                   onChange={event => {
                     setUrl(event.target.value);
+                    if (errors.url) {
+                      setErrors({...errors, url: undefined});
+                    }
                   }}
                   placeholder='Link URL (optional)'
                 />
-              </VStack>
+                <Text fontSize='xs' color='gray.500'>{url.length}/200</Text>
+                {errors.url && <Field.ErrorText>{errors.url}</Field.ErrorText>}
+              </Field.Root>
 
-              <VStack gap={1} align='stretch'>
-                <Text fontWeight='medium' fontSize='sm'>Description</Text>
+              <Field.Root invalid={errors.description ? true : undefined}>
+                <Field.Label fontWeight='medium' fontSize='sm'>Description</Field.Label>
                 <Textarea
                   value={description}
                   onChange={event => {
                     setDescription(event.target.value);
+                    if (errors.description) {
+                      setErrors({...errors, description: undefined});
+                    }
                   }}
                   placeholder='Add a description...'
                   rows={4}
                 />
-              </VStack>
+                <Text fontSize='xs' color='gray.500'>{description.length}/1000</Text>
+                {errors.description && <Field.ErrorText>{errors.description}</Field.ErrorText>}
+              </Field.Root>
             </VStack>
           </Dialog.Body>
 
