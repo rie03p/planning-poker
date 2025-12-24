@@ -37,6 +37,7 @@ export function CopyInviteBox({gameId}: CopyInviteBoxProps) {
 
   return (
     <Button
+      w={160}
       onClick={handleCopy}
       variant={copied ? 'solid' : 'outline'}
     >
