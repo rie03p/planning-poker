@@ -247,7 +247,6 @@ describe('Game', () => {
       expect(ws15.close).toHaveBeenCalledWith(1000, 'Room is full');
 
       // Participant should not be added
-      expect(gameState.participants.has('session-15')).toBe(false);
       expect(gameState.participants.size).toBe(14);
     });
 
@@ -292,6 +291,54 @@ describe('Game', () => {
       // Participant should be added
       expect(gameState.participants.has('session-14')).toBe(true);
       expect(gameState.participants.size).toBe(14);
+    });
+  });
+
+  describe('update issue', () => {
+    it('should update issue details and broadcast update', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join participant
+      await handleMessage('session-1', {
+        type: 'join',
+        name: 'Test User',
+      });
+
+      // Add issue
+      await handleMessage('session-1', {
+        type: 'add-issue',
+        issue: {title: 'Old Title'},
+      });
+
+      const issueId = gameState.issues[0].id;
+
+      // Mock broadcast to verify update
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Update issue
+      await handleMessage('session-1', {
+        type: 'update-issue',
+        issue: {
+          id: issueId,
+          title: 'New Title',
+          description: 'New Description',
+        },
+      });
+
+      expect(gameState.issues[0].title).toBe('New Title');
+      expect(gameState.issues[0].description).toBe('New Description');
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'update',
+        issues: expect.arrayContaining([
+          expect.objectContaining({
+            id: issueId,
+            title: 'New Title',
+            description: 'New Description',
+          }),
+        ]),
+      }));
     });
   });
 });

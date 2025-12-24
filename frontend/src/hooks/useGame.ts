@@ -5,6 +5,7 @@ import {
   type Participant,
   type ClientMessage,
   type VotingSystem,
+  type Issue,
   serverMessageSchema,
   clientMessageSchema,
 } from '@planning-poker/shared';
@@ -14,9 +15,16 @@ type UseGameReturn = {
   revealed: boolean;
   myVote: string | undefined;
   votingSystem: VotingSystem | undefined;
+  issues: Issue[];
+  activeIssueId: string | undefined;
   vote: (value: string | undefined) => void;
   reveal: () => void;
   reset: () => void;
+  addIssue: (title: string, description?: string, url?: string) => void;
+  removeIssue: (issueId: string) => void;
+  setActiveIssue: (issueId: string) => void;
+  voteNextIssue: () => void;
+  updateIssue: (id: string, title?: string, description?: string, url?: string) => void;
   disconnect: () => void;
   notFound: boolean;
   roomFull: boolean;
@@ -41,6 +49,8 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   const [myVote, setMyVote] = useState<string | undefined>(undefined);
   const [revealed, setRevealed] = useState(false);
   const [votingSystem, setVotingSystem] = useState<VotingSystem | undefined>(undefined);
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [activeIssueId, setActiveIssueId] = useState<string | undefined>(undefined);
   const [notFound, setNotFound] = useState<boolean>(false);
   const [roomFull, setRoomFull] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | undefined>(undefined);
@@ -76,12 +86,19 @@ export function useGame(gameId: string, name: string): UseGameReturn {
         setVotingSystem(data.votingSystem);
         setParticipants(data.participants);
         setRevealed(data.revealed);
+        setIssues(data.issues);
+        setActiveIssueId(data.activeIssueId);
         break;
       }
 
       case 'update': {
         setParticipants(data.participants);
         setRevealed(data.revealed);
+        setIssues(data.issues);
+        setActiveIssueId(data.activeIssueId);
+        // Sync myVote with the server state
+        const me = data.participants.find(p => p.name === name);
+        setMyVote(me?.vote);
         break;
       }
 
@@ -89,6 +106,8 @@ export function useGame(gameId: string, name: string): UseGameReturn {
         setParticipants(data.participants);
         setRevealed(false);
         setMyVote(undefined);
+        setIssues(data.issues);
+        setActiveIssueId(data.activeIssueId);
         break;
       }
 
@@ -182,14 +201,47 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     }
   }, []);
 
+  const addIssue = useCallback((title: string, description?: string, url?: string) => {
+    send({
+      type: 'add-issue',
+      issue: {title, description, url},
+    });
+  }, [send]);
+
+  const removeIssue = useCallback((issueId: string) => {
+    send({type: 'remove-issue', issueId});
+  }, [send]);
+
+  const setActiveIssue = useCallback((issueId: string) => {
+    send({type: 'set-active-issue', issueId});
+  }, [send]);
+
+  const voteNextIssue = useCallback(() => {
+    send({type: 'vote-next-issue'});
+  }, [send]);
+
   return {
     participants,
     revealed,
     myVote,
     votingSystem,
+    issues,
+    activeIssueId,
     vote,
     reveal,
     reset,
+    addIssue,
+    removeIssue,
+    setActiveIssue,
+    voteNextIssue,
+    updateIssue(id: string, title?: string, description?: string, url?: string) {
+      send({
+        type: 'update-issue',
+        issue: {
+          id, title, description, url,
+        },
+      });
+    },
     disconnect,
     notFound,
     roomFull,

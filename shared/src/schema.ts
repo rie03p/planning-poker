@@ -1,6 +1,7 @@
 import {z} from 'zod';
 
 export const MAX_PARTICIPANTS = 14;
+export const MAX_ISSUES = 50;
 
 export const votingSystemSchema = z.enum([
   'fibonacci',
@@ -50,6 +51,13 @@ export const registryUnregisterRequestSchema = z.object({
 });
 
 // Game state schemas
+export const issueSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1).max(100).trim(),
+  description: z.string().max(1000).optional(),
+  url: z.string().url().max(200).optional().or(z.literal('')),
+});
+
 export const participantSchema = z.object({
   id: z.string(),
   name: z.string().min(1).max(20).trim(),
@@ -62,23 +70,40 @@ export const clientMessageSchema = z.discriminatedUnion('type', [
   z.object({type: z.literal('vote'), vote: votingCardSchema.optional()}),
   z.object({type: z.literal('reveal')}),
   z.object({type: z.literal('reset')}),
+  z.object({
+    type: z.literal('add-issue'),
+    issue: issueSchema.omit({id: true}),
+  }),
+  z.object({type: z.literal('remove-issue'), issueId: z.string()}),
+  z.object({type: z.literal('set-active-issue'), issueId: z.string()}),
+  z.object({type: z.literal('vote-next-issue')}),
+  z.object({
+    type: z.literal('update-issue'),
+    issue: issueSchema,
+  }),
 ]);
 
 export const serverMessageSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('joined'),
-    participants: z.array(participantSchema),
+    participants: z.array(participantSchema).max(MAX_PARTICIPANTS),
     revealed: z.boolean(),
     votingSystem: votingSystemSchema,
+    issues: z.array(issueSchema).max(MAX_ISSUES),
+    activeIssueId: z.string().optional(),
   }),
   z.object({
     type: z.literal('update'),
-    participants: z.array(participantSchema),
+    participants: z.array(participantSchema).max(MAX_PARTICIPANTS),
     revealed: z.boolean(),
+    issues: z.array(issueSchema).max(MAX_ISSUES),
+    activeIssueId: z.string().optional(),
   }),
   z.object({
     type: z.literal('reset'),
-    participants: z.array(participantSchema),
+    participants: z.array(participantSchema).max(MAX_PARTICIPANTS),
+    issues: z.array(issueSchema).max(MAX_ISSUES),
+    activeIssueId: z.string().optional(),
   }),
   z.object({
     type: z.literal('not-found'),
@@ -94,6 +119,7 @@ export type CreateGameResponse = z.infer<typeof createGameResponseSchema>;
 export type RegistryExistsResponse = z.infer<typeof registryExistsResponseSchema>;
 export type RegistryRegisterRequest = z.infer<typeof registryRegisterRequestSchema>;
 export type RegistryUnregisterRequest = z.infer<typeof registryUnregisterRequestSchema>;
+export type Issue = z.infer<typeof issueSchema>;
 export type Participant = z.infer<typeof participantSchema>;
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
 export type ServerMessage = z.infer<typeof serverMessageSchema>;

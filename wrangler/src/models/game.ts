@@ -13,6 +13,8 @@ export class Game {
   private readonly gameState: GameState = {
     participants: new Map<string, Participant>(),
     revealed: false,
+    issues: [],
+    activeIssueId: undefined,
   };
 
   constructor(private readonly state: DurableObjectState, private readonly env: Env) {}
@@ -113,6 +115,8 @@ export class Game {
         type: 'update',
         participants: [...this.gameState.participants.values()],
         revealed: this.gameState.revealed,
+        issues: this.gameState.issues,
+        activeIssueId: this.gameState.activeIssueId,
       });
     }
 
@@ -160,6 +164,8 @@ export class Game {
           participants: [...this.gameState.participants.values()],
           revealed: this.gameState.revealed,
           votingSystem,
+          issues: this.gameState.issues,
+          activeIssueId: this.gameState.activeIssueId,
         });
         break;
       }
@@ -181,6 +187,8 @@ export class Game {
             type: 'update',
             participants: [...this.gameState.participants.values()],
             revealed: this.gameState.revealed,
+            issues: this.gameState.issues,
+            activeIssueId: this.gameState.activeIssueId,
           });
         }
 
@@ -193,12 +201,15 @@ export class Game {
           type: 'update',
           participants: [...this.gameState.participants.values()],
           revealed: this.gameState.revealed,
+          issues: this.gameState.issues,
+          activeIssueId: this.gameState.activeIssueId,
         });
         break;
       }
 
       case 'reset': {
         this.gameState.revealed = false;
+        this.gameState.activeIssueId = undefined;
         for (const p of this.gameState.participants.values()) {
           p.vote = undefined;
         }
@@ -206,10 +217,114 @@ export class Game {
         this.broadcast({
           type: 'reset',
           participants: [...this.gameState.participants.values()],
+          issues: this.gameState.issues,
+          activeIssueId: this.gameState.activeIssueId,
+        });
+        break;
+      }
+
+      case 'add-issue': {
+        const newIssue = {
+          id: crypto.randomUUID(),
+          ...data.issue,
+        };
+        this.gameState.issues.push(newIssue);
+
+        // If it's the first issue, set it as active
+        if (this.gameState.issues.length === 1) {
+          this.gameState.activeIssueId = newIssue.id;
+        }
+
+        this.broadcast({
+          type: 'update',
+          participants: [...this.gameState.participants.values()],
+          revealed: this.gameState.revealed,
+          issues: this.gameState.issues,
+          activeIssueId: this.gameState.activeIssueId,
+        });
+        break;
+      }
+
+      case 'remove-issue': {
+        this.gameState.issues = this.gameState.issues.filter(i => i.id !== data.issueId);
+        if (this.gameState.activeIssueId === data.issueId) {
+          this.gameState.activeIssueId = undefined;
+        }
+
+        this.broadcast({
+          type: 'update',
+          participants: [...this.gameState.participants.values()],
+          revealed: this.gameState.revealed,
+          issues: this.gameState.issues,
+          activeIssueId: this.gameState.activeIssueId,
+        });
+        break;
+      }
+
+      case 'set-active-issue': {
+        this.setActiveIssue(data.issueId);
+        break;
+      }
+
+      case 'vote-next-issue': {
+        const currentIndex = this.gameState.issues.findIndex(i => i.id === this.gameState.activeIssueId);
+        if (currentIndex !== -1 && currentIndex < this.gameState.issues.length - 1) {
+          const nextIssue = this.gameState.issues[currentIndex + 1];
+          this.setActiveIssue(nextIssue.id);
+        }
+
+        break;
+      }
+
+      case 'update-issue': {
+        const issueIndex = this.gameState.issues.findIndex(i => i.id === data.issue.id);
+        if (issueIndex === -1) {
+          return;
+        }
+
+        const existingIssue = this.gameState.issues[issueIndex];
+        this.gameState.issues[issueIndex] = {
+          ...existingIssue,
+          ...data.issue,
+          // Ensure we don't accidentally overwrite with undefined if we were doing deep merge,
+          // but here we are spreading the partial update.
+          // However, data.issue fields are optional.
+          // If data.issue.title is undefined, we keep existingIssue.title.
+          title: data.issue.title ?? existingIssue.title,
+          description: data.issue.description ?? existingIssue.description,
+          url: data.issue.url ?? existingIssue.url,
+        };
+
+        this.broadcast({
+          type: 'update',
+          participants: [...this.gameState.participants.values()],
+          revealed: this.gameState.revealed,
+          issues: this.gameState.issues,
+          activeIssueId: this.gameState.activeIssueId,
         });
         break;
       }
     }
+  }
+
+  private setActiveIssue(issueId: string) {
+    if (this.gameState.activeIssueId === issueId) {
+      return;
+    }
+
+    this.gameState.activeIssueId = issueId;
+    this.gameState.revealed = false;
+    for (const p of this.gameState.participants.values()) {
+      p.vote = undefined;
+    }
+
+    this.broadcast({
+      type: 'update',
+      participants: [...this.gameState.participants.values()],
+      revealed: this.gameState.revealed,
+      issues: this.gameState.issues,
+      activeIssueId: this.gameState.activeIssueId,
+    });
   }
 
   private broadcast(message: unknown) {
