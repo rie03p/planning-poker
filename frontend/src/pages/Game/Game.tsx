@@ -145,16 +145,18 @@ export function Game() {
         </VStack>
 
         {/* Active Issue Display */}
-        {activeIssueId && (
-          <Box bg='white' p={4} borderRadius='lg' shadow='sm' maxW='600px'>
-            <VStack>
-              <Badge colorPalette='blue'>Voting Now</Badge>
-              <Text fontSize='xl' fontWeight='bold'>
-                {issues.find(i => i.id === activeIssueId)?.title}
-              </Text>
-            </VStack>
-          </Box>
-        )}
+        <Box minH='120px' width='100%' display='flex' justifyContent='center' alignItems='center'>
+          {activeIssueId && (
+            <Box bg='white' p={4} borderRadius='lg' shadow='sm' maxW='600px' width='100%'>
+              <VStack>
+                <Badge colorPalette='blue'>Voting Now</Badge>
+                <Text fontSize='xl' fontWeight='bold' textAlign='center'>
+                  {issues.find(i => i.id === activeIssueId)?.title}
+                </Text>
+              </VStack>
+            </Box>
+          )}
+        </Box>
         <VStack gap={3} align='center' justify='center'>
           {/* Participants Area - Top */}
           {renderParticipants(participants.slice(Math.ceil(participants.length / 2)))}
