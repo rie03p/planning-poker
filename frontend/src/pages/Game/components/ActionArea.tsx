@@ -5,11 +5,13 @@ export function ActionArea({
   revealed,
   reveal,
   reset,
+  onVoteNext,
 }: {
   hasAnyVotes: boolean;
   revealed: boolean;
   reveal: () => void;
   reset: () => void;
+  onVoteNext?: () => void;
 }) {
   if (!hasAnyVotes) {
     return (
@@ -19,12 +21,26 @@ export function ActionArea({
     );
   }
 
+  if (!revealed) {
+    return (
+      <Button colorPalette='blue' onClick={reveal}>
+        Reveal votes
+      </Button>
+    );
+  }
+
+  // Revealed state
+  if (onVoteNext) {
+    return (
+      <Button colorPalette='green' onClick={onVoteNext}>
+        Vote next issue
+      </Button>
+    );
+  }
+
   return (
-    <Button
-      colorPalette={revealed ? 'gray' : 'blue'}
-      onClick={revealed ? reset : reveal}
-    >
-      {revealed ? 'Start new votes' : 'Reveal votes'}
+    <Button colorPalette='gray' onClick={reset}>
+      Start new votes
     </Button>
   );
 }

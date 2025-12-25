@@ -9,8 +9,10 @@ export {
   serverMessageSchema,
   votingSystemSchema,
   votingCardSchema,
+  issueSchema,
   VOTING_SYSTEMS,
   MAX_PARTICIPANTS,
+  MAX_ISSUES,
 } from './schema';
 
 export {
@@ -27,4 +29,5 @@ export type {
   ClientMessage,
   ServerMessage,
   VotingSystem,
+  Issue,
 } from './schema';

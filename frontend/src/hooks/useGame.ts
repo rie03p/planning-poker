@@ -5,6 +5,7 @@ import {
   type Participant,
   type ClientMessage,
   type VotingSystem,
+  type Issue,
   serverMessageSchema,
   clientMessageSchema,
 } from '@planning-poker/shared';
@@ -14,9 +15,16 @@ type UseGameReturn = {
   revealed: boolean;
   myVote: string | undefined;
   votingSystem: VotingSystem | undefined;
+  issues: Issue[];
+  activeIssueId: string | undefined;
   vote: (value: string | undefined) => void;
   reveal: () => void;
   reset: () => void;
+  addIssue: (title: string, description?: string, url?: string) => void;
+  removeIssue: (issueId: string) => void;
+  setActiveIssue: (issueId: string) => void;
+  voteNextIssue: () => void;
+  updateIssue: (issue: Issue) => void;
   disconnect: () => void;
   notFound: boolean;
   roomFull: boolean;
@@ -41,6 +49,8 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   const [myVote, setMyVote] = useState<string | undefined>(undefined);
   const [revealed, setRevealed] = useState(false);
   const [votingSystem, setVotingSystem] = useState<VotingSystem | undefined>(undefined);
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [activeIssueId, setActiveIssueId] = useState<string | undefined>(undefined);
   const [notFound, setNotFound] = useState<boolean>(false);
   const [roomFull, setRoomFull] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | undefined>(undefined);
@@ -59,56 +69,6 @@ export function useGame(gameId: string, name: string): UseGameReturn {
 
     ws.send(JSON.stringify(result.data));
   }, []);
-
-  const handleMessage = (event: MessageEvent) => {
-    const rawData = JSON.parse(event.data);
-
-    const result = serverMessageSchema.safeParse(rawData);
-    if (!result.success) {
-      console.error('Invalid server message:', result.error);
-      return;
-    }
-
-    const {data} = result;
-
-    switch (data.type) {
-      case 'joined': {
-        setVotingSystem(data.votingSystem);
-        setParticipants(data.participants);
-        setRevealed(data.revealed);
-        break;
-      }
-
-      case 'update': {
-        setParticipants(data.participants);
-        setRevealed(data.revealed);
-        break;
-      }
-
-      case 'reset': {
-        setParticipants(data.participants);
-        setRevealed(false);
-        setMyVote(undefined);
-        break;
-      }
-
-      case 'not-found': {
-        setNotFound(true);
-        break;
-      }
-
-      case 'room-full': {
-        setRoomFull(true);
-        break;
-      }
-
-      default: {
-        // Exhaustiveness check
-        const _exhaustiveCheck: never = data;
-        console.warn('Unknown message type:', _exhaustiveCheck);
-      }
-    }
-  };
 
   useEffect(() => {
     let cancelled = false;
@@ -145,6 +105,65 @@ export function useGame(gameId: string, name: string): UseGameReturn {
   }, [gameId]);
 
   useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const rawData = JSON.parse(event.data);
+
+      const result = serverMessageSchema.safeParse(rawData);
+      if (!result.success) {
+        console.error('Invalid server message:', result.error);
+        return;
+      }
+
+      const {data} = result;
+
+      switch (data.type) {
+        case 'joined': {
+          setVotingSystem(data.votingSystem);
+          setParticipants(data.participants);
+          setRevealed(data.revealed);
+          setIssues(data.issues);
+          setActiveIssueId(data.activeIssueId);
+          break;
+        }
+
+        case 'update': {
+          setParticipants(data.participants);
+          setRevealed(data.revealed);
+          setIssues(data.issues);
+          setActiveIssueId(data.activeIssueId);
+          // Sync myVote with the server state
+          const me = data.participants.find(p => p.name === name);
+          setMyVote(me?.vote);
+          break;
+        }
+
+        case 'reset': {
+          setParticipants(data.participants);
+          setRevealed(false);
+          setMyVote(undefined);
+          setIssues(data.issues);
+          setActiveIssueId(data.activeIssueId);
+          break;
+        }
+
+        case 'not-found': {
+          setNotFound(true);
+          break;
+        }
+
+        case 'room-full': {
+          setRoomFull(true);
+          break;
+        }
+
+        default: {
+          // Exhaustiveness check
+          const _exhaustiveCheck: never = data;
+          console.warn('Unknown message type:', _exhaustiveCheck);
+        }
+      }
+    };
+
     const wsBase = toWebSocketUrl(BACKEND_URL);
     const wsUrl = `${wsBase}/game/${gameId}`;
 
@@ -182,14 +201,47 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     }
   }, []);
 
+  const addIssue = useCallback((title: string, description?: string, url?: string) => {
+    send({
+      type: 'add-issue',
+      issue: {title, description, url},
+    });
+  }, [send]);
+
+  const removeIssue = useCallback((issueId: string) => {
+    send({type: 'remove-issue', issueId});
+  }, [send]);
+
+  const setActiveIssue = useCallback((issueId: string) => {
+    send({type: 'set-active-issue', issueId});
+  }, [send]);
+
+  const voteNextIssue = useCallback(() => {
+    send({type: 'vote-next-issue'});
+  }, [send]);
+
+  const updateIssue = useCallback((issue: Issue) => {
+    send({
+      type: 'update-issue',
+      issue,
+    });
+  }, [send]);
+
   return {
     participants,
     revealed,
     myVote,
     votingSystem,
+    issues,
+    activeIssueId,
     vote,
     reveal,
     reset,
+    addIssue,
+    removeIssue,
+    setActiveIssue,
+    voteNextIssue,
+    updateIssue,
     disconnect,
     notFound,
     roomFull,

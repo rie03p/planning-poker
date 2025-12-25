@@ -13,7 +13,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@chakra-ui/icons": "^2.2.4",
     "@chakra-ui/react": "^3.30.0",
     "@emotion/react": "^11.14.0",
     "@planning-poker/shared": "workspace:*",
