@@ -360,6 +360,93 @@ describe('useGame', () => {
       expect(result.current.myVote).toBeUndefined();
     });
   });
+
+  it('sends add-issue message', () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const ws = getWs();
+    ws.emitOpen();
+
+    result.current.addIssue('New Issue', 'Description', 'http://example.com');
+
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
+      type: 'add-issue',
+      issue: {title: 'New Issue', description: 'Description', url: 'http://example.com'},
+    }));
+  });
+
+  it('sends remove-issue message', () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const ws = getWs();
+    ws.emitOpen();
+
+    result.current.removeIssue('issue-1');
+
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
+      type: 'remove-issue',
+      issueId: 'issue-1',
+    }));
+  });
+
+  it('sends set-active-issue message', () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const ws = getWs();
+    ws.emitOpen();
+
+    result.current.setActiveIssue('issue-2');
+
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
+      type: 'set-active-issue',
+      issueId: 'issue-2',
+    }));
+  });
+
+  it('sends vote-next-issue message', () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const ws = getWs();
+    ws.emitOpen();
+
+    result.current.voteNextIssue();
+
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
+      type: 'vote-next-issue',
+    }));
+  });
+
+  it('sends update-issue message', () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const ws = getWs();
+    ws.emitOpen();
+
+    const issue = {
+      id: 'issue-1', title: 'Updated Title', description: 'Updated Desc', url: 'http://updated.com',
+    };
+    result.current.updateIssue(issue);
+
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
+      type: 'update-issue',
+      issue,
+    }));
+  });
+
+  it('sets roomFull when room-full message is received', async () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const ws = getWs();
+    ws.emitOpen();
+
+    ws.emitMessage({
+      type: 'room-full',
+    });
+
+    await vi.waitFor(() => {
+      expect(result.current.roomFull).toBe(true);
+    });
+  });
 });
 
 type MockWsInstance = {

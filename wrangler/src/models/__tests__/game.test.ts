@@ -341,4 +341,225 @@ describe('Game', () => {
       }));
     });
   });
+
+  describe('handleDisconnect', () => {
+    it('should remove participant and broadcast update', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const handleDisconnect = (game as any).handleDisconnect.bind(game);
+      const {gameState} = (game as any);
+
+      // Join participant
+      await handleMessage('session-1', {
+        type: 'join',
+        name: 'Test User',
+      });
+
+      expect(gameState.participants.has('session-1')).toBe(true);
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Disconnect
+      await handleDisconnect('session-1');
+
+      // Assert
+      expect(gameState.participants.has('session-1')).toBe(false);
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'update',
+        participants: [],
+      }));
+    });
+
+    it('should set alarm if room becomes empty', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const handleDisconnect = (game as any).handleDisconnect.bind(game);
+
+      // Join participant
+      await handleMessage('session-1', {
+        type: 'join',
+        name: 'Test User',
+      });
+
+      // Act: Disconnect
+      await handleDisconnect('session-1');
+
+      // Assert
+      expect(mockState.storage.setAlarm).toHaveBeenCalled();
+    });
+  });
+
+  describe('reveal', () => {
+    it('should set revealed to true and broadcast', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join participant
+      await handleMessage('session-1', {
+        type: 'join',
+        name: 'Test User',
+      });
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Reveal
+      await handleMessage('session-1', {
+        type: 'reveal',
+      });
+
+      // Assert
+      expect(gameState.revealed).toBe(true);
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'update',
+        revealed: true,
+      }));
+    });
+  });
+
+  describe('reset', () => {
+    it('should reset state and broadcast', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join and vote
+      await handleMessage('session-1', {
+        type: 'join',
+        name: 'Test User',
+      });
+      await handleMessage('session-1', {
+        type: 'vote',
+        vote: '5',
+      });
+
+      gameState.revealed = true;
+      gameState.activeIssueId = 'some-issue-id';
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Reset
+      await handleMessage('session-1', {
+        type: 'reset',
+      });
+
+      // Assert
+      expect(gameState.revealed).toBe(false);
+      expect(gameState.activeIssueId).toBeUndefined();
+      expect(gameState.participants.get('session-1').vote).toBeUndefined();
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'reset',
+        activeIssueId: undefined,
+        issues: expect.any(Array),
+        participants: expect.any(Array),
+      }));
+    });
+  });
+
+  describe('issue management', () => {
+    it('should add issue and set as active if first', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join
+      await handleMessage('session-1', {type: 'join', name: 'User'});
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Add Issue
+      await handleMessage('session-1', {
+        type: 'add-issue',
+        issue: {title: 'Issue 1'},
+      });
+
+      // Assert
+      expect(gameState.issues).toHaveLength(1);
+      expect(gameState.issues[0].title).toBe('Issue 1');
+      expect(gameState.activeIssueId).toBe(gameState.issues[0].id);
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'update',
+        issues: expect.any(Array),
+        activeIssueId: gameState.issues[0].id,
+      }));
+    });
+
+    it('should remove issue and unset active if it matches', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join
+      await handleMessage('session-1', {type: 'join', name: 'User'});
+
+      // Add Issue
+      await handleMessage('session-1', {
+        type: 'add-issue',
+        issue: {title: 'Issue 1'},
+      });
+      const issueId = gameState.issues[0].id;
+
+      // Act: Remove Issue
+      await handleMessage('session-1', {
+        type: 'remove-issue',
+        issueId,
+      });
+
+      // Assert
+      expect(gameState.issues).toHaveLength(0);
+      expect(gameState.activeIssueId).toBeUndefined();
+    });
+
+    it('should set active issue and reset votes/revealed', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join and Vote
+      await handleMessage('session-1', {type: 'join', name: 'User'});
+      await handleMessage('session-1', {type: 'vote', vote: '5'});
+      gameState.revealed = true;
+
+      // Add issues
+      await handleMessage('session-1', {type: 'add-issue', issue: {title: 'Issue 1'}});
+      await handleMessage('session-1', {type: 'add-issue', issue: {title: 'Issue 2'}});
+
+      const issue2Id = gameState.issues[1].id;
+
+      // Act: Set Active Issue
+      await handleMessage('session-1', {
+        type: 'set-active-issue',
+        issueId: issue2Id,
+      });
+
+      // Assert
+      expect(gameState.activeIssueId).toBe(issue2Id);
+      expect(gameState.revealed).toBe(false);
+      expect(gameState.participants.get('session-1').vote).toBeUndefined();
+    });
+
+    it('should vote next issue', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join
+      await handleMessage('session-1', {type: 'join', name: 'User'});
+
+      // Add issues
+      await handleMessage('session-1', {type: 'add-issue', issue: {title: 'Issue 1'}});
+      await handleMessage('session-1', {type: 'add-issue', issue: {title: 'Issue 2'}});
+
+      // Initially Issue 1 is active (because it was first)
+      expect(gameState.activeIssueId).toBe(gameState.issues[0].id);
+
+      // Act: Vote Next Issue
+      await handleMessage('session-1', {
+        type: 'vote-next-issue',
+      });
+
+      // Assert
+      expect(gameState.activeIssueId).toBe(gameState.issues[1].id);
+    });
+  });
 });
