@@ -45,7 +45,7 @@ describe('useGame', () => {
       ],
       revealed: false,
       issues: [],
-      activeIssueId: null,
+      activeIssueId: undefined,
     });
 
     await vi.waitFor(() => {
@@ -73,7 +73,7 @@ describe('useGame', () => {
       ],
       revealed: true,
       issues: [],
-      activeIssueId: null,
+      activeIssueId: undefined,
     });
 
     await vi.waitFor(() => {
@@ -153,6 +153,8 @@ describe('useGame', () => {
         {id: '1', name: 'Alice', vote: undefined},
         {id: '2', name: 'Bob', vote: undefined},
       ],
+      issues: [],
+      activeIssueId: undefined,
     });
 
     await vi.waitFor(() => {
