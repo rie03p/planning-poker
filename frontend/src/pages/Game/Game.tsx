@@ -123,7 +123,7 @@ export function Game() {
 
   return (
     <HStack align='stretch' minH='100vh' gap={0}>
-      <VStack gap={8} py={8} flex={1} width='100%'>
+      <VStack gap={5} py={8} flex={1} width='100%'>
         <VStack gap={4} width='100%' align='flex-end' pr={8}>
           <HStack>
             <CopyInviteBox gameId={gameId} />
@@ -147,7 +147,7 @@ export function Game() {
         {/* Active Issue Display */}
         <Box minH='120px' width='100%' display='flex' justifyContent='center' alignItems='center'>
           {activeIssueId && (
-            <Box bg='white' p={4} borderRadius='lg' shadow='sm' maxW='600px' width='100%'>
+            <Box bg='white' p={3} borderRadius='lg' shadow='sm' maxW='600px' width='100%'>
               <VStack>
                 <Badge colorPalette='blue'>Voting Now</Badge>
                 <Text fontSize='xl' fontWeight='bold' textAlign='center'>
@@ -157,7 +157,7 @@ export function Game() {
             </Box>
           )}
         </Box>
-        <VStack gap={3} align='center' justify='center'>
+        <VStack gap={2} align='center' justify='center'>
           {/* Participants Area - Top */}
           {renderParticipants(participants.slice(Math.ceil(participants.length / 2)))}
 
