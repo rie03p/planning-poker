@@ -28,10 +28,10 @@ export function IssueDetailDialog({
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
   const [errors, setErrors] = useState<{title?: string; url?: string; description?: string}>({});
-  const prevIssueIdRef = useRef<string | undefined>(undefined);
+  const previousIssueIdRef = useRef<string | undefined>(undefined);
 
-  if (issue?.id !== prevIssueIdRef.current) {
-    prevIssueIdRef.current = issue?.id;
+  if (issue?.id !== previousIssueIdRef.current) {
+    previousIssueIdRef.current = issue?.id;
     if (issue) {
       setTitle(issue.title);
       setUrl(issue.url ?? '');
@@ -48,8 +48,8 @@ export function IssueDetailDialog({
     const result = issueSchema.safeParse({
       id: issue.id,
       title,
-      description: description || undefined,
-      url: url || undefined,
+      description,
+      url,
     });
 
     if (!result.success) {
@@ -78,8 +78,8 @@ export function IssueDetailDialog({
       onUpdateIssue({
         id: issue.id,
         title,
-        description: description || undefined,
-        url: url || undefined,
+        description,
+        url,
       });
       onClose();
     }

@@ -284,15 +284,8 @@ export class Game {
 
         const existingIssue = this.gameState.issues[issueIndex];
         this.gameState.issues[issueIndex] = {
-          ...existingIssue,
           ...data.issue,
-          // Ensure we don't accidentally overwrite with undefined if we were doing deep merge,
-          // but here we are spreading the partial update.
-          // However, data.issue fields are optional.
-          // If data.issue.title is undefined, we keep existingIssue.title.
-          title: data.issue.title ?? existingIssue.title,
-          description: data.issue.description ?? existingIssue.description,
-          url: data.issue.url ?? existingIssue.url,
+          id: existingIssue.id, // Ensure the ID cannot be changed by the client
         };
 
         this.broadcast({

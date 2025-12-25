@@ -220,6 +220,13 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     send({type: 'vote-next-issue'});
   }, [send]);
 
+  const updateIssue = useCallback((issue: Issue) => {
+    send({
+      type: 'update-issue',
+      issue,
+    });
+  }, [send]);
+
   return {
     participants,
     revealed,
@@ -234,12 +241,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     removeIssue,
     setActiveIssue,
     voteNextIssue,
-    updateIssue(issue: Issue) {
-      send({
-        type: 'update-issue',
-        issue,
-      });
-    },
+    updateIssue,
     disconnect,
     notFound,
     roomFull,
