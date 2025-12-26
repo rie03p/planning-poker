@@ -66,7 +66,7 @@ export function IssuesListContent({
         bg='white'
       >
         <Text fontWeight='bold' fontSize='lg'>
-          Issues
+          Issues ({issues.length}/{MAX_ISSUES})
         </Text>
         {onClose && <CloseButton onClick={onClose} />}
       </HStack>
@@ -105,108 +105,105 @@ export function IssuesListContent({
 
       {/* Scrollable Issues List */}
       <Box flex={1} overflowY='auto' p={4}>
-        <VStack gap={6} align='stretch'>
-          <VStack gap={3} align='stretch'>
-            <Text fontWeight='bold'>Queue ({issues.length}/{MAX_ISSUES})</Text>
-            {issues.length === 0
-              ? (
-                <Text color='gray.500' textAlign='center' py={4}>
-                  No issues registered yet.
-                </Text>
-              )
-              : (
-                issues.map(issue => {
-                  const isActive = issue.id === activeIssueId;
-                  return (
-                    <Card.Root
-                      key={issue.id}
-                      variant={isActive ? 'subtle' : 'outline'}
-                      colorPalette={isActive ? 'blue' : undefined}
-                      onClick={() => {
-                        setEditingIssue(issue);
-                      }}
-                      cursor='pointer'
-                      _hover={{borderColor: 'blue.400'}}
-                    >
-                      <Card.Body p={3}>
-                        <VStack align='stretch' gap={2}>
-                          <HStack justify='space-between' align='center'>
-                            <Text fontWeight='medium' truncate flex={1}>
-                              {issue.title}
-                            </Text>
-                            <IconButton
-                              aria-label='Remove issue'
-                              size='sm'
-                              colorPalette='red'
-                              variant='ghost'
-                              onClick={event => {
-                                event.stopPropagation();
-                                setDeletingIssueId(issue.id);
-                              }}
-                            >
-                              <Trash2 size={16} />
-                            </IconButton>
-                          </HStack>
+        <VStack gap={3} align='stretch'>
+          {issues.length === 0
+            ? (
+              <Text color='gray.500' textAlign='center' py={4}>
+                No issues registered yet.
+              </Text>
+            )
+            : (
+              issues.map(issue => {
+                const isActive = issue.id === activeIssueId;
+                return (
+                  <Card.Root
+                    key={issue.id}
+                    variant={isActive ? 'subtle' : 'outline'}
+                    colorPalette={isActive ? 'blue' : undefined}
+                    onClick={() => {
+                      setEditingIssue(issue);
+                    }}
+                    cursor='pointer'
+                    _hover={{borderColor: 'blue.400'}}
+                  >
+                    <Card.Body p={3}>
+                      <VStack align='stretch' gap={2}>
+                        <HStack justify='space-between' align='center'>
+                          <Text fontWeight='medium' truncate flex={1}>
+                            {issue.title}
+                          </Text>
+                          <IconButton
+                            aria-label='Remove issue'
+                            size='sm'
+                            colorPalette='red'
+                            variant='ghost'
+                            onClick={event => {
+                              event.stopPropagation();
+                              setDeletingIssueId(issue.id);
+                            }}
+                          >
+                            <Trash2 size={16} />
+                          </IconButton>
+                        </HStack>
 
-                          {issue.url && (
-                            <Link
-                              href={issue.url}
-                              target='_blank'
-                              fontSize='sm'
-                              colorPalette='blue'
-                              onClick={event => {
-                                event.stopPropagation();
-                              }}
-                              width='fit-content'
-                            >
-                              <HStack gap={1}>
-                                <Text maxW='200px' truncate>
-                                  {issue.url}
-                                </Text>
-                                <ExternalLink
-                                  size={14}
-                                  style={{margin: '0 2px'}}
-                                />
-                              </HStack>
-                            </Link>
-                          )}
+                        {issue.url && (
+                          <Link
+                            href={issue.url}
+                            target='_blank'
+                            fontSize='sm'
+                            colorPalette='blue'
+                            onClick={event => {
+                              event.stopPropagation();
+                            }}
+                            width='fit-content'
+                          >
+                            <HStack gap={1}>
+                              <Text maxW='200px' truncate>
+                                {issue.url}
+                              </Text>
+                              <ExternalLink
+                                size={14}
+                                style={{margin: '0 2px'}}
+                              />
+                            </HStack>
+                          </Link>
+                        )}
 
-                          <Box pt={2} onClick={event => {
-                            event.stopPropagation();
-                          }}>
-                            {isActive
-                              ? (
-                                <Button
-                                  size='sm'
-                                  colorPalette='blue'
-                                  width='full'
-                                  variant='solid'
-                                  disabled
-                                  _disabled={{opacity: 1, cursor: 'default'}}
-                                >
-                                  Voting now...
-                                </Button>
-                              )
-                              : (
-                                <Button
-                                  size='sm'
-                                  variant='subtle'
-                                  width='full'
-                                  onClick={() => {
-                                    onSetActiveIssue(issue.id);
-                                  }}
-                                >
-                                  Vote this issue
-                                </Button>
-                              )}
-                          </Box>
-                        </VStack>
-                      </Card.Body>
-                    </Card.Root>
-                  );
-                })
-              )}
-          </VStack>
+                        <Box pt={2} onClick={event => {
+                          event.stopPropagation();
+                        }}>
+                          {isActive
+                            ? (
+                              <Button
+                                size='sm'
+                                colorPalette='blue'
+                                width='full'
+                                variant='solid'
+                                disabled
+                                _disabled={{opacity: 1, cursor: 'default'}}
+                              >
+                                Voting now...
+                              </Button>
+                            )
+                            : (
+                              <Button
+                                size='sm'
+                                variant='subtle'
+                                width='full'
+                                onClick={() => {
+                                  onSetActiveIssue(issue.id);
+                                }}
+                              >
+                                Vote this issue
+                              </Button>
+                            )}
+                        </Box>
+                      </VStack>
+                    </Card.Body>
+                  </Card.Root>
+                );
+              })
+            )}
         </VStack>
       </Box>
 
