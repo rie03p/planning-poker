@@ -66,7 +66,7 @@ export function IssuesListContent({
         bg='white'
       >
         <Text fontWeight='bold' fontSize='lg'>
-          Issues
+          Issues ({issues.length}/{MAX_ISSUES})
         </Text>
         {onClose && <CloseButton onClick={onClose} />}
       </HStack>
@@ -107,7 +107,6 @@ export function IssuesListContent({
       <Box flex={1} overflowY='auto' p={4}>
         <VStack gap={6} align='stretch'>
           <VStack gap={3} align='stretch'>
-            <Text fontWeight='bold'>Queue ({issues.length}/{MAX_ISSUES})</Text>
             {issues.length === 0
               ? (
                 <Text color='gray.500' textAlign='center' py={4}>
