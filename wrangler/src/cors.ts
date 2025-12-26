@@ -1,6 +1,6 @@
 const ALLOWED_ORIGINS = new Set([
   'https://planning-poker-ba3.pages.dev',
-  'http://localhost:5173',
+  // 'http://localhost:5173',
 ]);
 
 export function getCorsHeaders(origin: string | undefined): Headers | undefined {

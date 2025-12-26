@@ -96,8 +96,20 @@ export const serverMessageSchema = z.discriminatedUnion('type', [
     type: z.literal('update'),
     participants: z.array(participantSchema).max(MAX_PARTICIPANTS),
     revealed: z.boolean(),
-    issues: z.array(issueSchema).max(MAX_ISSUES),
+    issues: z.array(issueSchema).max(MAX_ISSUES).optional(),
     activeIssueId: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal('issue-added'),
+    issue: issueSchema,
+  }),
+  z.object({
+    type: z.literal('issue-removed'),
+    issueId: z.string(),
+  }),
+  z.object({
+    type: z.literal('issue-updated'),
+    issue: issueSchema,
   }),
   z.object({
     type: z.literal('reset'),

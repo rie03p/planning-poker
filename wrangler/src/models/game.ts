@@ -115,7 +115,6 @@ export class Game {
         type: 'update',
         participants: [...this.gameState.participants.values()],
         revealed: this.gameState.revealed,
-        issues: this.gameState.issues,
         activeIssueId: this.gameState.activeIssueId,
       });
     }
@@ -187,7 +186,6 @@ export class Game {
             type: 'update',
             participants: [...this.gameState.participants.values()],
             revealed: this.gameState.revealed,
-            issues: this.gameState.issues,
             activeIssueId: this.gameState.activeIssueId,
           });
         }
@@ -201,7 +199,6 @@ export class Game {
           type: 'update',
           participants: [...this.gameState.participants.values()],
           revealed: this.gameState.revealed,
-          issues: this.gameState.issues,
           activeIssueId: this.gameState.activeIssueId,
         });
         break;
@@ -236,28 +233,46 @@ export class Game {
         }
 
         this.broadcast({
-          type: 'update',
-          participants: [...this.gameState.participants.values()],
-          revealed: this.gameState.revealed,
-          issues: this.gameState.issues,
-          activeIssueId: this.gameState.activeIssueId,
+          type: 'issue-added',
+          issue: newIssue,
         });
+
+        // specific update for activeIssueId if it changed (first issue)
+        if (this.gameState.issues.length === 1) {
+          this.broadcast({
+            type: 'update',
+            participants: [...this.gameState.participants.values()],
+            revealed: this.gameState.revealed,
+            activeIssueId: this.gameState.activeIssueId,
+          });
+        }
+
         break;
       }
 
       case 'remove-issue': {
+        const previousActiveIssueId = this.gameState.activeIssueId;
+
         this.gameState.issues = this.gameState.issues.filter(i => i.id !== data.issueId);
+
         if (this.gameState.activeIssueId === data.issueId) {
           this.gameState.activeIssueId = undefined;
         }
 
         this.broadcast({
-          type: 'update',
-          participants: [...this.gameState.participants.values()],
-          revealed: this.gameState.revealed,
-          issues: this.gameState.issues,
-          activeIssueId: this.gameState.activeIssueId,
+          type: 'issue-removed',
+          issueId: data.issueId,
         });
+
+        if (previousActiveIssueId !== this.gameState.activeIssueId) {
+          this.broadcast({
+            type: 'update',
+            participants: [...this.gameState.participants.values()],
+            revealed: this.gameState.revealed,
+            activeIssueId: this.gameState.activeIssueId,
+          });
+        }
+
         break;
       }
 
@@ -289,11 +304,8 @@ export class Game {
         };
 
         this.broadcast({
-          type: 'update',
-          participants: [...this.gameState.participants.values()],
-          revealed: this.gameState.revealed,
-          issues: this.gameState.issues,
-          activeIssueId: this.gameState.activeIssueId,
+          type: 'issue-updated',
+          issue: this.gameState.issues[issueIndex],
         });
         break;
       }
@@ -315,7 +327,6 @@ export class Game {
       type: 'update',
       participants: [...this.gameState.participants.values()],
       revealed: this.gameState.revealed,
-      issues: this.gameState.issues,
       activeIssueId: this.gameState.activeIssueId,
     });
   }

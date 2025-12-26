@@ -330,14 +330,12 @@ describe('Game', () => {
       expect(gameState.issues[0].title).toBe('New Title');
       expect(gameState.issues[0].description).toBe('New Description');
       expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'update',
-        issues: expect.arrayContaining([
-          expect.objectContaining({
-            id: issueId,
-            title: 'New Title',
-            description: 'New Description',
-          }),
-        ]),
+        type: 'issue-updated',
+        issue: expect.objectContaining({
+          id: issueId,
+          title: 'New Title',
+          description: 'New Description',
+        }),
       }));
     });
   });
@@ -478,8 +476,14 @@ describe('Game', () => {
       expect(gameState.issues[0].title).toBe('Issue 1');
       expect(gameState.activeIssueId).toBe(gameState.issues[0].id);
       expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'issue-added',
+        issue: expect.objectContaining({
+          id: gameState.issues[0].id,
+          title: 'Issue 1',
+        }),
+      }));
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
         type: 'update',
-        issues: expect.any(Array),
         activeIssueId: gameState.issues[0].id,
       }));
     });
