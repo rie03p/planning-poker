@@ -129,11 +129,29 @@ export function useGame(gameId: string, name: string): UseGameReturn {
         case 'update': {
           setParticipants(data.participants);
           setRevealed(data.revealed);
-          setIssues(data.issues);
+          if (data.issues) {
+            setIssues(data.issues);
+          }
+
           setActiveIssueId(data.activeIssueId);
           // Sync myVote with the server state
           const me = data.participants.find(p => p.name === name);
           setMyVote(me?.vote);
+          break;
+        }
+
+        case 'issue-added': {
+          setIssues(previous => [...previous, data.issue]);
+          break;
+        }
+
+        case 'issue-removed': {
+          setIssues(previous => previous.filter(i => i.id !== data.issueId));
+          break;
+        }
+
+        case 'issue-updated': {
+          setIssues(previous => previous.map(i => (i.id === data.issue.id ? data.issue : i)));
           break;
         }
 

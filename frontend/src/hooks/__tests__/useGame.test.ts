@@ -447,6 +447,122 @@ describe('useGame', () => {
       expect(result.current.roomFull).toBe(true);
     });
   });
+
+  it('adds issue when issue-added message is received', async () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const ws = getWs();
+    ws.emitOpen();
+
+    const newIssue = {id: 'issue-1', title: 'New Issue'};
+
+    ws.emitMessage({
+      type: 'issue-added',
+      issue: newIssue,
+    });
+
+    await vi.waitFor(() => {
+      expect(result.current.issues).toHaveLength(1);
+      expect(result.current.issues[0]).toEqual(newIssue);
+    });
+  });
+
+  it('removes issue when issue-removed message is received', async () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const ws = getWs();
+    ws.emitOpen();
+
+    // Initial state with one issue
+    ws.emitMessage({
+      type: 'joined',
+      votingSystem: 'fibonacci',
+      participants: [],
+      revealed: false,
+      issues: [{id: 'issue-1', title: 'Issue 1'}],
+      activeIssueId: undefined,
+    });
+
+    await vi.waitFor(() => {
+      expect(result.current.issues).toHaveLength(1);
+    });
+
+    ws.emitMessage({
+      type: 'issue-removed',
+      issueId: 'issue-1',
+    });
+
+    await vi.waitFor(() => {
+      expect(result.current.issues).toHaveLength(0);
+    });
+  });
+
+  it('updates issue when issue-updated message is received', async () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const ws = getWs();
+    ws.emitOpen();
+
+    // Initial state
+    ws.emitMessage({
+      type: 'joined',
+      votingSystem: 'fibonacci',
+      participants: [],
+      revealed: false,
+      issues: [{id: 'issue-1', title: 'Issue 1'}],
+      activeIssueId: undefined,
+    });
+
+    await vi.waitFor(() => {
+      expect(result.current.issues[0].title).toBe('Issue 1');
+    });
+
+    const updatedIssue = {id: 'issue-1', title: 'Updated Title'};
+
+    ws.emitMessage({
+      type: 'issue-updated',
+      issue: updatedIssue,
+    });
+
+    await vi.waitFor(() => {
+      expect(result.current.issues[0].title).toBe('Updated Title');
+    });
+  });
+
+  it('preserves issues when update message does not contain issues', async () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const ws = getWs();
+    ws.emitOpen();
+
+    // Initial state
+    ws.emitMessage({
+      type: 'joined',
+      votingSystem: 'fibonacci',
+      participants: [],
+      revealed: false,
+      issues: [{id: 'issue-1', title: 'Issue 1'}],
+      activeIssueId: undefined,
+    });
+
+    await vi.waitFor(() => {
+      expect(result.current.issues).toHaveLength(1);
+    });
+
+    // Update message without issues
+    ws.emitMessage({
+      type: 'update',
+      participants: [],
+      revealed: true,
+      activeIssueId: undefined,
+      // issues field is missing
+    });
+
+    await vi.waitFor(() => {
+      expect(result.current.revealed).toBe(true);
+      expect(result.current.issues).toHaveLength(1); // Should still have the issue
+    });
+  });
 });
 
 type MockWsInstance = {
