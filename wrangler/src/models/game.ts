@@ -228,7 +228,8 @@ export class Game {
         this.gameState.issues.push(newIssue);
 
         // If it's the first issue, set it as active
-        if (this.gameState.issues.length === 1) {
+        const isFirstIssue = this.gameState.issues.length === 1;
+        if (isFirstIssue) {
           this.gameState.activeIssueId = newIssue.id;
         }
 
@@ -238,7 +239,7 @@ export class Game {
         });
 
         // specific update for activeIssueId if it changed (first issue)
-        if (this.gameState.issues.length === 1) {
+        if (isFirstIssue) {
           this.broadcast({
             type: 'update',
             participants: [...this.gameState.participants.values()],
