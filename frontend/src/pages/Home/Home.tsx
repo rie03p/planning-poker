@@ -39,7 +39,7 @@ export function Home() {
   };
 
   return (
-    <Flex minH='100vh' align='center' justify='center' bg='gray.50'>
+    <Flex flex='1' w='full' align='center' justify='center' bg='gray.50'>
       <VStack gap={6} w='full' maxW='500px' px={4}>
         <Heading size='xl'>Planning Poker</Heading>
 
