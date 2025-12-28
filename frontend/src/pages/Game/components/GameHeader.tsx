@@ -31,7 +31,7 @@ export function GameHeader({
       shadow='sm'
     >
       <HStack justify='space-between' h='40px' gap={4}>
-        <Box w='200px' flexShrink={0}>
+        <Box w={{base: 'auto', md: '200px'}} flexShrink={0}>
           <Text fontSize='xl' fontWeight='bold' color='blue.600'>
             Planning Poker
           </Text>
@@ -77,7 +77,7 @@ export function GameHeader({
             )}
         </Box>
 
-        <HStack w='200px' justify='flex-end' gap={2} flexShrink={0}>
+        <HStack w={{base: 'auto', md: '200px'}} justify='flex-end' gap={2} flexShrink={0}>
           <CopyInviteBox gameId={gameId} />
           <IssuesMenuButton isOpen={isIssuesOpen} onToggle={onToggleIssues} />
         </HStack>

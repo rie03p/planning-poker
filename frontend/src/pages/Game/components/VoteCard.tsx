@@ -11,26 +11,24 @@ export function VoteCard({
     <Box
       w='56px'
       h='80px'
-      borderRadius='lg'
-      borderWidth='2px'
-      borderColor='blue.400'
       display='flex'
       alignItems='center'
       justifyContent='center'
+      borderRadius='lg'
+      borderWidth='2px'
+      borderColor='blue.400'
+      bg={selected ? 'blue.400' : 'white'}
+      color={selected ? 'white' : 'blue.400'}
       fontSize='xl'
       fontWeight='bold'
-      color={selected ? 'white' : 'blue.400'}
       cursor='pointer'
       userSelect='none'
-      bg={selected ? 'blue.400' : 'white'}
+      shadow={selected ? 'lg' : 'none'}
       transform={selected ? 'translateY(-8px)' : 'translateY(0)'}
-      transition='transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease'
-      boxShadow={selected ? 'lg' : 'none'}
+      transition='all 0.15s ease'
       _hover={{
-        transform: selected
-          ? 'translateY(-8px)'
-          : 'translateY(-4px)',
-        boxShadow: 'md',
+        transform: selected ? 'translateY(-8px)' : 'translateY(-4px)',
+        shadow: 'md',
       }}
     >
       {children}

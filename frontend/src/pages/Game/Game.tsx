@@ -101,7 +101,14 @@ export function Game() {
   };
 
   return (
-    <HStack align='stretch' minH='100vh' gap={0} bg='gray.50'>
+    <HStack
+      align='stretch'
+      minH='100vh'
+      maxW='100vw'
+      overflowX='hidden'
+      gap={0}
+      bg='gray.50'
+    >
       <VStack flex={1} width='100%' gap={0}>
         <GameHeader
           gameId={gameId}

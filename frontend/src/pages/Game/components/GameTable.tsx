@@ -23,21 +23,21 @@ export function GameTable({
 }: GameTableProps) {
   return (
     <Box
-      bg='gray.800'
-      borderRadius='100px'
-      borderWidth='8px'
-      borderColor='gray.700'
-      px={20}
-      py={10}
-      minH='160px'
-      minW='320px'
+      position='relative'
       display='flex'
       alignItems='center'
       justifyContent='center'
-      textAlign='center'
-      shadow='2xl'
-      position='relative'
+      minH='160px'
+      minW='320px'
+      px={20}
+      py={10}
+      bg='gray.800'
       color='white'
+      textAlign='center'
+      borderRadius='100px'
+      borderWidth='8px'
+      borderColor='gray.700'
+      shadow='2xl'
       _before={{
         content: '""',
         position: 'absolute',

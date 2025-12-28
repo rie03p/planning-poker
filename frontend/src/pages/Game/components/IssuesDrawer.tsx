@@ -35,7 +35,7 @@ export function IssuesDrawer({
     >
       <Drawer.Backdrop />
       <Drawer.Positioner>
-        <Drawer.Content>
+        <Drawer.Content rounded={{base: 'none', md: 'l-xl'}}>
           <IssuesListContent
             issues={issues}
             activeIssueId={activeIssueId}

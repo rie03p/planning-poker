@@ -20,16 +20,26 @@ export function CardSelection({
       borderColor='gray.200'
       p={4}
       shadow='xs'
+      overflowX='auto'
+      textAlign='center'
     >
-      <HStack justify='center' gap={3}>
+      <HStack
+        display='inline-flex'
+        gap={3}
+        pt={8}
+        pb={4}
+        px={4}
+      >
         {cards?.map(card => (
           <Box
             key={card}
+            flexShrink={0}
             onClick={() => {
               onVote(card, myVote === card);
             }}
+            pb={1}
           >
-            <VoteCard selected={myVote === card}>
+            <VoteCard selected={String(myVote) === String(card)}>
               {card}
             </VoteCard>
           </Box>
