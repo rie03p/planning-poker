@@ -90,6 +90,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
+        id: 'user-1',
       });
 
       // Try to vote with a t-shirts value in fibonacci game
@@ -114,6 +115,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
+        id: 'user-1',
       });
 
       // Vote with valid fibonacci value
@@ -138,6 +140,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
+        id: 'user-1',
       });
 
       // Try to vote with a fibonacci value in t-shirts game
@@ -162,6 +165,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
+        id: 'user-1',
       });
 
       // Vote with valid t-shirts value
@@ -186,6 +190,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
+        id: 'user-1',
       });
 
       // Vote with ?
@@ -227,6 +232,8 @@ describe('Game', () => {
           name: `User ${i}`,
           vote: undefined,
         });
+        // Mock session mapping
+        (game as any).sessionToUserId.set(sessionId, sessionId);
       }
 
       // Create mock for 15th participant
@@ -240,6 +247,7 @@ describe('Game', () => {
       await handleMessage('session-15', {
         type: 'join',
         name: 'User 15',
+        id: 'user-15',
       });
 
       // Should send room-full message and close connection
@@ -270,6 +278,8 @@ describe('Game', () => {
           name: `User ${i}`,
           vote: undefined,
         });
+        // Mock session mapping
+        (game as any).sessionToUserId.set(sessionId, sessionId);
       }
 
       // Try to join the 14th participant (should succeed)
@@ -282,6 +292,7 @@ describe('Game', () => {
       await handleMessage('session-14', {
         type: 'join',
         name: 'User 14',
+        id: 'user-14',
       });
 
       // Should NOT send room-full message
@@ -289,7 +300,7 @@ describe('Game', () => {
       expect(ws14.close).not.toHaveBeenCalled();
 
       // Participant should be added
-      expect(gameState.participants.has('session-14')).toBe(true);
+      expect(gameState.participants.has('user-14')).toBe(true);
       expect(gameState.participants.size).toBe(14);
     });
   });
@@ -304,6 +315,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
+        id: 'user-1',
       });
 
       // Add issue
@@ -351,9 +363,10 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
+        id: 'user-1',
       });
 
-      expect(gameState.participants.has('session-1')).toBe(true);
+      expect(gameState.participants.has('user-1')).toBe(true);
 
       const broadcastSpy = vi.spyOn(game as any, 'broadcast');
 
@@ -361,7 +374,7 @@ describe('Game', () => {
       await handleDisconnect('session-1');
 
       // Assert
-      expect(gameState.participants.has('session-1')).toBe(false);
+      expect(gameState.participants.has('user-1')).toBe(false);
       expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
         type: 'update',
         participants: [],
@@ -377,6 +390,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
+        id: 'user-1',
       });
 
       // Act: Disconnect
@@ -397,6 +411,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
+        id: 'user-1',
       });
 
       const broadcastSpy = vi.spyOn(game as any, 'broadcast');
@@ -425,6 +440,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
+        id: 'user-1',
       });
       await handleMessage('session-1', {
         type: 'vote',
@@ -444,7 +460,7 @@ describe('Game', () => {
       // Assert
       expect(gameState.revealed).toBe(false);
       expect(gameState.activeIssueId).toBeUndefined();
-      expect(gameState.participants.get('session-1').vote).toBeUndefined();
+      expect(gameState.participants.get('user-1').vote).toBeUndefined();
       expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
         type: 'reset',
         activeIssueId: undefined,
@@ -461,7 +477,7 @@ describe('Game', () => {
       const {gameState} = (game as any);
 
       // Join
-      await handleMessage('session-1', {type: 'join', name: 'User'});
+      await handleMessage('session-1', {type: 'join', name: 'User', id: 'user-1'});
 
       const broadcastSpy = vi.spyOn(game as any, 'broadcast');
 
@@ -494,7 +510,7 @@ describe('Game', () => {
       const {gameState} = (game as any);
 
       // Join
-      await handleMessage('session-1', {type: 'join', name: 'User'});
+      await handleMessage('session-1', {type: 'join', name: 'User', id: 'user-1'});
 
       // Add Issue
       await handleMessage('session-1', {
@@ -520,7 +536,7 @@ describe('Game', () => {
       const {gameState} = (game as any);
 
       // Join and Vote
-      await handleMessage('session-1', {type: 'join', name: 'User'});
+      await handleMessage('session-1', {type: 'join', name: 'User', id: 'user-1'});
       await handleMessage('session-1', {type: 'vote', vote: '5'});
       gameState.revealed = true;
 
@@ -539,7 +555,7 @@ describe('Game', () => {
       // Assert
       expect(gameState.activeIssueId).toBe(issue2Id);
       expect(gameState.revealed).toBe(false);
-      expect(gameState.participants.get('session-1').vote).toBeUndefined();
+      expect(gameState.participants.get('user-1').vote).toBeUndefined();
     });
 
     it('should vote next issue', async () => {
@@ -548,7 +564,7 @@ describe('Game', () => {
       const {gameState} = (game as any);
 
       // Join
-      await handleMessage('session-1', {type: 'join', name: 'User'});
+      await handleMessage('session-1', {type: 'join', name: 'User', id: 'user-1'});
 
       // Add issues
       await handleMessage('session-1', {type: 'add-issue', issue: {title: 'Issue 1'}});

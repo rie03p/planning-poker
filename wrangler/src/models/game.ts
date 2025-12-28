@@ -10,6 +10,7 @@ import {type GameState, type Env} from '../types';
 
 export class Game {
   private readonly sessions = new Map<string, WebSocket>();
+  private readonly sessionToUserId = new Map<string, string>();
   private readonly gameState: GameState = {
     participants: new Map<string, Participant>(),
     revealed: false,
@@ -106,8 +107,21 @@ export class Game {
 
   private async handleDisconnect(sessionId: string) {
     this.sessions.delete(sessionId);
-    const wasParticipant = this.gameState.participants.has(sessionId);
-    this.gameState.participants.delete(sessionId);
+    const userId = this.sessionToUserId.get(sessionId);
+    this.sessionToUserId.delete(sessionId);
+
+    if (!userId) {
+      return;
+    }
+
+    // Check if the user has any other active sessions
+    const hasOtherSession = [...this.sessionToUserId.values()].includes(userId);
+    if (hasOtherSession) {
+      return;
+    }
+
+    const wasParticipant = this.gameState.participants.has(userId);
+    this.gameState.participants.delete(userId);
 
     // Only broadcast if the disconnected session was actually a participant
     if (wasParticipant) {
@@ -135,7 +149,9 @@ export class Game {
 
     switch (data.type) {
       case 'join': {
-        if (this.gameState.participants.size >= MAX_PARTICIPANTS) {
+        const userId = data.id;
+
+        if (this.gameState.participants.size >= MAX_PARTICIPANTS && !this.gameState.participants.has(userId)) {
           const ws = this.sessions.get(sessionId);
           if (ws) {
             try {
@@ -149,11 +165,19 @@ export class Game {
           return;
         }
 
-        this.gameState.participants.set(sessionId, {
-          id: sessionId,
-          name: data.name,
-          vote: undefined,
-        });
+        this.sessionToUserId.set(sessionId, userId);
+
+        const existingParticipant = this.gameState.participants.get(userId);
+        if (existingParticipant) {
+          existingParticipant.name = data.name;
+        } else {
+          this.gameState.participants.set(userId, {
+            id: userId,
+            name: data.name,
+            vote: undefined,
+          });
+        }
+
         await this.state.storage.deleteAlarm();
 
         // Send votingSystem on join
@@ -170,7 +194,12 @@ export class Game {
       }
 
       case 'vote': {
-        const p = this.gameState.participants.get(sessionId);
+        const userId = this.sessionToUserId.get(sessionId);
+        if (!userId) {
+          return;
+        }
+
+        const p = this.gameState.participants.get(userId);
         if (p) {
           // Validate vote against current voting system
           const votingSystem = await this.getVotingSystem();
