@@ -1,5 +1,5 @@
 import {
-  Box, HStack, Text, Badge, Tooltip,
+  Box, HStack, Text, Tooltip,
 } from '@chakra-ui/react';
 import {type Issue} from '@planning-poker/shared';
 import {CopyInviteBox} from './CopyInviteBox';
