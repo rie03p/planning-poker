@@ -20,18 +20,18 @@ describe('useGame', () => {
   it('sends join message on websocket open', () => {
     const getWs = mockWebSocket();
 
-    renderHook(() => useGame('test-game', 'Alice'));
+    renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
 
-    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({type: 'join', name: 'Alice'}));
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({type: 'join', name: 'Alice', id: 'user-id-alice'}));
   });
 
   it('updates participants when joined message is received', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -40,7 +40,7 @@ describe('useGame', () => {
       type: 'joined',
       votingSystem: 'fibonacci',
       participants: [
-        {id: '1', name: 'Alice', vote: undefined},
+        {id: 'user-id-alice', name: 'Alice', vote: undefined},
         {id: '2', name: 'Bob', vote: undefined},
       ],
       revealed: false,
@@ -60,7 +60,7 @@ describe('useGame', () => {
   it('updates participants when update message is received', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -68,7 +68,7 @@ describe('useGame', () => {
     ws.emitMessage({
       type: 'update',
       participants: [
-        {id: '1', name: 'Alice', vote: '5'},
+        {id: 'user-id-alice', name: 'Alice', vote: '5'},
         {id: '2', name: 'Bob', vote: '8'},
       ],
       revealed: true,
@@ -87,7 +87,7 @@ describe('useGame', () => {
   it('sends vote message and updates local vote', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -103,7 +103,7 @@ describe('useGame', () => {
   it('sends reveal message', () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -116,7 +116,7 @@ describe('useGame', () => {
   it('sends reset message and clears local vote', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -137,7 +137,7 @@ describe('useGame', () => {
   it('resets participants and vote when reset message is received', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -150,7 +150,7 @@ describe('useGame', () => {
     ws.emitMessage({
       type: 'reset',
       participants: [
-        {id: '1', name: 'Alice', vote: undefined},
+        {id: 'user-id-alice', name: 'Alice', vote: undefined},
         {id: '2', name: 'Bob', vote: undefined},
       ],
       issues: [],
@@ -169,7 +169,7 @@ describe('useGame', () => {
   it('closes websocket on disconnect', () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -182,7 +182,7 @@ describe('useGame', () => {
   it('sets notFound when not-found message is received', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -204,7 +204,7 @@ describe('useGame', () => {
 
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -222,7 +222,7 @@ describe('useGame', () => {
 
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -235,7 +235,7 @@ describe('useGame', () => {
   it('allows changing vote', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -254,7 +254,7 @@ describe('useGame', () => {
   it('allows clearing vote by passing undefined', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -274,7 +274,7 @@ describe('useGame', () => {
   it('syncs myVote with server state when update message is received', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -289,7 +289,7 @@ describe('useGame', () => {
     ws.emitMessage({
       type: 'update',
       participants: [
-        {id: '1', name: 'Alice', vote: undefined},
+        {id: 'user-id-alice', name: 'Alice', vote: undefined},
         {id: '2', name: 'Bob', vote: undefined},
       ],
       revealed: false,
@@ -307,7 +307,7 @@ describe('useGame', () => {
   it('syncs myVote when another participant with same name votes', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -316,7 +316,7 @@ describe('useGame', () => {
     ws.emitMessage({
       type: 'update',
       participants: [
-        {id: '1', name: 'Alice', vote: '8'},
+        {id: 'user-id-alice', name: 'Alice', vote: '8'},
         {id: '2', name: 'Bob', vote: '5'},
       ],
       revealed: false,
@@ -334,7 +334,7 @@ describe('useGame', () => {
   it('handles update message when participant with same name is not found', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
 
     const ws = getWs();
     ws.emitOpen();
@@ -363,7 +363,7 @@ describe('useGame', () => {
 
   it('sends add-issue message', () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
     const ws = getWs();
     ws.emitOpen();
 
@@ -377,7 +377,7 @@ describe('useGame', () => {
 
   it('sends remove-issue message', () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
     const ws = getWs();
     ws.emitOpen();
 
@@ -391,7 +391,7 @@ describe('useGame', () => {
 
   it('sends set-active-issue message', () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
     const ws = getWs();
     ws.emitOpen();
 
@@ -405,7 +405,7 @@ describe('useGame', () => {
 
   it('sends vote-next-issue message', () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
     const ws = getWs();
     ws.emitOpen();
 
@@ -418,7 +418,7 @@ describe('useGame', () => {
 
   it('sends update-issue message', () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
     const ws = getWs();
     ws.emitOpen();
 
@@ -435,7 +435,7 @@ describe('useGame', () => {
 
   it('sets roomFull when room-full message is received', async () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
     const ws = getWs();
     ws.emitOpen();
 
@@ -450,7 +450,7 @@ describe('useGame', () => {
 
   it('adds issue when issue-added message is received', async () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
     const ws = getWs();
     ws.emitOpen();
 
@@ -469,7 +469,7 @@ describe('useGame', () => {
 
   it('removes issue when issue-removed message is received', async () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
     const ws = getWs();
     ws.emitOpen();
 
@@ -499,7 +499,7 @@ describe('useGame', () => {
 
   it('updates issue when issue-updated message is received', async () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
     const ws = getWs();
     ws.emitOpen();
 
@@ -531,7 +531,7 @@ describe('useGame', () => {
 
   it('preserves issues when update message does not contain issues', async () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
     const ws = getWs();
     ws.emitOpen();
 
