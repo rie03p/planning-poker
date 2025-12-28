@@ -1,7 +1,6 @@
 import {
   Box, Container, Flex, Heading, Link, Spacer,
 } from '@chakra-ui/react';
-import {Link as RouterLink} from 'react-router-dom';
 import github from '../assets/github.svg';
 
 export const Header = () => (
@@ -17,13 +16,9 @@ export const Header = () => (
   >
     <Container maxW='6xl'>
       <Flex align='center'>
-        <Link asChild _hover={{textDecoration: 'none'}}>
-          <RouterLink to='/'>
-            <Heading as='h1' size='lg' cursor='pointer'>
-              Planning Poker
-            </Heading>
-          </RouterLink>
-        </Link>
+        <Heading as='h1' size='lg'>
+          Planning Poker
+        </Heading>
 
         <Spacer />
 
