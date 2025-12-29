@@ -21,6 +21,15 @@ export function GameTable({
   issues,
   voteNextIssue,
 }: GameTableProps) {
+  const handleVoteNext = (() => {
+    if (!activeIssueId) {
+      return undefined;
+    }
+
+    const index = issues.findIndex(i => i.id === activeIssueId);
+    return index !== -1 && index < issues.length - 1 ? voteNextIssue : undefined;
+  })();
+
   return (
     <Box
       position='relative'
@@ -53,12 +62,7 @@ export function GameTable({
         revealed={revealed}
         reveal={reveal}
         reset={reset}
-        onVoteNext={
-          activeIssueId
-          && issues.findIndex(i => i.id === activeIssueId) < issues.length - 1
-            ? voteNextIssue
-            : undefined
-        }
+        onVoteNext={handleVoteNext}
       />
     </Box>
   );

@@ -39,7 +39,7 @@ export function CardSelection({
             }}
             pb={1}
           >
-            <VoteCard selected={String(myVote) === String(card)}>
+            <VoteCard selected={myVote === card}>
               {card}
             </VoteCard>
           </Box>
