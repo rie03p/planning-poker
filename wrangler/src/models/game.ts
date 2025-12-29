@@ -149,7 +149,11 @@ export class Game {
 
     switch (data.type) {
       case 'join': {
-        const userId = data.id;
+        const {clientId} = data;
+
+        const userId = clientId && this.gameState.participants.has(clientId)
+          ? clientId
+          : crypto.randomUUID();
 
         if (this.gameState.participants.size >= MAX_PARTICIPANTS && !this.gameState.participants.has(userId)) {
           const ws = this.sessions.get(sessionId);
@@ -180,16 +184,28 @@ export class Game {
 
         await this.state.storage.deleteAlarm();
 
-        // Send votingSystem on join
+        // Send votingSystem on join with assigned userId
         const votingSystem = await this.getVotingSystem();
+        const ws = this.sessions.get(sessionId);
+        if (ws) {
+          ws.send(JSON.stringify({
+            type: 'joined',
+            userId,
+            participants: [...this.gameState.participants.values()],
+            revealed: this.gameState.revealed,
+            votingSystem,
+            issues: this.gameState.issues,
+            activeIssueId: this.gameState.activeIssueId,
+          }));
+        }
+
+        // Broadcast update to others
         this.broadcast({
-          type: 'joined',
+          type: 'update',
           participants: [...this.gameState.participants.values()],
           revealed: this.gameState.revealed,
-          votingSystem,
-          issues: this.gameState.issues,
           activeIssueId: this.gameState.activeIssueId,
-        });
+        }, sessionId);
         break;
       }
 
@@ -361,7 +377,7 @@ export class Game {
     });
   }
 
-  private broadcast(message: unknown) {
+  private broadcast(message: unknown, excludeSessionId?: string) {
     const result = serverMessageSchema.safeParse(message);
     if (!result.success) {
       console.error('Invalid server message:', result.error);
@@ -369,7 +385,11 @@ export class Game {
     }
 
     const string_ = JSON.stringify(result.data);
-    for (const ws of this.sessions.values()) {
+    for (const [sessionId, ws] of this.sessions.entries()) {
+      if (excludeSessionId && sessionId === excludeSessionId) {
+        continue;
+      }
+
       try {
         ws.send(string_);
       } catch (error) {

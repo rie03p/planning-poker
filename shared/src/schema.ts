@@ -66,7 +66,7 @@ export const participantSchema = z.object({
 
 // WebSocket message schemas
 export const clientMessageSchema = z.discriminatedUnion('type', [
-  z.object({type: z.literal('join'), name: participantSchema.shape.name, id: participantSchema.shape.id}),
+  z.object({type: z.literal('join'), name: participantSchema.shape.name, clientId: participantSchema.shape.id.optional()}),
   z.object({type: z.literal('vote'), vote: votingCardSchema.optional()}),
   z.object({type: z.literal('reveal')}),
   z.object({type: z.literal('reset')}),
@@ -86,6 +86,7 @@ export const clientMessageSchema = z.discriminatedUnion('type', [
 export const serverMessageSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('joined'),
+    userId: z.string(),
     participants: z.array(participantSchema).max(MAX_PARTICIPANTS),
     revealed: z.boolean(),
     votingSystem: votingSystemSchema,

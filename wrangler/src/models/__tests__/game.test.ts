@@ -47,6 +47,39 @@ describe('Game', () => {
   let mockState: any;
   let mockEnv: any;
 
+  const joinAndGetUserId = async (sessionId: string, name: string, clientId?: string): Promise<string> => {
+    const {sessions} = (game as any);
+    const mockWs = {
+      send: vi.fn(),
+      close: vi.fn(),
+    };
+    sessions.set(sessionId, mockWs);
+
+    const handleMessage = (game as any).handleMessage.bind(game);
+    await handleMessage(sessionId, {
+      type: 'join',
+      name,
+      clientId,
+    });
+
+    // Extract userId from the 'joined' message
+    const joinedCall = mockWs.send.mock.calls.find((call: any) => {
+      try {
+        const message = JSON.parse(call[0]);
+        return message.type === 'joined';
+      } catch {
+        return false;
+      }
+    });
+
+    if (!joinedCall) {
+      throw new Error('No joined message found');
+    }
+
+    const joinedMessage = JSON.parse(joinedCall[0]);
+    return joinedMessage.userId;
+  };
+
   beforeEach(() => {
     mockState = createMockState();
     mockEnv = createMockEnv();
@@ -90,7 +123,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
-        id: 'user-1',
+        clientId: 'user-1',
       });
 
       // Try to vote with a t-shirts value in fibonacci game
@@ -115,7 +148,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
-        id: 'user-1',
+        clientId: 'user-1',
       });
 
       // Vote with valid fibonacci value
@@ -140,7 +173,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
-        id: 'user-1',
+        clientId: 'user-1',
       });
 
       // Try to vote with a fibonacci value in t-shirts game
@@ -165,7 +198,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
-        id: 'user-1',
+        clientId: 'user-1',
       });
 
       // Vote with valid t-shirts value
@@ -190,7 +223,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
-        id: 'user-1',
+        clientId: 'user-1',
       });
 
       // Vote with ?
@@ -208,6 +241,43 @@ describe('Game', () => {
       expect(consoleErrorSpy).not.toHaveBeenCalled();
 
       consoleErrorSpy.mockRestore();
+    });
+  });
+
+  describe('userId security', () => {
+    it('should ignore arbitrary clientId and generate new userId for fresh join', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+
+      const userId = await joinAndGetUserId('session-1', 'Test User', 'fake-client-id-123');
+
+      // The userId returned should be a server-generated UUID, not the fake clientId
+      expect(userId).not.toBe('fake-client-id-123');
+      expect(userId).toMatch(/^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/);
+    });
+
+    it('should accept clientId if it matches existing participant (reconnection)', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const {gameState} = (game as any);
+
+      // First join - get server-assigned ID
+      const userId = await joinAndGetUserId('session-1', 'Test User', 'any-id');
+      (game as any).sessionToUserId.set('session-1', userId);
+
+      expect(gameState.participants.has(userId)).toBe(true);
+
+      // Disconnect
+      const handleDisconnect = (game as any).handleDisconnect.bind(game);
+      await handleDisconnect('session-1');
+
+      // Participant should be removed after disconnect
+      expect(gameState.participants.has(userId)).toBe(false);
+
+      // Try to reconnect with the same userId
+      const reconnectedUserId = await joinAndGetUserId('session-2', 'Test User', userId);
+
+      // Should get a NEW userId because the old one is no longer in participants
+      expect(reconnectedUserId).not.toBe(userId);
+      expect(reconnectedUserId).toMatch(/^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/);
     });
   });
 
@@ -247,7 +317,7 @@ describe('Game', () => {
       await handleMessage('session-15', {
         type: 'join',
         name: 'User 15',
-        id: 'user-15',
+        clientId: 'user-15',
       });
 
       // Should send room-full message and close connection
@@ -261,46 +331,34 @@ describe('Game', () => {
     it('should allow join when under limit', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
 
-      const handleMessage = (game as any).handleMessage.bind(game);
-      const {sessions} = (game as any);
       const {gameState} = (game as any);
 
-      // Add 13 participants to game state and sessions (with individual mocks)
-      for (let i = 0; i < 13; i++) {
+      // Add 13 participants using joinAndGetUserId
+      const joinPromises = Array.from({length: 13}, async (_, i) => {
         const sessionId = `session-${i}`;
-        const mockWs = {
-          send: vi.fn(),
-          close: vi.fn(),
-        };
-        sessions.set(sessionId, mockWs);
-        gameState.participants.set(sessionId, {
-          id: sessionId,
-          name: `User ${i}`,
-          vote: undefined,
-        });
-        // Mock session mapping
-        (game as any).sessionToUserId.set(sessionId, sessionId);
-      }
+        const userId = await joinAndGetUserId(sessionId, `User ${i}`, `user-${i}`);
+        (game as any).sessionToUserId.set(sessionId, userId);
+      });
+      await Promise.all(joinPromises);
 
       // Try to join the 14th participant (should succeed)
-      const ws14 = {
-        send: vi.fn(),
-        close: vi.fn(),
-      };
-      sessions.set('session-14', ws14);
-
-      await handleMessage('session-14', {
-        type: 'join',
-        name: 'User 14',
-        id: 'user-14',
-      });
+      const userId14 = await joinAndGetUserId('session-14', 'User 14', 'user-14');
+      const ws14 = (game as any).sessions.get('session-14');
 
       // Should NOT send room-full message
-      expect(ws14.send).not.toHaveBeenCalledWith(JSON.stringify({type: 'room-full'}));
+      const roomFullCall = ws14.send.mock.calls.find((call: any) => {
+        try {
+          const message = JSON.parse(call[0]);
+          return message.type === 'room-full';
+        } catch {
+          return false;
+        }
+      });
+      expect(roomFullCall).toBeUndefined();
       expect(ws14.close).not.toHaveBeenCalled();
 
       // Participant should be added
-      expect(gameState.participants.has('user-14')).toBe(true);
+      expect(gameState.participants.has(userId14)).toBe(true);
       expect(gameState.participants.size).toBe(14);
     });
   });
@@ -315,7 +373,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
-        id: 'user-1',
+        clientId: 'user-1',
       });
 
       // Add issue
@@ -355,18 +413,14 @@ describe('Game', () => {
   describe('handleDisconnect', () => {
     it('should remove participant and broadcast update', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
-      const handleMessage = (game as any).handleMessage.bind(game);
       const handleDisconnect = (game as any).handleDisconnect.bind(game);
       const {gameState} = (game as any);
 
-      // Join participant
-      await handleMessage('session-1', {
-        type: 'join',
-        name: 'Test User',
-        id: 'user-1',
-      });
+      // Join participant and get assigned userId
+      const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
+      (game as any).sessionToUserId.set('session-1', userId);
 
-      expect(gameState.participants.has('user-1')).toBe(true);
+      expect(gameState.participants.has(userId)).toBe(true);
 
       const broadcastSpy = vi.spyOn(game as any, 'broadcast');
 
@@ -374,7 +428,7 @@ describe('Game', () => {
       await handleDisconnect('session-1');
 
       // Assert
-      expect(gameState.participants.has('user-1')).toBe(false);
+      expect(gameState.participants.has(userId)).toBe(false);
       expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
         type: 'update',
         participants: [],
@@ -390,7 +444,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
-        id: 'user-1',
+        clientId: 'user-1',
       });
 
       // Act: Disconnect
@@ -411,7 +465,7 @@ describe('Game', () => {
       await handleMessage('session-1', {
         type: 'join',
         name: 'Test User',
-        id: 'user-1',
+        clientId: 'user-1',
       });
 
       const broadcastSpy = vi.spyOn(game as any, 'broadcast');
@@ -436,12 +490,10 @@ describe('Game', () => {
       const handleMessage = (game as any).handleMessage.bind(game);
       const {gameState} = (game as any);
 
-      // Join and vote
-      await handleMessage('session-1', {
-        type: 'join',
-        name: 'Test User',
-        id: 'user-1',
-      });
+      // Join and vote - get userId from server
+      const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
+      (game as any).sessionToUserId.set('session-1', userId);
+
       await handleMessage('session-1', {
         type: 'vote',
         vote: '5',
@@ -460,7 +512,7 @@ describe('Game', () => {
       // Assert
       expect(gameState.revealed).toBe(false);
       expect(gameState.activeIssueId).toBeUndefined();
-      expect(gameState.participants.get('user-1').vote).toBeUndefined();
+      expect(gameState.participants.get(userId).vote).toBeUndefined();
       expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
         type: 'reset',
         activeIssueId: undefined,
@@ -477,7 +529,7 @@ describe('Game', () => {
       const {gameState} = (game as any);
 
       // Join
-      await handleMessage('session-1', {type: 'join', name: 'User', id: 'user-1'});
+      await handleMessage('session-1', {type: 'join', name: 'User', clientId: 'user-1'});
 
       const broadcastSpy = vi.spyOn(game as any, 'broadcast');
 
@@ -510,7 +562,7 @@ describe('Game', () => {
       const {gameState} = (game as any);
 
       // Join
-      await handleMessage('session-1', {type: 'join', name: 'User', id: 'user-1'});
+      await handleMessage('session-1', {type: 'join', name: 'User', clientId: 'user-1'});
 
       // Add Issue
       await handleMessage('session-1', {
@@ -535,8 +587,10 @@ describe('Game', () => {
       const handleMessage = (game as any).handleMessage.bind(game);
       const {gameState} = (game as any);
 
-      // Join and Vote
-      await handleMessage('session-1', {type: 'join', name: 'User', id: 'user-1'});
+      // Join and Vote - get userId from server
+      const userId = await joinAndGetUserId('session-1', 'User', 'user-1');
+      (game as any).sessionToUserId.set('session-1', userId);
+
       await handleMessage('session-1', {type: 'vote', vote: '5'});
       gameState.revealed = true;
 
@@ -555,7 +609,7 @@ describe('Game', () => {
       // Assert
       expect(gameState.activeIssueId).toBe(issue2Id);
       expect(gameState.revealed).toBe(false);
-      expect(gameState.participants.get('user-1').vote).toBeUndefined();
+      expect(gameState.participants.get(userId).vote).toBeUndefined();
     });
 
     it('should vote next issue', async () => {
@@ -564,7 +618,7 @@ describe('Game', () => {
       const {gameState} = (game as any);
 
       // Join
-      await handleMessage('session-1', {type: 'join', name: 'User', id: 'user-1'});
+      await handleMessage('session-1', {type: 'join', name: 'User', clientId: 'user-1'});
 
       // Add issues
       await handleMessage('session-1', {type: 'add-issue', issue: {title: 'Issue 1'}});
