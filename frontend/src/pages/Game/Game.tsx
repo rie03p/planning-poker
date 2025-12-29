@@ -31,12 +31,6 @@ export function Game() {
   } = useLocalStorage<string>('planning-poker:userId', '');
 
   useEffect(() => {
-    if (!userId) {
-      setUserId(crypto.randomUUID());
-    }
-  }, [userId, setUserId]);
-
-  useEffect(() => {
     if (name) {
       const result = participantSchema.shape.name.safeParse(name);
       if (!result.success) {
@@ -45,7 +39,11 @@ export function Game() {
     }
   }, [name, setName]);
 
-  const game = useGame(gameId, name ?? '', userId ?? '');
+  const handleUserIdChange = (newUserId: string) => {
+    setUserId(newUserId);
+  };
+
+  const game = useGame(gameId, name ?? '', userId ?? '', handleUserIdChange);
 
   const {
     participants,

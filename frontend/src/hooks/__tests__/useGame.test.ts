@@ -20,24 +20,25 @@ describe('useGame', () => {
   it('sends join message on websocket open', () => {
     const getWs = mockWebSocket();
 
-    renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
 
-    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({type: 'join', name: 'Alice', id: 'user-id-alice'}));
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({type: 'join', name: 'Alice', clientId: 'user-id-alice'}));
   });
 
   it('updates participants when joined message is received', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
 
     ws.emitMessage({
       type: 'joined',
+      userId: 'user-id-alice',
       votingSystem: 'fibonacci',
       participants: [
         {id: 'user-id-alice', name: 'Alice', vote: undefined},
@@ -60,7 +61,7 @@ describe('useGame', () => {
   it('updates participants when update message is received', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -87,7 +88,7 @@ describe('useGame', () => {
   it('sends vote message and updates local vote', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -103,7 +104,7 @@ describe('useGame', () => {
   it('sends reveal message', () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -115,11 +116,27 @@ describe('useGame', () => {
 
   it('sends reset message and clears local vote', async () => {
     const getWs = mockWebSocket();
+    const onUserIdChange = vi.fn();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', onUserIdChange));
 
     const ws = getWs();
     ws.emitOpen();
+
+    // Wait for connection to be established
+    ws.emitMessage({
+      type: 'joined',
+      userId: 'user-id-alice',
+      votingSystem: 'fibonacci',
+      participants: [{id: 'user-id-alice', name: 'Alice', vote: undefined}],
+      revealed: false,
+      issues: [],
+      activeIssueId: undefined,
+    });
+
+    await vi.waitFor(() => {
+      expect(result.current.participants).toHaveLength(1);
+    });
 
     result.current.vote('5');
     await vi.waitFor(() => {
@@ -128,6 +145,7 @@ describe('useGame', () => {
 
     result.current.reset();
 
+    // Check that reset was called
     expect(ws.send).toHaveBeenCalledWith(JSON.stringify({type: 'reset'}));
     await vi.waitFor(() => {
       expect(result.current.myVote).toBeUndefined();
@@ -137,7 +155,7 @@ describe('useGame', () => {
   it('resets participants and vote when reset message is received', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -169,7 +187,7 @@ describe('useGame', () => {
   it('closes websocket on disconnect', () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -182,7 +200,7 @@ describe('useGame', () => {
   it('sets notFound when not-found message is received', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -204,7 +222,7 @@ describe('useGame', () => {
 
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -222,7 +240,7 @@ describe('useGame', () => {
 
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -235,7 +253,7 @@ describe('useGame', () => {
   it('allows changing vote', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -253,11 +271,27 @@ describe('useGame', () => {
 
   it('allows clearing vote by passing undefined', async () => {
     const getWs = mockWebSocket();
+    const onUserIdChange = vi.fn();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', onUserIdChange));
 
     const ws = getWs();
     ws.emitOpen();
+
+    // Wait for connection to be established
+    ws.emitMessage({
+      type: 'joined',
+      userId: 'user-id-alice',
+      votingSystem: 'fibonacci',
+      participants: [{id: 'user-id-alice', name: 'Alice', vote: undefined}],
+      revealed: false,
+      issues: [],
+      activeIssueId: undefined,
+    });
+
+    await vi.waitFor(() => {
+      expect(result.current.participants).toHaveLength(1);
+    });
 
     result.current.vote('5');
     await vi.waitFor(() => {
@@ -268,13 +302,15 @@ describe('useGame', () => {
     await vi.waitFor(() => {
       expect(result.current.myVote).toBeUndefined();
     });
+
+    // Check that vote with undefined was called
     expect(ws.send).toHaveBeenCalledWith(JSON.stringify({type: 'vote', vote: undefined}));
   });
 
   it('syncs myVote with server state when update message is received', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -307,7 +343,7 @@ describe('useGame', () => {
   it('syncs myVote when another participant with same name votes', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -334,7 +370,7 @@ describe('useGame', () => {
   it('handles update message when participant with same name is not found', async () => {
     const getWs = mockWebSocket();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
 
     const ws = getWs();
     ws.emitOpen();
@@ -363,7 +399,7 @@ describe('useGame', () => {
 
   it('sends add-issue message', () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
     const ws = getWs();
     ws.emitOpen();
 
@@ -377,7 +413,7 @@ describe('useGame', () => {
 
   it('sends remove-issue message', () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
     const ws = getWs();
     ws.emitOpen();
 
@@ -391,7 +427,7 @@ describe('useGame', () => {
 
   it('sends set-active-issue message', () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
     const ws = getWs();
     ws.emitOpen();
 
@@ -405,7 +441,7 @@ describe('useGame', () => {
 
   it('sends vote-next-issue message', () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
     const ws = getWs();
     ws.emitOpen();
 
@@ -418,7 +454,7 @@ describe('useGame', () => {
 
   it('sends update-issue message', () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
     const ws = getWs();
     ws.emitOpen();
 
@@ -435,7 +471,7 @@ describe('useGame', () => {
 
   it('sets roomFull when room-full message is received', async () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
     const ws = getWs();
     ws.emitOpen();
 
@@ -450,7 +486,7 @@ describe('useGame', () => {
 
   it('adds issue when issue-added message is received', async () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
     const ws = getWs();
     ws.emitOpen();
 
@@ -469,13 +505,14 @@ describe('useGame', () => {
 
   it('removes issue when issue-removed message is received', async () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
     const ws = getWs();
     ws.emitOpen();
 
     // Initial state with one issue
     ws.emitMessage({
       type: 'joined',
+      userId: 'user-id-alice',
       votingSystem: 'fibonacci',
       participants: [],
       revealed: false,
@@ -499,13 +536,14 @@ describe('useGame', () => {
 
   it('updates issue when issue-updated message is received', async () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
     const ws = getWs();
     ws.emitOpen();
 
     // Initial state
     ws.emitMessage({
       type: 'joined',
+      userId: 'user-id-alice',
       votingSystem: 'fibonacci',
       participants: [],
       revealed: false,
@@ -531,13 +569,14 @@ describe('useGame', () => {
 
   it('preserves issues when update message does not contain issues', async () => {
     const getWs = mockWebSocket();
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice'));
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
     const ws = getWs();
     ws.emitOpen();
 
     // Initial state
     ws.emitMessage({
       type: 'joined',
+      userId: 'user-id-alice',
       votingSystem: 'fibonacci',
       participants: [],
       revealed: false,

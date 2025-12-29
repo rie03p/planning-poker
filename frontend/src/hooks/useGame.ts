@@ -44,7 +44,7 @@ function toWebSocketUrl(httpUrl: string): string {
   throw new Error(`Invalid BACKEND_URL: ${httpUrl}`);
 }
 
-export function useGame(gameId: string, name: string, userId: string): UseGameReturn {
+export function useGame(gameId: string, name: string, initialUserId: string, onUserIdChange: (userId: string) => void): UseGameReturn {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [myVote, setMyVote] = useState<string | undefined>(undefined);
   const [revealed, setRevealed] = useState(false);
@@ -54,6 +54,7 @@ export function useGame(gameId: string, name: string, userId: string): UseGameRe
   const [notFound, setNotFound] = useState<boolean>(false);
   const [roomFull, setRoomFull] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | undefined>(undefined);
+  const userIdRef = useRef<string>(initialUserId);
 
   const send = useCallback((message: ClientMessage) => {
     const ws = wsRef.current;
@@ -118,6 +119,9 @@ export function useGame(gameId: string, name: string, userId: string): UseGameRe
 
       switch (data.type) {
         case 'joined': {
+          userIdRef.current = data.userId;
+          onUserIdChange(data.userId);
+
           setVotingSystem(data.votingSystem);
           setParticipants(data.participants);
           setRevealed(data.revealed);
@@ -125,7 +129,7 @@ export function useGame(gameId: string, name: string, userId: string): UseGameRe
           setActiveIssueId(data.activeIssueId);
 
           // Sync myVote with the server state based on userId
-          const me = data.participants.find(p => p.id === userId);
+          const me = data.participants.find(p => p.id === data.userId);
           setMyVote(me?.vote);
           break;
         }
@@ -139,7 +143,7 @@ export function useGame(gameId: string, name: string, userId: string): UseGameRe
 
           setActiveIssueId(data.activeIssueId);
           // Sync myVote with the server state based on userId
-          const me = data.participants.find(p => p.id === userId);
+          const me = data.participants.find(p => p.id === userIdRef.current);
           setMyVote(me?.vote);
           break;
         }
@@ -193,9 +197,7 @@ export function useGame(gameId: string, name: string, userId: string): UseGameRe
     wsRef.current = ws;
 
     ws.addEventListener('open', () => {
-      if (userId) {
-        send({type: 'join', name, id: userId});
-      }
+      send({type: 'join', name, clientId: userIdRef.current || undefined});
     });
 
     ws.addEventListener('message', handleMessage);
@@ -203,7 +205,7 @@ export function useGame(gameId: string, name: string, userId: string): UseGameRe
     return () => {
       ws.close();
     };
-  }, [gameId, name, userId, send]);
+  }, [gameId, name, send, onUserIdChange]);
 
   const vote = useCallback((value: string | undefined) => {
     send({type: 'vote', vote: value});
