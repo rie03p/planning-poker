@@ -44,7 +44,7 @@ function toWebSocketUrl(httpUrl: string): string {
   throw new Error(`Invalid BACKEND_URL: ${httpUrl}`);
 }
 
-export function useGame(gameId: string, name: string): UseGameReturn {
+export function useGame(gameId: string, name: string, userId: string): UseGameReturn {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [myVote, setMyVote] = useState<string | undefined>(undefined);
   const [revealed, setRevealed] = useState(false);
@@ -123,6 +123,10 @@ export function useGame(gameId: string, name: string): UseGameReturn {
           setRevealed(data.revealed);
           setIssues(data.issues);
           setActiveIssueId(data.activeIssueId);
+
+          // Sync myVote with the server state based on userId
+          const me = data.participants.find(p => p.id === userId);
+          setMyVote(me?.vote);
           break;
         }
 
@@ -134,8 +138,8 @@ export function useGame(gameId: string, name: string): UseGameReturn {
           }
 
           setActiveIssueId(data.activeIssueId);
-          // Sync myVote with the server state
-          const me = data.participants.find(p => p.name === name);
+          // Sync myVote with the server state based on userId
+          const me = data.participants.find(p => p.id === userId);
           setMyVote(me?.vote);
           break;
         }
@@ -189,7 +193,9 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     wsRef.current = ws;
 
     ws.addEventListener('open', () => {
-      send({type: 'join', name});
+      if (userId) {
+        send({type: 'join', name, id: userId});
+      }
     });
 
     ws.addEventListener('message', handleMessage);
@@ -197,7 +203,7 @@ export function useGame(gameId: string, name: string): UseGameReturn {
     return () => {
       ws.close();
     };
-  }, [gameId, name, send]);
+  }, [gameId, name, userId, send]);
 
   const vote = useCallback((value: string | undefined) => {
     send({type: 'vote', vote: value});

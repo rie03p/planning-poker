@@ -1,5 +1,6 @@
-import {Button} from '@chakra-ui/react';
+import {IconButton, Tooltip} from '@chakra-ui/react';
 import {useState, useRef, useEffect} from 'react';
+import {Link, Check} from 'lucide-react';
 
 export type CopyInviteBoxProps = {
   gameId: string;
@@ -36,12 +37,22 @@ export function CopyInviteBox({gameId}: CopyInviteBoxProps) {
   }, []);
 
   return (
-    <Button
-      w={160}
-      onClick={handleCopy}
-      variant={copied ? 'solid' : 'outline'}
-    >
-      {copied ? 'Copied!' : 'Copy invitation link'}
-    </Button>
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>
+        <IconButton
+          onClick={handleCopy}
+          variant={copied ? 'solid' : 'outline'}
+          colorPalette={copied ? 'green' : 'gray'}
+          aria-label='Copy invitation link'
+        >
+          {copied ? <Check size={16} /> : <Link size={16} />}
+        </IconButton>
+      </Tooltip.Trigger>
+      <Tooltip.Positioner>
+        <Tooltip.Content>
+          {copied ? 'Copied!' : 'Copy invitation link'}
+        </Tooltip.Content>
+      </Tooltip.Positioner>
+    </Tooltip.Root>
   );
 }

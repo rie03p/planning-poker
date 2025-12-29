@@ -15,7 +15,7 @@ export function ActionArea({
 }) {
   if (!hasAnyVotes) {
     return (
-      <Text fontSize='xl' fontWeight='medium'>
+      <Text fontSize='xl' fontWeight='bold' color='white'>
         Pick your cards!
       </Text>
     );
@@ -23,7 +23,13 @@ export function ActionArea({
 
   if (!revealed) {
     return (
-      <Button colorPalette='blue' onClick={reveal}>
+      <Button
+        colorPalette='orange'
+        size='lg'
+        borderRadius='full'
+        onClick={reveal}
+        px={8}
+      >
         Reveal votes
       </Button>
     );
@@ -32,14 +38,27 @@ export function ActionArea({
   // Revealed state
   if (onVoteNext) {
     return (
-      <Button colorPalette='green' onClick={onVoteNext}>
+      <Button
+        colorPalette='blue'
+        size='lg'
+        borderRadius='full'
+        onClick={onVoteNext}
+        px={8}
+      >
         Vote next issue
       </Button>
     );
   }
 
   return (
-    <Button colorPalette='gray' onClick={reset}>
+    <Button
+      colorPalette='gray'
+      variant='surface'
+      size='lg'
+      borderRadius='full'
+      onClick={reset}
+      px={8}
+    >
       Start new votes
     </Button>
   );
