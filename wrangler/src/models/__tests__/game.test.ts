@@ -255,7 +255,7 @@ describe('Game', () => {
       expect(userId).toMatch(/^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/);
     });
 
-    it('should accept clientId if it matches existing participant (reconnection)', async () => {
+    it('should generate new userId on reconnection if participant was removed', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const {gameState} = (game as any);
 

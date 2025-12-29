@@ -98,8 +98,8 @@ describe('Game Session Management', () => {
     expect(gameState.participants.get(userIdA)).toBeDefined();
     expect(sessionToUserId.get(sessionA)).toBe(userIdA);
 
-    // 2. Join user 1 again (session B) with same clientId
-    // Since sessionA is already using this clientId, server will generate a new userId
+    // 2. Join user 1 again (session B) with the same client-provided ID.
+    // The server will generate a new unique userId because the provided clientId ('user-123') does not match an existing participant's ID.
     await handleMessage(sessionB, {
       type: 'join',
       name: 'User 1',

@@ -56,11 +56,6 @@ export function useGame(gameId: string, name: string, initialUserId: string, onU
   const wsRef = useRef<WebSocket | undefined>(undefined);
   const userIdRef = useRef<string>(initialUserId);
 
-  // Sync userIdRef when initialUserId changes from parent (e.g., localStorage update from another tab)
-  useEffect(() => {
-    userIdRef.current = initialUserId;
-  }, [initialUserId]);
-
   const send = useCallback((message: ClientMessage) => {
     const ws = wsRef.current;
     if (!ws || ws.readyState !== WebSocket.OPEN) {
