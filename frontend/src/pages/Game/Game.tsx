@@ -77,8 +77,9 @@ export function Game() {
       return activeIssueObject.voteResults;
     }
 
-    // Otherwise calculate from current participants
-    if (revealed) {
+    // Otherwise calculate from current participants when revealed or when there are votes
+    // (to handle page reload scenarios where revealed state is lost but votes remain)
+    if (revealed || hasAnyVotes) {
       const results: Record<string, number> = {};
       for (const p of participants) {
         if (p.vote) {
@@ -86,11 +87,11 @@ export function Game() {
         }
       }
 
-      return results;
+      return Object.keys(results).length > 0 ? results : undefined;
     }
 
     return undefined;
-  }, [issues, activeIssueId, participants, revealed]);
+  }, [issues, activeIssueId, participants, revealed, hasAnyVotes]);
 
   if (!name) {
     return <JoinDialog isOpen={true} onJoin={setName} />;
