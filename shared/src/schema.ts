@@ -51,11 +51,16 @@ export const registryUnregisterRequestSchema = z.object({
 });
 
 // Game state schemas
+export const voteResultsSchema = z.record(z.string(), z.number());
+
+export type VoteResults = z.infer<typeof voteResultsSchema>;
+
 export const issueSchema = z.object({
   id: z.string(),
   title: z.string().min(1).max(100).trim(),
   description: z.string().max(1000).optional(),
   url: z.string().url().max(200).optional().or(z.literal('')),
+  voteResults: voteResultsSchema.optional(),
 });
 
 export const participantSchema = z.object({

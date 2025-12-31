@@ -482,6 +482,113 @@ describe('Game', () => {
         revealed: true,
       }));
     });
+
+    it('should save vote results to active issue when revealed', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join participants
+      const user1Id = await joinAndGetUserId('session-1', 'User 1', 'user-1');
+      const user2Id = await joinAndGetUserId('session-2', 'User 2', 'user-2');
+      const user3Id = await joinAndGetUserId('session-3', 'User 3', 'user-3');
+      (game as any).sessionToUserId.set('session-1', user1Id);
+      (game as any).sessionToUserId.set('session-2', user2Id);
+      (game as any).sessionToUserId.set('session-3', user3Id);
+
+      // Add an issue
+      await handleMessage('session-1', {
+        type: 'add-issue',
+        issue: {title: 'Test Issue', description: 'Test Description'},
+      });
+
+      const issueId = gameState.issues[0].id;
+      expect(gameState.activeIssueId).toBe(issueId);
+
+      // Vote
+      await handleMessage('session-1', {type: 'vote', vote: '5'});
+      await handleMessage('session-2', {type: 'vote', vote: '8'});
+      await handleMessage('session-3', {type: 'vote', vote: '5'});
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Reveal
+      await handleMessage('session-1', {type: 'reveal'});
+
+      // Assert
+      expect(gameState.revealed).toBe(true);
+      expect(gameState.issues[0].voteResults).toEqual({
+        5: 2,
+        8: 1,
+      });
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'issue-updated',
+        issue: expect.objectContaining({
+          id: issueId,
+          title: 'Test Issue',
+          voteResults: {5: 2, 8: 1},
+        }),
+      }));
+    });
+
+    it('should handle reveal without active issue', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join participants
+      const user1Id = await joinAndGetUserId('session-1', 'User 1', 'user-1');
+      (game as any).sessionToUserId.set('session-1', user1Id);
+
+      // Vote without active issue
+      await handleMessage('session-1', {type: 'vote', vote: '5'});
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Reveal
+      await handleMessage('session-1', {type: 'reveal'});
+
+      // Assert
+      expect(gameState.revealed).toBe(true);
+      expect(gameState.issues).toHaveLength(0);
+      // Should not throw error or crash
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'update',
+        revealed: true,
+      }));
+    });
+
+    it('should handle reveal with no votes', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join participants
+      await joinAndGetUserId('session-1', 'User 1', 'user-1');
+
+      // Add an issue
+      await handleMessage('session-1', {
+        type: 'add-issue',
+        issue: {title: 'Test Issue'},
+      });
+
+      const issueId = gameState.issues[0].id;
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Reveal without any votes
+      await handleMessage('session-1', {type: 'reveal'});
+
+      // Assert
+      expect(gameState.revealed).toBe(true);
+      expect(gameState.issues[0].voteResults).toEqual({});
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'issue-updated',
+        issue: expect.objectContaining({
+          id: issueId,
+          voteResults: {},
+        }),
+      }));
+    });
   });
 
   describe('reset', () => {

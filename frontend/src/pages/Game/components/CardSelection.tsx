@@ -15,19 +15,16 @@ export function CardSelection({
   return (
     <Box
       w='full'
-      bg='white'
-      borderTopWidth='1px'
-      borderColor='gray.200'
-      p={4}
-      shadow='xs'
       overflowX='auto'
-      textAlign='center'
+      h='full'
     >
       <HStack
-        display='inline-flex'
+        w='fit-content'
+        minW='full'
+        h='full'
+        alignItems='center'
+        justifyContent='center'
         gap={3}
-        pt={8}
-        pb={4}
         px={4}
       >
         {cards?.map(card => (
@@ -38,6 +35,7 @@ export function CardSelection({
               onVote(card, myVote === card);
             }}
             pb={1}
+            cursor='pointer'
           >
             <VoteCard selected={myVote === card}>
               {card}

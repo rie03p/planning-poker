@@ -36,8 +36,8 @@ export function GameTable({
       display='flex'
       alignItems='center'
       justifyContent='center'
-      minH='160px'
-      minW='320px'
+      h='160px'
+      w='320px'
       px={20}
       py={10}
       bg='gray.800'

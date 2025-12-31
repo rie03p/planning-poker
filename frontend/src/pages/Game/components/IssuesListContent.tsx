@@ -12,9 +12,12 @@ import {
   CloseButton,
   Dialog,
 } from '@chakra-ui/react';
-import {Plus, Trash2, ExternalLink} from 'lucide-react';
+import {
+  Plus, Trash2, ExternalLink, BarChart3,
+} from 'lucide-react';
 import {type Issue, MAX_ISSUES} from '@planning-poker/shared';
 import {IssueDetailDialog} from './IssueDetailDialog';
+import {VotingResultsModal} from './VotingResultsModal';
 
 type IssuesListContentProps = {
   issues: Issue[];
@@ -38,6 +41,7 @@ export function IssuesListContent({
   const [newIssueTitle, setNewIssueTitle] = useState('');
   const [editingIssue, setEditingIssue] = useState<Issue | undefined>(undefined);
   const [deletingIssueId, setDeletingIssueId] = useState<string | undefined>(undefined);
+  const [viewingResultsIssue, setViewingResultsIssue] = useState<Issue | undefined>(undefined);
 
   const handleAddIssue = () => {
     if (!newIssueTitle.trim()) {
@@ -132,6 +136,20 @@ export function IssuesListContent({
                           <Text fontWeight='medium' truncate flex={1}>
                             {issue.title}
                           </Text>
+                          {issue.voteResults && Object.keys(issue.voteResults).length > 0 && (
+                            <IconButton
+                              aria-label='View voting results'
+                              size='sm'
+                              colorPalette='blue'
+                              variant='ghost'
+                              onClick={event => {
+                                event.stopPropagation();
+                                setViewingResultsIssue(issue);
+                              }}
+                            >
+                              <BarChart3 size={16} />
+                            </IconButton>
+                          )}
                           <IconButton
                             aria-label='Remove issue'
                             size='sm'
@@ -255,6 +273,15 @@ export function IssuesListContent({
           </Dialog.Content>
         </Dialog.Positioner>
       </Dialog.Root>
+
+      {/* Voting Results Modal */}
+      <VotingResultsModal
+        isOpen={Boolean(viewingResultsIssue)}
+        onClose={() => {
+          setViewingResultsIssue(undefined);
+        }}
+        issue={viewingResultsIssue}
+      />
     </Box>
   );
 }
