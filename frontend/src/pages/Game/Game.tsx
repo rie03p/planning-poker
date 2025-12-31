@@ -10,7 +10,7 @@ import {NotFound} from '../NotFound';
 import {JoinDialog} from './components/JoinDialog';
 import {GameHeader} from './components/GameHeader';
 import {GameTable} from './components/GameTable';
-import {CardSelection} from './components/CardSelection';
+import {GameFooter} from './components/GameFooter';
 import {ParticipantGroup} from './components/ParticipantGroup';
 import {IssuesDrawer} from './components/IssuesDrawer';
 
@@ -69,6 +69,28 @@ export function Game() {
     () => participants.some(p => p.vote !== undefined),
     [participants],
   );
+
+  const currentVoteResults = useMemo(() => {
+    // If active issue has saved results, use them
+    const activeIssueObject = issues.find(i => i.id === activeIssueId);
+    if (activeIssueObject?.voteResults) {
+      return activeIssueObject.voteResults;
+    }
+
+    // Otherwise calculate from current participants
+    if (revealed) {
+      const results: Record<string, number> = {};
+      for (const p of participants) {
+        if (p.vote) {
+          results[p.vote] = (results[p.vote] ?? 0) + 1;
+        }
+      }
+
+      return results;
+    }
+
+    return undefined;
+  }, [issues, activeIssueId, participants, revealed]);
 
   if (!name) {
     return <JoinDialog isOpen={true} onJoin={setName} />;
@@ -163,10 +185,12 @@ export function Game() {
         </VStack>
 
         {/* Card Selection Footer */}
-        <CardSelection
+        <GameFooter
           cards={cards}
           myVote={myVote}
           onVote={handleVote}
+          revealed={revealed}
+          voteResults={currentVoteResults}
         />
       </VStack>
 

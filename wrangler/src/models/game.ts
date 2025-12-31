@@ -240,6 +240,29 @@ export class Game {
 
       case 'reveal': {
         this.gameState.revealed = true;
+
+        // Save vote results to active issue
+        if (this.gameState.activeIssueId) {
+          const voteResults: Record<string, number> = {};
+          for (const p of this.gameState.participants.values()) {
+            if (p.vote) {
+              voteResults[p.vote] = (voteResults[p.vote] ?? 0) + 1;
+            }
+          }
+
+          const issueIndex = this.gameState.issues.findIndex(i => i.id === this.gameState.activeIssueId);
+          if (issueIndex !== -1) {
+            this.gameState.issues[issueIndex] = {
+              ...this.gameState.issues[issueIndex],
+              voteResults,
+            };
+            this.broadcast({
+              type: 'issue-updated',
+              issue: this.gameState.issues[issueIndex],
+            });
+          }
+        }
+
         this.broadcast({
           type: 'update',
           participants: [...this.gameState.participants.values()],

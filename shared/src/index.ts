@@ -30,4 +30,5 @@ export type {
   ServerMessage,
   VotingSystem,
   Issue,
+  VoteResults,
 } from './schema';
