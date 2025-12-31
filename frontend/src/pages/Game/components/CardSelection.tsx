@@ -16,14 +16,14 @@ export function CardSelection({
     <Box
       w='full'
       overflowX='auto'
-      textAlign='center'
       h='full'
-      display='flex'
-      alignItems='center'
-      justifyContent='center'
     >
       <HStack
-        display='inline-flex'
+        w='fit-content'
+        minW='full'
+        h='full'
+        alignItems='center'
+        justifyContent='center'
         gap={3}
         px={4}
       >
