@@ -3,9 +3,11 @@ name: Deploy
 on:
   push:
     branches:
-      - master
+      - staging
+      - production
     paths:
       - 'wrangler/**'
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -26,8 +28,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Deploy with Wrangler
-        run: pnpm wrangler deploy
+      - name: Deploy
+        run: pnpm wrangler deploy --env ${{ github.ref_name }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
