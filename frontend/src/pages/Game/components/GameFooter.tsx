@@ -22,6 +22,9 @@ export function GameFooter({
   const showResults = revealed && voteResults !== undefined;
   const [displayedResults, setDisplayedResults] = useState<VoteResults | undefined>(voteResults);
 
+  // FIXME:
+  // This state is used to keep the voting results mounted long enough
+  // to allow the exit animation to finish when "Start new votes" is clicked.
   useEffect(() => {
     if (voteResults) {
       setDisplayedResults(voteResults);
@@ -60,6 +63,8 @@ export function GameFooter({
       </Box>
 
       {/* Voting Results - Slides up from bottom */}
+      {/* When voteResults becomes undefined, the component is immediately removed from DOM,
+          preventing the animation from being visible */}
       <Box
         position='absolute'
         left={0}
