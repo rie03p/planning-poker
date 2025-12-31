@@ -1,7 +1,7 @@
 import type {Env} from './types';
 
 function getAllowedOrigins(env: Env): Set<string> {
-  const envOrigins = env.ALLOWED_ORIGINS.split(',').map(o => o.trim());
+  const envOrigins = env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(o => o.length > 0);
   return new Set(envOrigins);
 }
 
