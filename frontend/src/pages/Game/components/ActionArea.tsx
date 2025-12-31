@@ -15,7 +15,7 @@ export function ActionArea({
 }) {
   if (!hasAnyVotes) {
     return (
-      <Text fontSize='xl' fontWeight='bold' color='white'>
+      <Text fontSize='lg' fontWeight='bold' color='white'>
         Pick your cards!
       </Text>
     );
