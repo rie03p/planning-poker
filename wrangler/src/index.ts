@@ -7,7 +7,7 @@ import {type Env} from './types';
 const worker = {
   async fetch(request: Request, env: Env) {
     const origin = request.headers.get('Origin');
-    const corsHeaders = getCorsHeaders(origin ?? undefined);
+    const corsHeaders = getCorsHeaders(origin ?? undefined, env);
 
     if (!corsHeaders) {
       return new Response('Origin not allowed', {status: 403});
