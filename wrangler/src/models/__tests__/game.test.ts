@@ -518,15 +518,15 @@ describe('Game', () => {
       // Assert
       expect(gameState.revealed).toBe(true);
       expect(gameState.issues[0].voteResults).toEqual({
-        '5': 2,
-        '8': 1,
+        5: 2,
+        8: 1,
       });
       expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
         type: 'issue-updated',
         issue: expect.objectContaining({
           id: issueId,
           title: 'Test Issue',
-          voteResults: {'5': 2, '8': 1},
+          voteResults: {5: 2, 8: 1},
         }),
       }));
     });
