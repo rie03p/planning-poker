@@ -1,10 +1,14 @@
-const ALLOWED_ORIGINS = new Set([
-  'https://planning-poker-ba3.pages.dev',
-  // 'http://localhost:5173',
-]);
+import type {Env} from './types';
 
-export function getCorsHeaders(origin: string | undefined): Headers | undefined {
-  if (!origin || !ALLOWED_ORIGINS.has(origin)) {
+function getAllowedOrigins(env: Env): Set<string> {
+  const envOrigins = env.ALLOWED_ORIGINS.split(',').map(o => o.trim());
+  return new Set(envOrigins);
+}
+
+export function getCorsHeaders(origin: string | undefined, env: Env): Headers | undefined {
+  const allowedOrigins = getAllowedOrigins(env);
+
+  if (!origin || !allowedOrigins.has(origin)) {
     return undefined;
   }
 
