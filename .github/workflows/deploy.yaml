@@ -3,14 +3,16 @@ name: Deploy
 on:
   push:
     branches:
-      - staging
-      - production
+      - master
+    tags:
+      - 'v*'
     paths:
       - 'wrangler/**'
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-staging:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
 
     defaults:
@@ -28,8 +30,33 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Deploy
-        run: pnpm wrangler deploy --env ${{ github.ref_name }}
+      - name: Deploy to staging
+        run: pnpm wrangler deploy --env staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-production:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: wrangler
+
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup mise
+        uses: jdx/mise-action@146a28175021df8ca24f8ee1828cc2a60f980bd5 # v3.5.1
+        with:
+          experimental: true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy to production
+        run: pnpm wrangler deploy --env production
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

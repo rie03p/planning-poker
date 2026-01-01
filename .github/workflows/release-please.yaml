@@ -3,7 +3,7 @@ name: release-please
 on:
   push:
     branches:
-      - production
+      - master
 
 permissions:
   contents: write
