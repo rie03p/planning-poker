@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/rie03p/planning-poker/compare/v1.1.0...v1.1.1) (2026-01-01)
+
+
+### Bug Fixes
+
+* Use PAT to create tags ([d32fce7](https://github.com/rie03p/planning-poker/commit/d32fce75307df1bcc577f95406d94a3a21f597aa))
+
 ## [1.1.0](https://github.com/rie03p/planning-poker/compare/v1.0.0...v1.1.0) (2026-01-01)
 
 
