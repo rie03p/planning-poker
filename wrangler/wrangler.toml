@@ -23,6 +23,21 @@ tag = "v2"
 new_sqlite_classes = ["GameRegistry"]
 
 # -------------------------------------------------
+# Development environment
+# -------------------------------------------------
+
+[vars]
+ALLOWED_ORIGINS = "http://localhost:5173"
+
+[[durable_objects.bindings]]
+name = "GAME"
+class_name = "Game"
+
+[[durable_objects.bindings]]
+name = "REGISTRY"
+class_name = "GameRegistry"
+
+# -------------------------------------------------
 # Staging environment
 # -------------------------------------------------
 
