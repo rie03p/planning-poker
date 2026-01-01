@@ -6,8 +6,6 @@ on:
       - master
     tags:
       - 'v*'
-    paths:
-      - 'wrangler/**'
   workflow_dispatch:
 
 jobs:
