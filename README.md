@@ -15,6 +15,9 @@ Estimate story points collaboratively with live synchronization.
   - Modified Fibonacci
   - T-Shirt sizes
   - Powers of 2
+- **Issue Management**
+  - Add, edit, and remove issues
+  - Vote on individual issues
 - **Reveal / Reset** voting rounds
 - **Sharable game links**
 - **Persistent state** using Cloudflare Durable Objects
@@ -126,4 +129,3 @@ pnpm test:coverage
 ## License
 
 MIT
-
