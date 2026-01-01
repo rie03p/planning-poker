@@ -4,9 +4,7 @@ Briefly describe what this PR changes or adds.
 
 ## Changes
 
-- 
-- 
-- 
+- Describe the changes in a list format.
 
 ## Verification
 
@@ -21,8 +19,8 @@ Briefly describe what this PR changes or adds.
 
 ## Related Issues
 
-- Closes #
-- Related #
+- Closes #<issue_number>
+- Related #<issue_number>
 
 ## Notes for Reviewers
 
