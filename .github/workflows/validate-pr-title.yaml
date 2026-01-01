@@ -1,0 +1,86 @@
+name: Validate PR Title
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+
+jobs:
+  validate-title:
+    name: Validate title
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate pull request title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          echo "Validating PR title: '$TITLE'"
+
+          # -------------------------------------------------
+          # Conventional Commits regex
+          #
+          # type(scope)!: description
+          #
+          # Allowed types:
+          # build, chore, ci, docs, feat, fix,
+          # perf, refactor, revert, style, test
+          #
+          # Examples:
+          #   feat: add new feature
+          #   fix(ui): fix button color
+          #   refactor(core)!: drop legacy API
+          # -------------------------------------------------
+          CONVENTIONAL_REGEX='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9-]+\))?!?: .+$'
+
+          # -------------------------------------------------
+          # Allowed special PR titles
+          #
+          # - Revert PRs (GitHub default)
+          # - Release transport PRs created by git-pr-release
+          # -------------------------------------------------
+          REVERT_REGEX='^Revert[[:space:]]\".+\"$'
+          RELEASE_TRANSPORT_REGEX='^Release: '
+
+          if [[ "$TITLE" =~ $CONVENTIONAL_REGEX ]]; then
+            echo "✅ Conventional Commit title detected."
+            exit 0
+          fi
+
+          if [[ "$TITLE" =~ $REVERT_REGEX ]]; then
+            echo "✅ Revert PR title detected."
+            exit 0
+          fi
+
+          if [[ "$TITLE" =~ $RELEASE_TRANSPORT_REGEX ]]; then
+            echo "✅ Release transport PR detected (allowed exception)."
+            exit 0
+          fi
+
+          echo "❌ Invalid PR title."
+          echo ""
+          echo "Expected one of the following:"
+          echo ""
+          echo "1. Conventional Commits format:"
+          echo "   type(scope): description"
+          echo ""
+          echo "   Allowed types:"
+          echo "   build, chore, ci, docs, feat, fix, perf,"
+          echo "   refactor, revert, style, test"
+          echo ""
+          echo "   Examples:"
+          echo "   - feat: add new feature"
+          echo "   - fix(ui): fix button color"
+          echo ""
+          echo "2. Revert PR (GitHub generated):"
+          echo "   Revert \"...\""
+          echo ""
+          echo "3. Release transport PR:"
+          echo "   Release: staging → production"
+          echo ""
+          exit 1
