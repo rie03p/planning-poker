@@ -32,12 +32,14 @@ export function VotingResultsModal({
       <Dialog.Positioner>
         <Dialog.Content>
           <Dialog.Header>
-            <Dialog.Title>Vote Results</Dialog.Title>
+            <Dialog.Title
+              wordBreak='break-word'
+              overflowWrap='break-word'
+            >
+              {issue.title}
+            </Dialog.Title>
           </Dialog.Header>
           <Dialog.Body>
-            <Dialog.Description truncate fontWeight='bold' mb={4}>
-              {issue.title}
-            </Dialog.Description>
             <Box py={2}>
               <VotingResultsChart voteResults={issue.voteResults} />
             </Box>
