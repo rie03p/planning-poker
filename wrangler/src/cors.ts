@@ -7,8 +7,12 @@ function getAllowedOrigins(env: Env): Set<string> {
 
 export function getCorsHeaders(origin: string | undefined, env: Env): Headers | undefined {
   const allowedOrigins = getAllowedOrigins(env);
+  const isAllowedOrigin
+    = origin
+      && (allowedOrigins.has(origin)
+        || /https:\/\/[a-z\d]+\.planning-poker-ba3\.pages\.dev$/.test(origin));
 
-  if (!origin || !allowedOrigins.has(origin)) {
+  if (!isAllowedOrigin) {
     return undefined;
   }
 

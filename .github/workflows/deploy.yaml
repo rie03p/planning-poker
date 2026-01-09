@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - master
-    tags:
-      - 'v*'
+      - production
   workflow_dispatch:
 
 jobs:
@@ -35,7 +34,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-production:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/production'
     runs-on: ubuntu-latest
 
     defaults:
