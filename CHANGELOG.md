@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.0](https://github.com/rie03p/planning-poker/compare/v1.1.1...v1.2.0) (2026-01-12)
+
+
+### Features
+
+* add functionality to remove all issues and reset game state ([367d4a4](https://github.com/rie03p/planning-poker/commit/367d4a4fa6c279fd6339484a6a23246f78ef7599))
+* add tests for removing all issues and resetting game state ([9768185](https://github.com/rie03p/planning-poker/commit/976818536b6681d943882e1a230256881a920ba5))
+* delete all issues ([ab57181](https://github.com/rie03p/planning-poker/commit/ab57181df0b5702346c603400b42385c82d15d84))
+* refactor issue removal ([deba6df](https://github.com/rie03p/planning-poker/commit/deba6df2f6310b4a503a00b557e4d506196e1bf7))
+
 ## [1.1.1](https://github.com/rie03p/planning-poker/compare/v1.1.0...v1.1.1) (2026-01-01)
 
 
