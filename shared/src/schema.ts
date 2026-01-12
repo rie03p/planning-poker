@@ -86,6 +86,7 @@ export const clientMessageSchema = z.discriminatedUnion('type', [
     type: z.literal('update-issue'),
     issue: issueSchema,
   }),
+  z.object({type: z.literal('remove-all-issues')}),
 ]);
 
 export const serverMessageSchema = z.discriminatedUnion('type', [

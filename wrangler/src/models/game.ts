@@ -378,6 +378,25 @@ export class Game {
         });
         break;
       }
+
+      case 'remove-all-issues': {
+        this.gameState.issues = [];
+        this.gameState.activeIssueId = undefined;
+        this.gameState.revealed = false;
+
+        // Reset votes as there are no issues to vote on
+        for (const p of this.gameState.participants.values()) {
+          p.vote = undefined;
+        }
+
+        this.broadcast({
+          type: 'reset',
+          participants: [...this.gameState.participants.values()],
+          issues: [],
+          activeIssueId: undefined,
+        });
+        break;
+      }
     }
   }
 

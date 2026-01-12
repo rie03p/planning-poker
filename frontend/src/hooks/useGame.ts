@@ -25,6 +25,7 @@ type UseGameReturn = {
   setActiveIssue: (issueId: string) => void;
   voteNextIssue: () => void;
   updateIssue: (issue: Issue) => void;
+  removeAllIssues: () => void;
   disconnect: () => void;
   notFound: boolean;
   roomFull: boolean;
@@ -253,6 +254,10 @@ export function useGame(gameId: string, name: string, initialUserId: string, onU
     });
   }, [send]);
 
+  const removeAllIssues = useCallback(() => {
+    send({type: 'remove-all-issues'});
+  }, [send]);
+
   return {
     participants,
     revealed,
@@ -268,6 +273,7 @@ export function useGame(gameId: string, name: string, initialUserId: string, onU
     setActiveIssue,
     voteNextIssue,
     updateIssue,
+    removeAllIssues,
     disconnect,
     notFound,
     roomFull,

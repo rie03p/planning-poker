@@ -11,9 +11,11 @@ import {
   Box,
   CloseButton,
   Dialog,
+  Menu,
+  Portal,
 } from '@chakra-ui/react';
 import {
-  Plus, Trash2, ExternalLink, BarChart3,
+  Plus, Trash2, ExternalLink, BarChart3, MoreHorizontal,
 } from 'lucide-react';
 import {type Issue, MAX_ISSUES} from '@planning-poker/shared';
 import {IssueDetailDialog} from './IssueDetailDialog';
@@ -26,6 +28,7 @@ type IssuesListContentProps = {
   onRemoveIssue: (issueId: string) => void;
   onSetActiveIssue: (issueId: string) => void;
   onUpdateIssue: (issue: Issue) => void;
+  onRemoveAllIssues: () => void;
   onClose?: () => void;
 };
 
@@ -36,12 +39,14 @@ export function IssuesListContent({
   onRemoveIssue,
   onSetActiveIssue,
   onUpdateIssue,
+  onRemoveAllIssues,
   onClose,
 }: IssuesListContentProps) {
   const [newIssueTitle, setNewIssueTitle] = useState('');
   const [editingIssue, setEditingIssue] = useState<Issue | undefined>(undefined);
   const [deletingIssueId, setDeletingIssueId] = useState<string | undefined>(undefined);
   const [viewingResultsIssue, setViewingResultsIssue] = useState<Issue | undefined>(undefined);
+  const [isdeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
 
   const handleAddIssue = () => {
     if (!newIssueTitle.trim()) {
@@ -59,6 +64,11 @@ export function IssuesListContent({
     }
   };
 
+  const confirmDeleteAll = () => {
+    onRemoveAllIssues();
+    setIsDeleteAllDialogOpen(false);
+  };
+
   return (
     <Box height='100%' display='flex' flexDirection='column' bg='white'>
       {/* Header */}
@@ -72,7 +82,44 @@ export function IssuesListContent({
         <Text fontWeight='bold' fontSize='lg'>
           Issues ({issues.length}/{MAX_ISSUES})
         </Text>
-        {onClose && <CloseButton onClick={onClose} />}
+        <HStack gap={2}>
+          {issues.length > 0 && (
+            <Menu.Root positioning={{placement: 'bottom-end', offset: {mainAxis: 8}}}>
+              <Menu.Trigger asChild>
+                <IconButton
+                  aria-label='Options'
+                  variant='ghost'
+                  size='sm'
+                  colorPalette='gray'
+                >
+                  <MoreHorizontal />
+                </IconButton>
+              </Menu.Trigger>
+              <Menu.Positioner zIndex='popover'>
+                <Menu.Content
+                  p={2}
+                  borderRadius='xl'
+                  boxShadow='lg'
+                  minW='220px'
+                >
+                  <Menu.Item
+                    value='delete-all'
+                    color='red.500'
+                    gap={2}
+                    _hover={{bg: 'red.50', color: 'red.600'}}
+                    onClick={() => {
+                      setIsDeleteAllDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 size={16} />
+                    Delete all issues
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Menu.Root>
+          )}
+          {onClose && <CloseButton onClick={onClose} />}
+        </HStack>
       </HStack>
 
       {/* Add Issue Form - Fixed at top */}
@@ -245,33 +292,74 @@ export function IssuesListContent({
         }}
         placement='center'
       >
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <Dialog.Header>
-              <Dialog.Title>Delete Issue</Dialog.Title>
-            </Dialog.Header>
-            <Dialog.Body>
-              Are you sure you want to delete this issue? This action cannot be
-              undone.
-            </Dialog.Body>
-            <Dialog.Footer>
-              <Dialog.ActionTrigger asChild>
-                <Button
-                  variant='outline'
-                  onClick={() => {
-                    setDeletingIssueId(undefined);
-                  }}
-                >
-                  Cancel
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                <Dialog.Title>Delete Issue</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                Are you sure you want to delete this issue? This action cannot be
+                undone.
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Dialog.ActionTrigger asChild>
+                  <Button
+                    variant='outline'
+                    onClick={() => {
+                      setDeletingIssueId(undefined);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </Dialog.ActionTrigger>
+                <Button colorPalette='red' onClick={confirmDelete}>
+                  Delete
                 </Button>
-              </Dialog.ActionTrigger>
-              <Button colorPalette='red' onClick={confirmDelete}>
-                Delete
-              </Button>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+
+      {/* Delete All Confirmation Dialog */}
+      <Dialog.Root
+        open={isdeleteAllDialogOpen}
+        onOpenChange={event => {
+          setIsDeleteAllDialogOpen(event.open);
+        }}
+        placement='center'
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                <Dialog.Title>Delete All Issues</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                Are you sure you want to delete ALL issues? This action cannot be
+                undone.
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Dialog.ActionTrigger asChild>
+                  <Button
+                    variant='outline'
+                    onClick={() => {
+                      setIsDeleteAllDialogOpen(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </Dialog.ActionTrigger>
+                <Button colorPalette='red' onClick={confirmDeleteAll}>
+                  Delete All
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
       </Dialog.Root>
 
       {/* Voting Results Modal */}
