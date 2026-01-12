@@ -62,6 +62,7 @@ export function Game() {
     setActiveIssue,
     voteNextIssue,
     updateIssue,
+    removeAllIssues,
   } = game;
   const [isIssuesOpen, setIsIssuesOpen] = useState(false);
 
@@ -207,6 +208,7 @@ export function Game() {
         onRemoveIssue={removeIssue}
         onSetActiveIssue={setActiveIssue}
         onUpdateIssue={updateIssue}
+        onRemoveAllIssues={removeAllIssues}
       />
     </HStack>
   );

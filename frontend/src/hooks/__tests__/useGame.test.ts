@@ -602,6 +602,59 @@ describe('useGame', () => {
       expect(result.current.issues).toHaveLength(1); // Should still have the issue
     });
   });
+
+  it('sends remove-all-issues message', () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
+    const ws = getWs();
+    ws.emitOpen();
+
+    result.current.removeAllIssues();
+
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
+      type: 'remove-all-issues',
+    }));
+  });
+
+  it('calls onUserIdChange when userId changes', async () => {
+    const getWs = mockWebSocket();
+    const onUserIdChange = vi.fn();
+
+    renderHook(() => useGame('test-game', 'Alice', 'initial-id', onUserIdChange));
+
+    const ws = getWs();
+    ws.emitOpen();
+
+    ws.emitMessage({
+      type: 'joined',
+      userId: 'new-user-id',
+      votingSystem: 'fibonacci',
+      participants: [{id: 'new-user-id', name: 'Alice', vote: undefined}],
+      revealed: false,
+      issues: [],
+      activeIssueId: undefined,
+    });
+
+    await vi.waitFor(() => {
+      expect(onUserIdChange).toHaveBeenCalledWith('new-user-id');
+    });
+  });
+
+  it('handles errors in fetch gracefully', async () => {
+    globalThis.fetch = vi.fn(async () => {
+      throw new Error('Network error');
+    });
+
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
+
+    const ws = getWs();
+    ws.emitOpen();
+
+    await vi.waitFor(() => {
+      expect(result.current.notFound).toBe(true);
+    });
+  });
 });
 
 type MockWsInstance = {

@@ -11,6 +11,7 @@ type IssuesDrawerProps = {
   onRemoveIssue: (issueId: string) => void;
   onSetActiveIssue: (issueId: string) => void;
   onUpdateIssue: (issue: Issue) => void;
+  onRemoveAllIssues: () => void;
 };
 
 export function IssuesDrawer({
@@ -22,6 +23,7 @@ export function IssuesDrawer({
   onRemoveIssue,
   onSetActiveIssue,
   onUpdateIssue,
+  onRemoveAllIssues,
 }: IssuesDrawerProps) {
   return (
     <Drawer.Root
@@ -43,6 +45,7 @@ export function IssuesDrawer({
             onRemoveIssue={onRemoveIssue}
             onSetActiveIssue={onSetActiveIssue}
             onUpdateIssue={onUpdateIssue}
+            onRemoveAllIssues={onRemoveAllIssues}
             onClose={onClose}
           />
         </Drawer.Content>

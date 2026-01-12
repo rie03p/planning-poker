@@ -273,11 +273,7 @@ export class Game {
       }
 
       case 'reset': {
-        this.gameState.revealed = false;
-        this.gameState.activeIssueId = undefined;
-        for (const p of this.gameState.participants.values()) {
-          p.vote = undefined;
-        }
+        this.resetVotingState();
 
         this.broadcast({
           type: 'reset',
@@ -378,6 +374,27 @@ export class Game {
         });
         break;
       }
+
+      case 'remove-all-issues': {
+        this.gameState.issues = [];
+        this.resetVotingState();
+
+        this.broadcast({
+          type: 'reset',
+          participants: [...this.gameState.participants.values()],
+          issues: [],
+          activeIssueId: undefined,
+        });
+        break;
+      }
+    }
+  }
+
+  private resetVotingState() {
+    this.gameState.revealed = false;
+    this.gameState.activeIssueId = undefined;
+    for (const p of this.gameState.participants.values()) {
+      p.vote = undefined;
     }
   }
 

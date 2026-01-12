@@ -742,5 +742,216 @@ describe('Game', () => {
       // Assert
       expect(gameState.activeIssueId).toBe(gameState.issues[1].id);
     });
+
+    it('should remove all issues and reset game state', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join and vote - get userId from server
+      const userId = await joinAndGetUserId('session-1', 'User', 'user-1');
+      (game as any).sessionToUserId.set('session-1', userId);
+
+      // Add issues
+      await handleMessage('session-1', {type: 'add-issue', issue: {title: 'Issue 1'}});
+      await handleMessage('session-1', {type: 'add-issue', issue: {title: 'Issue 2'}});
+
+      // Vote and reveal
+      await handleMessage('session-1', {type: 'vote', vote: '5'});
+      await handleMessage('session-1', {type: 'reveal'});
+
+      expect(gameState.issues).toHaveLength(2);
+      expect(gameState.revealed).toBe(true);
+      expect(gameState.participants.get(userId).vote).toBe('5');
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Remove All Issues
+      await handleMessage('session-1', {
+        type: 'remove-all-issues',
+      });
+
+      // Assert
+      expect(gameState.issues).toHaveLength(0);
+      expect(gameState.activeIssueId).toBeUndefined();
+      expect(gameState.revealed).toBe(false);
+      expect(gameState.participants.get(userId).vote).toBeUndefined();
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'reset',
+        issues: [],
+        activeIssueId: undefined,
+        participants: expect.any(Array),
+      }));
+    });
+  });
+
+  describe('broadcast', () => {
+    it('should send message to all sessions except excluded one', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const {sessions} = (game as any);
+
+      const mockWs1 = {send: vi.fn(), close: vi.fn()};
+      const mockWs2 = {send: vi.fn(), close: vi.fn()};
+      const mockWs3 = {send: vi.fn(), close: vi.fn()};
+
+      sessions.set('session-1', mockWs1);
+      sessions.set('session-2', mockWs2);
+      sessions.set('session-3', mockWs3);
+
+      const broadcast = (game as any).broadcast.bind(game);
+
+      // Act: Broadcast, excluding session-2
+      broadcast({
+        type: 'update',
+        participants: [],
+        revealed: false,
+        activeIssueId: undefined,
+      }, 'session-2');
+
+      // Assert
+      expect(mockWs1.send).toHaveBeenCalledTimes(1);
+      expect(mockWs2.send).not.toHaveBeenCalled();
+      expect(mockWs3.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle send errors gracefully', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const {sessions} = (game as any);
+
+      const mockWs1 = {
+        send: vi.fn(() => {
+          throw new Error('Send failed');
+        }),
+        close: vi.fn(),
+      };
+
+      sessions.set('session-1', mockWs1);
+
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const broadcast = (game as any).broadcast.bind(game);
+
+      // Act: Broadcast to failing websocket
+      broadcast({
+        type: 'update',
+        participants: [],
+        revealed: false,
+        activeIssueId: undefined,
+      });
+
+      // Assert: Should log error but not throw
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to send message to session', expect.any(Error));
+
+      consoleErrorSpy.mockRestore();
+    });
+  });
+
+  describe('setActiveIssue (private method)', () => {
+    it('should not update if same issue is already active', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join
+      await handleMessage('session-1', {type: 'join', name: 'User', clientId: 'user-1'});
+
+      // Add issue
+      await handleMessage('session-1', {type: 'add-issue', issue: {title: 'Issue 1'}});
+
+      const issue1Id = gameState.issues[0].id;
+      expect(gameState.activeIssueId).toBe(issue1Id);
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+      broadcastSpy.mockClear(); // Clear previous calls
+
+      // Act: Set active issue to the same issue
+      const setActiveIssue = (game as any).setActiveIssue.bind(game);
+      setActiveIssue(issue1Id);
+
+      // Assert: Should not broadcast update
+      expect(broadcastSpy).not.toHaveBeenCalled();
+      expect(gameState.activeIssueId).toBe(issue1Id);
+    });
+  });
+
+  describe('handleDisconnect with multiple sessions', () => {
+    it('should not remove participant if they have other active sessions', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleDisconnect = (game as any).handleDisconnect.bind(game);
+      const {gameState, sessions} = (game as any);
+
+      // Join with first session and get server-assigned userId
+      const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
+      (game as any).sessionToUserId.set('session-1', userId);
+
+      // Simulate same user joining with another session (e.g., second tab)
+      const mockWs2 = {send: vi.fn(), close: vi.fn()};
+      sessions.set('session-2', mockWs2);
+      (game as any).sessionToUserId.set('session-2', userId);
+
+      expect(gameState.participants.has(userId)).toBe(true);
+      expect(gameState.participants.size).toBe(1);
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Disconnect first session
+      await handleDisconnect('session-1');
+
+      // Assert: Participant should still exist because of session-2
+      expect(gameState.participants.has(userId)).toBe(true);
+      expect(broadcastSpy).not.toHaveBeenCalled(); // Should not broadcast update
+      expect(mockState.storage.setAlarm).not.toHaveBeenCalled(); // Should not set alarm
+    });
+
+    it('should remove participant only when all sessions disconnect', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleDisconnect = (game as any).handleDisconnect.bind(game);
+      const {gameState, sessions} = (game as any);
+
+      // Join with first session
+      const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
+      (game as any).sessionToUserId.set('session-1', userId);
+
+      // Add second session for same user
+      const mockWs2 = {send: vi.fn(), close: vi.fn()};
+      sessions.set('session-2', mockWs2);
+      (game as any).sessionToUserId.set('session-2', userId);
+
+      expect(gameState.participants.size).toBe(1);
+
+      // Disconnect first session
+      await handleDisconnect('session-1');
+      expect(gameState.participants.has(userId)).toBe(true);
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Disconnect second session
+      await handleDisconnect('session-2');
+
+      // Assert: Now participant should be removed
+      expect(gameState.participants.has(userId)).toBe(false);
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'update',
+        participants: [],
+      }));
+      expect(mockState.storage.setAlarm).toHaveBeenCalled();
+    });
+
+    it('should not broadcast if disconnected session was never a participant', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleDisconnect = (game as any).handleDisconnect.bind(game);
+      const {sessions} = (game as any);
+
+      // Create a session without joining as a participant
+      const mockWs = {send: vi.fn(), close: vi.fn()};
+      sessions.set('session-orphan', mockWs);
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Disconnect session without participant
+      await handleDisconnect('session-orphan');
+
+      // Assert: Should not broadcast
+      expect(broadcastSpy).not.toHaveBeenCalled();
+    });
   });
 });
