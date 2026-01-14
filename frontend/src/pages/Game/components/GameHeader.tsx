@@ -1,6 +1,7 @@
 import {
-  Box, HStack, Text, Tooltip,
+  Box, HStack, Link, Text, Tooltip,
 } from '@chakra-ui/react';
+import {ExternalLink} from 'lucide-react';
 import {type Issue} from '@planning-poker/shared';
 import {CopyInviteBox} from './CopyInviteBox';
 import {IssuesMenuButton} from './IssuesMenuButton';
@@ -20,6 +21,29 @@ export function GameHeader({
   isIssuesOpen,
   onToggleIssues,
 }: GameHeaderProps) {
+  const activeIssue = issues.find(issue => issue.id === activeIssueId);
+  const activeIssueUrl = activeIssue?.url?.trim();
+  const ActiveIssueBadge = ({title}: {title: string | undefined}) => (
+    <HStack
+      gap={activeIssueUrl ? 2 : 3}
+      bg='blue.50'
+      px={4}
+      py={2}
+      borderRadius='full'
+      borderWidth='1px'
+      borderColor='blue.200'
+      maxW='100%'
+      cursor={activeIssueUrl ? 'pointer' : 'default'}
+      _hover={activeIssueUrl ? {bg: 'blue.100', borderColor: 'blue.300'} : undefined}
+      transition={activeIssueUrl ? 'background 0.2s ease, border-color 0.2s ease' : undefined}
+    >
+      <Text fontWeight='medium' truncate>
+        {title}
+      </Text>
+      {activeIssueUrl && <ExternalLink size={14} />}
+    </HStack>
+  );
+
   return (
     <Box
       w='full'
@@ -47,25 +71,25 @@ export function GameHeader({
             ? (
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>
-                  <HStack
-                    gap={3}
-                    bg='blue.50'
-                    px={4}
-                    py={2}
-                    borderRadius='full'
-                    borderWidth='1px'
-                    borderColor='blue.200'
-                    maxW='100%'
-                    cursor='default'
-                  >
-                    <Text fontWeight='medium' truncate>
-                      {issues.find(i => i.id === activeIssueId)?.title}
-                    </Text>
-                  </HStack>
+                  {activeIssueUrl
+                    ? (
+                      <Link
+                        href={activeIssueUrl}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        color='inherit'
+                        _hover={{textDecoration: 'none'}}
+                      >
+                        <ActiveIssueBadge title={activeIssue?.title} />
+                      </Link>
+                    )
+                    : (
+                      <ActiveIssueBadge title={activeIssue?.title} />
+                    )}
                 </Tooltip.Trigger>
                 <Tooltip.Positioner>
                   <Tooltip.Content maxW='sm'>
-                    {issues.find(i => i.id === activeIssueId)?.title}
+                    {activeIssue?.title}
                   </Tooltip.Content>
                 </Tooltip.Positioner>
               </Tooltip.Root>
