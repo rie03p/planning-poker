@@ -1,11 +1,12 @@
 import {
   useState, useEffect, useCallback, useRef,
 } from 'react';
-import type {
-  Participant,
-  VotingSystem,
-  Issue,
-  ServerMessage,
+import {
+  type Participant,
+  type VotingSystem,
+  type Issue,
+  type ServerMessage,
+  registryExistsResponseSchema,
 } from '@planning-poker/shared';
 import {BACKEND_URL} from '../config/constants';
 import type {UseGameReturn} from '../types/game';
@@ -49,9 +50,10 @@ export function useGame(
           return;
         }
 
-        const {exists} = await response.json() as {exists: boolean};
+        const data = await response.json();
+        const result = registryExistsResponseSchema.safeParse(data);
 
-        if (!exists && !cancelled) {
+        if (!result.success || (!result.data.exists && !cancelled)) {
           setNotFound(true);
         }
       } catch {

@@ -36,7 +36,6 @@ export function useWebSocket({
   onError,
 }: UseWebSocketOptions): UseWebSocketReturn {
   const wsRef = useRef<WebSocket | undefined>(undefined);
-  const userIdRef = useRef<string>(initialUserId);
 
   const send = useCallback((message: ClientMessage) => {
     const ws = wsRef.current;
@@ -84,7 +83,7 @@ export function useWebSocket({
     wsRef.current = ws;
 
     ws.addEventListener('open', () => {
-      send({type: 'join', name, clientId: userIdRef.current || undefined});
+      send({type: 'join', name, clientId: initialUserId || undefined});
       onOpen?.();
     });
 
@@ -99,7 +98,7 @@ export function useWebSocket({
     return () => {
       ws.close();
     };
-  }, [gameId, name, send, onMessage, onOpen, onClose, onError]);
+  }, [gameId, name, initialUserId, send, onMessage, onOpen, onClose, onError]);
 
   return {send, disconnect};
 }

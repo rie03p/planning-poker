@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = {hasError: false};
+    this.state = {hasError: false, error: undefined};
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
@@ -73,7 +73,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               </Box>
             )}
           </Box>
-          <Button colorPalette='blue' onClick={this.handleReset}>
+          <Button colorScheme='blue' onClick={this.handleReset}>
             再試行
           </Button>
         </VStack>

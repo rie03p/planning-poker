@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {
   Button, Flex, Text, VStack,
 } from '@chakra-ui/react';
+import {createGameResponseSchema} from '@planning-poker/shared';
 import {BACKEND_URL, DEFAULT_VOTING_SYSTEM} from '../../config/constants';
 import {SelectVotingSystem} from './components/SelectVotingSystem';
 
@@ -28,8 +29,14 @@ export function Home() {
         throw new Error('Failed to create game');
       }
 
-      const {gameId} = await response.json() as {gameId: string};
-      navigate(`/${gameId}`);
+      const data = await response.json();
+      const result = createGameResponseSchema.safeParse(data);
+
+      if (!result.success) {
+        throw new Error('Invalid response from server');
+      }
+
+      navigate(`/${result.data.gameId}`);
     } catch (error_) {
       console.error('Error creating game:', error_);
       setError('Failed to create game. Please try again.');
@@ -49,7 +56,7 @@ export function Home() {
         />
 
         <Button
-          colorPalette='blue'
+          colorScheme='blue'
           size='lg'
           w='full'
           onClick={handleCreateGame}
