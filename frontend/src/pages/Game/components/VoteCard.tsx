@@ -1,12 +1,14 @@
 import {Box} from '@chakra-ui/react';
 
+type VoteCardProps = {
+  children?: React.ReactNode;
+  selected?: boolean;
+};
+
 export function VoteCard({
   children,
   selected,
-}: {
-  children?: React.ReactNode;
-  selected?: boolean;
-}) {
+}: VoteCardProps) {
   return (
     <Box
       w='56px'

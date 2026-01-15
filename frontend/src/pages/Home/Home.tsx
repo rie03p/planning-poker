@@ -3,18 +3,19 @@ import {useNavigate} from 'react-router-dom';
 import {
   Button, Flex, Text, VStack,
 } from '@chakra-ui/react';
+import {createGameResponseSchema} from '@planning-poker/shared';
+import {BACKEND_URL, DEFAULT_VOTING_SYSTEM} from '../../config/constants';
 import {SelectVotingSystem} from './components/SelectVotingSystem';
-
-const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8787';
 
 export function Home() {
   const navigate = useNavigate();
-  const [votingSystem, setVotingSystem] = useState<string>('t-shirts');
+  const [votingSystem, setVotingSystem] = useState<string>(DEFAULT_VOTING_SYSTEM);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
   const handleCreateGame = async () => {
     setIsCreating(true);
+    setError(undefined);
     try {
       const response = await fetch(`${BACKEND_URL}/games`, {
         method: 'POST',
@@ -28,10 +29,16 @@ export function Home() {
         throw new Error('Failed to create game');
       }
 
-      const {gameId} = await response.json();
-      navigate(`/${gameId}`);
-    } catch (error) {
-      console.error('Error creating game:', error);
+      const data = await response.json();
+      const result = createGameResponseSchema.safeParse(data);
+
+      if (!result.success) {
+        throw new Error('Invalid response from server');
+      }
+
+      navigate(`/${result.data.gameId}`);
+    } catch (error_) {
+      console.error('Error creating game:', error_);
       setError('Failed to create game. Please try again.');
     } finally {
       setIsCreating(false);
@@ -49,7 +56,7 @@ export function Home() {
         />
 
         <Button
-          colorPalette='blue'
+          colorScheme='blue'
           size='lg'
           w='full'
           onClick={handleCreateGame}

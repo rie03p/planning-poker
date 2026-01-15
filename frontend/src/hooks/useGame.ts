@@ -1,51 +1,27 @@
 import {
-  useState, useEffect, useRef, useCallback,
+  useState, useEffect, useCallback, useRef,
 } from 'react';
 import {
   type Participant,
-  type ClientMessage,
   type VotingSystem,
   type Issue,
-  serverMessageSchema,
-  clientMessageSchema,
+  type ServerMessage,
+  registryExistsResponseSchema,
 } from '@planning-poker/shared';
+import {BACKEND_URL} from '../config/constants';
+import type {UseGameReturn} from '../types/game';
+import {useWebSocket} from './useWebSocket';
 
-type UseGameReturn = {
-  participants: Participant[];
-  revealed: boolean;
-  myVote: string | undefined;
-  votingSystem: VotingSystem | undefined;
-  issues: Issue[];
-  activeIssueId: string | undefined;
-  vote: (value: string | undefined) => void;
-  reveal: () => void;
-  reset: () => void;
-  addIssue: (title: string, description?: string, url?: string) => void;
-  removeIssue: (issueId: string) => void;
-  setActiveIssue: (issueId: string) => void;
-  voteNextIssue: () => void;
-  updateIssue: (issue: Issue) => void;
-  removeAllIssues: () => void;
-  disconnect: () => void;
-  notFound: boolean;
-  roomFull: boolean;
-};
-
-const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8787';
-
-function toWebSocketUrl(httpUrl: string): string {
-  if (httpUrl.startsWith('https://')) {
-    return httpUrl.replace(/^https:\/\//, 'wss://');
-  }
-
-  if (httpUrl.startsWith('http://')) {
-    return httpUrl.replace(/^http:\/\//, 'ws://');
-  }
-
-  throw new Error(`Invalid BACKEND_URL: ${httpUrl}`);
-}
-
-export function useGame(gameId: string, name: string, initialUserId: string, onUserIdChange: (userId: string) => void): UseGameReturn {
+/**
+ * Custom hook for managing game state and actions
+ * Handles WebSocket communication and game logic
+ */
+export function useGame(
+  gameId: string,
+  name: string,
+  initialUserId: string,
+  onUserIdChange: (userId: string) => void,
+): UseGameReturn {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [myVote, setMyVote] = useState<string | undefined>(undefined);
   const [revealed, setRevealed] = useState(false);
@@ -54,24 +30,11 @@ export function useGame(gameId: string, name: string, initialUserId: string, onU
   const [activeIssueId, setActiveIssueId] = useState<string | undefined>(undefined);
   const [notFound, setNotFound] = useState<boolean>(false);
   const [roomFull, setRoomFull] = useState<boolean>(false);
-  const wsRef = useRef<WebSocket | undefined>(undefined);
+
+  // Track userId across renders for WebSocket communication
   const userIdRef = useRef<string>(initialUserId);
 
-  const send = useCallback((message: ClientMessage) => {
-    const ws = wsRef.current;
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      return;
-    }
-
-    const result = clientMessageSchema.safeParse(message);
-    if (!result.success) {
-      console.error('Invalid client message:', result.error);
-      return;
-    }
-
-    ws.send(JSON.stringify(result.data));
-  }, []);
-
+  // Check if game exists
   useEffect(() => {
     let cancelled = false;
 
@@ -87,9 +50,10 @@ export function useGame(gameId: string, name: string, initialUserId: string, onU
           return;
         }
 
-        const {exists} = await response.json();
+        const data = await response.json();
+        const result = registryExistsResponseSchema.safeParse(data);
 
-        if (!exists && !cancelled) {
+        if (!result.success || (!result.data.exists && !cancelled)) {
           setNotFound(true);
         }
       } catch {
@@ -106,108 +70,90 @@ export function useGame(gameId: string, name: string, initialUserId: string, onU
     };
   }, [gameId]);
 
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      const rawData = JSON.parse(event.data);
+  // Handle server messages
+  const handleMessage = useCallback((data: ServerMessage) => {
+    switch (data.type) {
+      case 'joined': {
+        userIdRef.current = data.userId;
+        onUserIdChange(data.userId);
 
-      const result = serverMessageSchema.safeParse(rawData);
-      if (!result.success) {
-        console.error('Invalid server message:', result.error);
-        return;
+        setVotingSystem(data.votingSystem);
+        setParticipants(data.participants);
+        setRevealed(data.revealed);
+        setIssues(data.issues);
+        setActiveIssueId(data.activeIssueId);
+
+        // Sync myVote with the server state based on userId
+        const me = data.participants.find(p => p.id === data.userId);
+        setMyVote(me?.vote);
+        break;
       }
 
-      const {data} = result;
-
-      switch (data.type) {
-        case 'joined': {
-          userIdRef.current = data.userId;
-          onUserIdChange(data.userId);
-
-          setVotingSystem(data.votingSystem);
-          setParticipants(data.participants);
-          setRevealed(data.revealed);
+      case 'update': {
+        setParticipants(data.participants);
+        setRevealed(data.revealed);
+        if (data.issues) {
           setIssues(data.issues);
-          setActiveIssueId(data.activeIssueId);
-
-          // Sync myVote with the server state based on userId
-          const me = data.participants.find(p => p.id === data.userId);
-          setMyVote(me?.vote);
-          break;
         }
 
-        case 'update': {
-          setParticipants(data.participants);
-          setRevealed(data.revealed);
-          if (data.issues) {
-            setIssues(data.issues);
-          }
-
-          setActiveIssueId(data.activeIssueId);
-          // Sync myVote with the server state based on userId
-          const me = data.participants.find(p => p.id === userIdRef.current);
-          setMyVote(me?.vote);
-          break;
-        }
-
-        case 'issue-added': {
-          setIssues(previous => [...previous, data.issue]);
-          break;
-        }
-
-        case 'issue-removed': {
-          setIssues(previous => previous.filter(i => i.id !== data.issueId));
-          break;
-        }
-
-        case 'issue-updated': {
-          setIssues(previous => previous.map(i => (i.id === data.issue.id ? data.issue : i)));
-          break;
-        }
-
-        case 'reset': {
-          setParticipants(data.participants);
-          setRevealed(false);
-          setMyVote(undefined);
-          setIssues(data.issues);
-          setActiveIssueId(data.activeIssueId);
-          break;
-        }
-
-        case 'not-found': {
-          setNotFound(true);
-          break;
-        }
-
-        case 'room-full': {
-          setRoomFull(true);
-          break;
-        }
-
-        default: {
-          // Exhaustiveness check
-          const _exhaustiveCheck: never = data;
-          console.warn('Unknown message type:', _exhaustiveCheck);
-        }
+        setActiveIssueId(data.activeIssueId);
+        // Sync myVote with the server state based on userId
+        const me = data.participants.find(p => p.id === userIdRef.current);
+        setMyVote(me?.vote);
+        break;
       }
-    };
 
-    const wsBase = toWebSocketUrl(BACKEND_URL);
-    const wsUrl = `${wsBase}/game/${gameId}`;
+      case 'issue-added': {
+        setIssues(previous => [...previous, data.issue]);
+        break;
+      }
 
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+      case 'issue-removed': {
+        setIssues(previous => previous.filter(i => i.id !== data.issueId));
+        break;
+      }
 
-    ws.addEventListener('open', () => {
-      send({type: 'join', name, clientId: userIdRef.current || undefined});
-    });
+      case 'issue-updated': {
+        setIssues(previous => previous.map(i => (i.id === data.issue.id ? data.issue : i)));
+        break;
+      }
 
-    ws.addEventListener('message', handleMessage);
+      case 'reset': {
+        setParticipants(data.participants);
+        setRevealed(false);
+        setMyVote(undefined);
+        setIssues(data.issues);
+        setActiveIssueId(data.activeIssueId);
+        break;
+      }
 
-    return () => {
-      ws.close();
-    };
-  }, [gameId, name, send, onUserIdChange]);
+      case 'not-found': {
+        setNotFound(true);
+        break;
+      }
 
+      case 'room-full': {
+        setRoomFull(true);
+        break;
+      }
+
+      default: {
+        // Exhaustiveness check
+        const _exhaustiveCheck: never = data;
+        console.warn('Unknown message type:', _exhaustiveCheck);
+      }
+    }
+  }, [onUserIdChange]);
+
+  // WebSocket connection
+  const {send, disconnect} = useWebSocket({
+    gameId,
+    name,
+    initialUserId,
+    onMessage: handleMessage,
+  });
+
+  // Game actions
   const vote = useCallback((value: string | undefined) => {
     send({type: 'vote', vote: value});
     setMyVote(value);
@@ -221,12 +167,6 @@ export function useGame(gameId: string, name: string, initialUserId: string, onU
     send({type: 'reset'});
     setMyVote(undefined);
   }, [send]);
-
-  const disconnect = useCallback(() => {
-    if (wsRef.current) {
-      wsRef.current.close();
-    }
-  }, []);
 
   const addIssue = useCallback((title: string, description?: string, url?: string) => {
     send({
