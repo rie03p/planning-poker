@@ -1,12 +1,18 @@
-import {useMemo, useEffect, useState} from 'react';
+import {
+  useMemo,
+  useEffect,
+  useState,
+} from 'react';
 import {useParams} from 'react-router-dom';
 import {
   VStack, HStack, Text,
 } from '@chakra-ui/react';
 import {getCardsForVotingSystem, MAX_PARTICIPANTS, participantSchema} from '@planning-poker/shared';
+import {LOCAL_STORAGE_KEYS} from '../../config/constants';
 import {useLocalStorage} from '../../hooks/useLocalStorage';
 import {useGame} from '../../hooks/useGame';
 import {NotFound} from '../NotFound';
+import {Loading} from '../../components/Loading';
 import {JoinDialog} from './components/JoinDialog';
 import {GameHeader} from './components/GameHeader';
 import {GameTable} from './components/GameTable';
@@ -23,12 +29,12 @@ export function Game() {
   const {
     value: name,
     setValue: setName,
-  } = useLocalStorage<string>('planning-poker:name', '');
+  } = useLocalStorage<string>(LOCAL_STORAGE_KEYS.NAME, '');
 
   const {
     value: userId,
     setValue: setUserId,
-  } = useLocalStorage<string>('planning-poker:userId', '');
+  } = useLocalStorage<string>(LOCAL_STORAGE_KEYS.USER_ID, '');
 
   useEffect(() => {
     if (name) {
@@ -116,11 +122,7 @@ export function Game() {
   }
 
   if (!votingSystem) {
-    return (
-      <VStack minH='100vh' justify='center' align='center'>
-        <Text>Connecting...</Text>
-      </VStack>
-    );
+    return <Loading message='Connecting...' />;
   }
 
   const cards = getCardsForVotingSystem(votingSystem);
@@ -131,6 +133,14 @@ export function Game() {
     } else {
       vote(value);
     }
+  };
+
+  const handleToggleIssues = () => {
+    setIsIssuesOpen(previous => !previous);
+  };
+
+  const handleCloseIssues = () => {
+    setIsIssuesOpen(false);
   };
 
   return (
@@ -148,9 +158,7 @@ export function Game() {
           activeIssueId={activeIssueId}
           issues={issues}
           isIssuesOpen={isIssuesOpen}
-          onToggleIssues={() => {
-            setIsIssuesOpen(!isIssuesOpen);
-          }}
+          onToggleIssues={handleToggleIssues}
         />
 
         {/* Main Content Area */}
@@ -199,9 +207,7 @@ export function Game() {
       {/* Issues Sidebar */}
       <IssuesDrawer
         isOpen={isIssuesOpen}
-        onClose={() => {
-          setIsIssuesOpen(false);
-        }}
+        onClose={handleCloseIssues}
         issues={issues}
         activeIssueId={activeIssueId}
         onAddIssue={addIssue}
