@@ -22,16 +22,36 @@ describe('game types', () => {
 
   it('GameActions has all required methods', () => {
     const gameActions: GameActions = {
-      vote: () => {},
-      reveal: () => {},
-      reset: () => {},
-      addIssue: () => {},
-      removeIssue: () => {},
-      setActiveIssue: () => {},
-      voteNextIssue: () => {},
-      updateIssue: () => {},
-      removeAllIssues: () => {},
-      disconnect: () => {},
+      vote() {
+        /* no-op */
+      },
+      reveal() {
+        /* no-op */
+      },
+      reset() {
+        /* no-op */
+      },
+      addIssue() {
+        /* no-op */
+      },
+      removeIssue() {
+        /* no-op */
+      },
+      setActiveIssue() {
+        /* no-op */
+      },
+      voteNextIssue() {
+        /* no-op */
+      },
+      updateIssue() {
+        /* no-op */
+      },
+      removeAllIssues() {
+        /* no-op */
+      },
+      disconnect() {
+        /* no-op */
+      },
     };
 
     expect(gameActions.vote).toBeInstanceOf(Function);
@@ -51,16 +71,36 @@ describe('game types', () => {
       notFound: false,
       roomFull: false,
       // GameActions methods
-      vote: () => {},
-      reveal: () => {},
-      reset: () => {},
-      addIssue: () => {},
-      removeIssue: () => {},
-      setActiveIssue: () => {},
-      voteNextIssue: () => {},
-      updateIssue: () => {},
-      removeAllIssues: () => {},
-      disconnect: () => {},
+      vote() {
+        /* no-op */
+      },
+      reveal() {
+        /* no-op */
+      },
+      reset() {
+        /* no-op */
+      },
+      addIssue() {
+        /* no-op */
+      },
+      removeIssue() {
+        /* no-op */
+      },
+      setActiveIssue() {
+        /* no-op */
+      },
+      voteNextIssue() {
+        /* no-op */
+      },
+      updateIssue() {
+        /* no-op */
+      },
+      removeAllIssues() {
+        /* no-op */
+      },
+      disconnect() {
+        /* no-op */
+      },
     };
 
     expect(useGameReturn).toBeDefined();

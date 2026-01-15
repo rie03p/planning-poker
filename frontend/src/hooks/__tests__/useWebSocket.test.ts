@@ -2,17 +2,17 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import {renderHook, waitFor} from '@testing-library/react';
-import {useWebSocket} from '../useWebSocket';
 import type {ServerMessage} from '@planning-poker/shared';
+import {useWebSocket} from '../useWebSocket';
 
-interface MockWsInstance {
+type MockWsInstance = {
   send: ReturnType<typeof vi.fn>;
   close: ReturnType<typeof vi.fn>;
   emitOpen: () => void;
   emitMessage: (data: unknown) => void;
   emitClose: () => void;
   emitError: (error?: unknown) => void;
-}
+};
 
 function mockWebSocket() {
   let instance!: MockWsInstance;
@@ -102,8 +102,7 @@ describe('useWebSocket', () => {
         name: 'Alice',
         initialUserId: 'user-123',
         onMessage,
-      }),
-    );
+      }));
 
     expect(globalThis.WebSocket).toBeDefined();
   });
@@ -120,8 +119,7 @@ describe('useWebSocket', () => {
         initialUserId: 'user-123',
         onMessage,
         onOpen,
-      }),
-    );
+      }));
 
     const ws = getWs();
     ws.emitOpen();
@@ -139,15 +137,12 @@ describe('useWebSocket', () => {
         name: 'Alice',
         initialUserId: 'user-123',
         onMessage,
-      }),
-    );
+      }));
 
     const ws = getWs();
     ws.emitOpen();
 
-    expect(ws.send).toHaveBeenCalledWith(
-      JSON.stringify({type: 'join', name: 'Alice', clientId: 'user-123'}),
-    );
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({type: 'join', name: 'Alice', clientId: 'user-123'}));
   });
 
   it('sends join message without clientId when initialUserId is empty', () => {
@@ -160,15 +155,12 @@ describe('useWebSocket', () => {
         name: 'Alice',
         initialUserId: '',
         onMessage,
-      }),
-    );
+      }));
 
     const ws = getWs();
     ws.emitOpen();
 
-    expect(ws.send).toHaveBeenCalledWith(
-      JSON.stringify({type: 'join', name: 'Alice', clientId: undefined}),
-    );
+    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({type: 'join', name: 'Alice', clientId: undefined}));
   });
 
   it('calls onMessage callback when message is received', async () => {
@@ -181,8 +173,7 @@ describe('useWebSocket', () => {
         name: 'Alice',
         initialUserId: 'user-123',
         onMessage,
-      }),
-    );
+      }));
 
     const ws = getWs();
     const message: ServerMessage = {
@@ -212,8 +203,7 @@ describe('useWebSocket', () => {
         initialUserId: 'user-123',
         onMessage,
         onError,
-      }),
-    );
+      }));
 
     const ws = getWs();
     ws.emitError();
@@ -235,8 +225,7 @@ describe('useWebSocket', () => {
         initialUserId: 'user-123',
         onMessage,
         onClose,
-      }),
-    );
+      }));
 
     const ws = getWs();
     ws.emitClose();
@@ -256,8 +245,7 @@ describe('useWebSocket', () => {
         name: 'Alice',
         initialUserId: 'user-123',
         onMessage,
-      }),
-    );
+      }));
 
     result.current.send({type: 'vote', vote: '5'});
 
@@ -275,8 +263,7 @@ describe('useWebSocket', () => {
         name: 'Alice',
         initialUserId: 'user-123',
         onMessage,
-      }),
-    );
+      }));
 
     result.current.disconnect();
 
@@ -294,8 +281,7 @@ describe('useWebSocket', () => {
         name: 'Alice',
         initialUserId: 'user-123',
         onMessage,
-      }),
-    );
+      }));
 
     const ws = getWs();
     unmount();
@@ -304,9 +290,10 @@ describe('useWebSocket', () => {
   });
 
   it('logs error for invalid JSON messages', async () => {
-    const getWs = mockWebSocket();
     const onMessage = vi.fn();
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {
+      /* no-op */
+    });
 
     class CustomMockWebSocket {
       static OPEN = 1;
@@ -336,12 +323,10 @@ describe('useWebSocket', () => {
     }
 
     let customInstance: CustomMockWebSocket;
-    globalThis.WebSocket = class {
-      constructor() {
-        customInstance = new CustomMockWebSocket();
-        return customInstance as any;
-      }
-    } as any;
+    globalThis.WebSocket = function (this: unknown) {
+      customInstance = new CustomMockWebSocket();
+      return customInstance as unknown;
+    } as unknown as typeof WebSocket;
 
     renderHook(() =>
       useWebSocket({
@@ -349,8 +334,7 @@ describe('useWebSocket', () => {
         name: 'Alice',
         initialUserId: 'user-123',
         onMessage,
-      }),
-    );
+      }));
 
     customInstance!.emitInvalidMessage();
 
@@ -371,8 +355,7 @@ describe('useWebSocket', () => {
         name: 'Alice',
         initialUserId: 'user-123',
         onMessage,
-      }),
-    );
+      }));
 
     const ws = getWs();
     const validMessage: ServerMessage = {
@@ -394,7 +377,9 @@ describe('useWebSocket', () => {
 
   it('does not send messages when WebSocket is closed', () => {
     const onMessage = vi.fn();
-    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
+      /* no-op */
+    });
 
     // Create a mock WebSocket that is closed
     class ClosedMockWebSocket {
@@ -415,12 +400,10 @@ describe('useWebSocket', () => {
     }
 
     let closedInstance: ClosedMockWebSocket;
-    globalThis.WebSocket = class {
-      constructor() {
-        closedInstance = new ClosedMockWebSocket();
-        return closedInstance as any;
-      }
-    } as any;
+    globalThis.WebSocket = function (this: unknown) {
+      closedInstance = new ClosedMockWebSocket();
+      return closedInstance as unknown;
+    } as unknown as typeof WebSocket;
 
     const {result} = renderHook(() =>
       useWebSocket({
@@ -428,8 +411,7 @@ describe('useWebSocket', () => {
         name: 'Alice',
         initialUserId: 'user-123',
         onMessage,
-      }),
-    );
+      }));
 
     result.current.send({type: 'vote', vote: '5'});
 
