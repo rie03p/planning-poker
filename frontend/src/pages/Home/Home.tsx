@@ -3,18 +3,18 @@ import {useNavigate} from 'react-router-dom';
 import {
   Button, Flex, Text, VStack,
 } from '@chakra-ui/react';
+import {BACKEND_URL, DEFAULT_VOTING_SYSTEM} from '../../config/constants';
 import {SelectVotingSystem} from './components/SelectVotingSystem';
-
-const BACKEND_URL: string = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8787';
 
 export function Home() {
   const navigate = useNavigate();
-  const [votingSystem, setVotingSystem] = useState<string>('t-shirts');
+  const [votingSystem, setVotingSystem] = useState<string>(DEFAULT_VOTING_SYSTEM);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
   const handleCreateGame = async () => {
     setIsCreating(true);
+    setError(undefined);
     try {
       const response = await fetch(`${BACKEND_URL}/games`, {
         method: 'POST',
@@ -28,10 +28,10 @@ export function Home() {
         throw new Error('Failed to create game');
       }
 
-      const {gameId} = await response.json();
+      const {gameId} = await response.json() as {gameId: string};
       navigate(`/${gameId}`);
-    } catch (error) {
-      console.error('Error creating game:', error);
+    } catch (error_) {
+      console.error('Error creating game:', error_);
       setError('Failed to create game. Please try again.');
     } finally {
       setIsCreating(false);
