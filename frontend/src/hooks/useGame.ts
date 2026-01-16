@@ -74,8 +74,13 @@ export function useGame(
   const handleMessage = useCallback((data: ServerMessage) => {
     switch (data.type) {
       case 'joined': {
+        const previousUserId = userIdRef.current;
         userIdRef.current = data.userId;
-        onUserIdChange(data.userId);
+
+        // Only update userId if it actually changed
+        if (previousUserId !== data.userId) {
+          onUserIdChange(data.userId);
+        }
 
         setVotingSystem(data.votingSystem);
         setParticipants(data.participants);

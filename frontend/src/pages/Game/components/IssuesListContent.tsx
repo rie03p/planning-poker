@@ -71,7 +71,7 @@ export function IssuesListContent({
           const title = match[1];
           const url = match[2];
           // Extract just the title without the prefix (e.g., "SRS-1947: ")
-          const cleanTitle = title.replace(/^[A-Z]+-\d+:\s*/, '').trim();
+          const cleanTitle = title.replace(/^[A-Z]+-\d+:\s*/, '').trim().slice(0, 100);
           onAddIssue(cleanTitle, undefined, url);
         }
       }
@@ -79,12 +79,14 @@ export function IssuesListContent({
       // Multiple plain lines - add each as a separate issue
       for (const line of lines) {
         if (line) {
-          onAddIssue(line);
+          const trimmedLine = line.slice(0, 100);
+          onAddIssue(trimmedLine);
         }
       }
     } else {
       // Single issue
-      onAddIssue(input);
+      const trimmedInput = input.slice(0, 100);
+      onAddIssue(trimmedInput);
     }
 
     setNewIssueTitle('');
