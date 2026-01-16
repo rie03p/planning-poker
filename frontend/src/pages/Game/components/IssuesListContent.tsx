@@ -24,7 +24,7 @@ import {VotingResultsModal} from './VotingResultsModal';
 type IssuesListContentProps = {
   issues: Issue[];
   activeIssueId: string | undefined;
-  onAddIssue: (title: string) => void;
+  onAddIssue: (title: string, description?: string, url?: string) => void;
   onRemoveIssue: (issueId: string) => void;
   onSetActiveIssue: (issueId: string) => void;
   onUpdateIssue: (issue: Issue) => void;
@@ -64,14 +64,15 @@ export function IssuesListContent({
     const allMarkdownLinks = lines.length > 0 && lines.every(line => markdownLinkRegex.test(line));
     
     if (allMarkdownLinks) {
-      // Parse markdown links and add multiple issues
+      // Parse markdown links and add multiple issues with URLs
       lines.forEach(line => {
         const match = line.match(markdownLinkRegex);
         if (match) {
           const title = match[1];
+          const url = match[2];
           // Extract just the title without the prefix (e.g., "SRS-1947: ")
           const cleanTitle = title.replace(/^[A-Z]+-\d+:\s*/, '').trim();
-          onAddIssue(cleanTitle);
+          onAddIssue(cleanTitle, undefined, url);
         }
       });
     } else if (lines.length > 1) {
