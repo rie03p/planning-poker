@@ -3,7 +3,7 @@ import {
   VStack,
   HStack,
   Text,
-  Input,
+  Textarea,
   Button,
   IconButton,
   Card,
@@ -53,7 +53,39 @@ export function IssuesListContent({
       return;
     }
 
-    onAddIssue(newIssueTitle);
+    // Parse input for multiple issues
+    const input = newIssueTitle.trim();
+    
+    // Check if input contains markdown links (Linear format)
+    const markdownLinkRegex = /^-\s*\[([^\]]+)\]\(([^)]+)\)\s*$/;
+    const lines = input.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
+    // Check if all lines are markdown links
+    const allMarkdownLinks = lines.length > 0 && lines.every(line => markdownLinkRegex.test(line));
+    
+    if (allMarkdownLinks) {
+      // Parse markdown links and add multiple issues
+      lines.forEach(line => {
+        const match = line.match(markdownLinkRegex);
+        if (match) {
+          const title = match[1];
+          // Extract just the title without the prefix (e.g., "SRS-1947: ")
+          const cleanTitle = title.replace(/^[A-Z]+-\d+:\s*/, '').trim();
+          onAddIssue(cleanTitle);
+        }
+      });
+    } else if (lines.length > 1) {
+      // Multiple plain lines - add each as a separate issue
+      lines.forEach(line => {
+        if (line) {
+          onAddIssue(line);
+        }
+      });
+    } else {
+      // Single issue
+      onAddIssue(input);
+    }
+    
     setNewIssueTitle('');
   };
 
@@ -125,29 +157,35 @@ export function IssuesListContent({
       {/* Add Issue Form - Fixed at top */}
       <VStack gap={3} align='stretch' p={4} borderBottomWidth='1px' bg='white'>
         <Text fontWeight='bold'>Add new issue</Text>
+        <Text fontSize='xs' color='gray.600'>
+          You can add multiple issues at once by entering them on separate lines.
+          Supports Linear markdown links format.
+        </Text>
         {issues.length >= MAX_ISSUES && (
           <Text color='red.500' fontSize='sm'>
             Maximum of {MAX_ISSUES} issues reached. Please remove some issues before adding more.
           </Text>
         )}
-        <HStack>
-          <Input
-            placeholder='Issue title'
+        <HStack align='start'>
+          <Textarea
+            placeholder='Issue title (supports multiple lines and Linear markdown format)'
             value={newIssueTitle}
             onChange={event => {
               setNewIssueTitle(event.target.value);
             }}
             onKeyDown={event => {
-              if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+              if (event.key === 'Enter' && event.metaKey && !event.nativeEvent.isComposing) {
                 handleAddIssue();
               }
             }}
             disabled={issues.length >= MAX_ISSUES}
+            rows={3}
           />
           <Button
             colorPalette='blue'
             onClick={handleAddIssue}
             disabled={!newIssueTitle.trim() || issues.length >= MAX_ISSUES}
+            flexShrink={0}
           >
             <Plus size={16} />
           </Button>
