@@ -5,11 +5,21 @@ import {type VoteResults} from '@planning-poker/shared';
 
 type VotingResultsChartProps = {
   voteResults: VoteResults;
+  cards?: readonly string[];
 };
 
-export function VotingResultsChart({voteResults}: VotingResultsChartProps) {
+export function VotingResultsChart({voteResults, cards}: VotingResultsChartProps) {
   const entries = Object.entries(voteResults).sort((a, b) => {
-    // Sort by card value - try numeric first, then alphabetic
+    // If cards definition is available, sort by index in cards array
+    if (cards) {
+      const indexA = cards.indexOf(a[0]);
+      const indexB = cards.indexOf(b[0]);
+      if (indexA !== -1 && indexB !== -1) {
+        return indexA - indexB;
+      }
+    }
+
+    // Fallback sort: try numeric first, then alphabetic
     const numberA = Number(a[0]);
     const numberB = Number(b[0]);
     if (!Number.isNaN(numberA) && !Number.isNaN(numberB)) {

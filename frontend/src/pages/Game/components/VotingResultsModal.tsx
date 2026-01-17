@@ -6,12 +6,14 @@ type VotingResultsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   issue: Issue | undefined;
+  cards?: readonly string[];
 };
 
 export function VotingResultsModal({
   isOpen,
   onClose,
   issue,
+  cards,
 }: VotingResultsModalProps) {
   if (!issue?.voteResults) {
     return null;
@@ -41,7 +43,7 @@ export function VotingResultsModal({
           </Dialog.Header>
           <Dialog.Body>
             <Box py={2}>
-              <VotingResultsChart voteResults={issue.voteResults} />
+              <VotingResultsChart voteResults={issue.voteResults} cards={cards} />
             </Box>
           </Dialog.Body>
           <Dialog.CloseTrigger />

@@ -32,6 +32,7 @@ type IssuesListContentProps = {
   onUpdateIssue: (issue: Issue) => void;
   onRemoveAllIssues: () => void;
   onClose?: () => void;
+  cards?: readonly string[];
 };
 
 export function IssuesListContent({
@@ -43,6 +44,7 @@ export function IssuesListContent({
   onUpdateIssue,
   onRemoveAllIssues,
   onClose,
+  cards,
 }: IssuesListContentProps) {
   const [newIssueTitle, setNewIssueTitle] = useState('');
   const [editingIssue, setEditingIssue] = useState<Issue | undefined>(undefined);
@@ -388,6 +390,7 @@ export function IssuesListContent({
           setViewingResultsIssue(undefined);
         }}
         issue={viewingResultsIssue}
+        cards={cards}
       />
     </Box>
   );

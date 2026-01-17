@@ -216,6 +216,7 @@ export function Game() {
         onSetActiveIssue={setActiveIssue}
         onUpdateIssue={updateIssue}
         onRemoveAllIssues={removeAllIssues}
+        cards={cards}
       />
     </HStack>
   );

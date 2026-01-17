@@ -81,7 +81,7 @@ export function GameFooter({
         pointerEvents={showResults ? 'auto' : 'none'}
       >
         <Box w='full' maxW='800px'>
-          {displayedResults && <VotingResultsChart voteResults={displayedResults} />}
+          {displayedResults && <VotingResultsChart voteResults={displayedResults} cards={cards} />}
         </Box>
       </Box>
     </Box>
