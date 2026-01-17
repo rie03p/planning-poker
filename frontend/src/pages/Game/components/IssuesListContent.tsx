@@ -13,9 +13,10 @@ import {
   Dialog,
   Menu,
   Portal,
+  Tooltip,
 } from '@chakra-ui/react';
 import {
-  Plus, Trash2, ExternalLink, BarChart3, MoreHorizontal,
+  Trash2, ExternalLink, BarChart3, MoreHorizontal, CircleHelp,
 } from 'lucide-react';
 import {type Issue, MAX_ISSUES} from '@planning-poker/shared';
 import {IssueDetailDialog} from './IssueDetailDialog';
@@ -157,42 +158,48 @@ export function IssuesListContent({
         </HStack>
       </HStack>
 
-      {/* Add Issue Form - Fixed at top */}
       <VStack gap={3} align='stretch' p={4} borderBottomWidth='1px' bg='white'>
-        <Text fontWeight='bold'>Add new issue</Text>
-        <Text fontSize='xs' color='gray.600'>
-          You can add multiple issues at once by entering them on separate lines.
-          Supports Linear markdown links format.
-        </Text>
+        <HStack gap={2} align='center'>
+          <Text fontWeight='bold'>Add new issue</Text>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <CircleHelp size={14} color='gray' />
+            </Tooltip.Trigger>
+            <Tooltip.Positioner>
+              <Tooltip.Content maxW='xs' fontSize='xs'>
+                You can add multiple issues at once by entering them on separate lines.
+                Supports Markdown list format (e.g. - [Title](URL))
+              </Tooltip.Content>
+            </Tooltip.Positioner>
+          </Tooltip.Root>
+        </HStack>
         {issues.length >= MAX_ISSUES && (
           <Text color='red.500' fontSize='sm'>
             Maximum of {MAX_ISSUES} issues reached. Please remove some issues before adding more.
           </Text>
         )}
-        <HStack align='start'>
-          <Textarea
-            placeholder='Issue title (supports multiple lines and Linear markdown format)'
-            value={newIssueTitle}
-            onChange={event => {
-              setNewIssueTitle(event.target.value);
-            }}
-            onKeyDown={event => {
-              if (event.key === 'Enter' && event.metaKey && !event.nativeEvent.isComposing) {
-                handleAddIssue();
-              }
-            }}
-            disabled={issues.length >= MAX_ISSUES}
-            rows={3}
-          />
-          <Button
-            colorPalette='blue'
-            onClick={handleAddIssue}
-            disabled={!newIssueTitle.trim() || issues.length >= MAX_ISSUES}
-            flexShrink={0}
-          >
-            <Plus size={16} />
-          </Button>
-        </HStack>
+        <Textarea
+          placeholder='Issue title'
+          value={newIssueTitle}
+          onChange={event => {
+            setNewIssueTitle(event.target.value);
+          }}
+          onKeyDown={event => {
+            if (event.key === 'Enter' && event.metaKey && !event.nativeEvent.isComposing) {
+              handleAddIssue();
+            }
+          }}
+          disabled={issues.length >= MAX_ISSUES}
+          rows={3}
+        />
+        <Button
+          colorPalette='blue'
+          onClick={handleAddIssue}
+          disabled={!newIssueTitle.trim() || issues.length >= MAX_ISSUES}
+          width='full'
+        >
+          Add Issue
+        </Button>
       </VStack>
 
       {/* Scrollable Issues List */}
