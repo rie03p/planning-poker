@@ -19,6 +19,7 @@ import {
   Trash2, ExternalLink, BarChart3, MoreHorizontal, CircleHelp,
 } from 'lucide-react';
 import {type Issue, MAX_ISSUES} from '@planning-poker/shared';
+import {parseIssueInput} from '../../../utils/issueInputParser';
 import {IssueDetailDialog} from './IssueDetailDialog';
 import {VotingResultsModal} from './VotingResultsModal';
 
@@ -54,40 +55,10 @@ export function IssuesListContent({
       return;
     }
 
-    // Parse input for multiple issues
-    const input = newIssueTitle.trim();
+    const parsedIssues = parseIssueInput(newIssueTitle);
 
-    // Check if input contains markdown links (Linear format)
-    const markdownLinkRegex = /^-\s*\[([^\]]+)]\(([^)]+)\)\s*$/;
-    const lines = input.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-
-    // Check if all lines are markdown links
-    const allMarkdownLinks = lines.length > 0 && lines.every(line => markdownLinkRegex.test(line));
-
-    if (allMarkdownLinks) {
-      // Parse markdown links and add multiple issues with URLs
-      for (const line of lines) {
-        const match = markdownLinkRegex.exec(line);
-        if (match) {
-          const title = match[1];
-          const url = match[2];
-          // Extract just the title without the prefix (e.g., "SRS-1947: ")
-          const cleanTitle = title.replace(/^[A-Z]+-\d+:\s*/, '').trim().slice(0, 100);
-          onAddIssue(cleanTitle, undefined, url);
-        }
-      }
-    } else if (lines.length > 1) {
-      // Multiple plain lines - add each as a separate issue
-      for (const line of lines) {
-        if (line) {
-          const trimmedLine = line.slice(0, 100);
-          onAddIssue(trimmedLine);
-        }
-      }
-    } else {
-      // Single issue
-      const trimmedInput = input.slice(0, 100);
-      onAddIssue(trimmedInput);
+    for (const issue of parsedIssues) {
+      onAddIssue(issue.title, undefined, issue.url);
     }
 
     setNewIssueTitle('');
