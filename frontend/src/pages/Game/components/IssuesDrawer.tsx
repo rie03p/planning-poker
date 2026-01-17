@@ -7,7 +7,7 @@ type IssuesDrawerProps = {
   onClose: () => void;
   issues: Issue[];
   activeIssueId: string | undefined;
-  onAddIssue: (title: string) => void;
+  onAddIssue: (title: string, description?: string, url?: string) => void;
   onRemoveIssue: (issueId: string) => void;
   onSetActiveIssue: (issueId: string) => void;
   onUpdateIssue: (issue: Issue) => void;

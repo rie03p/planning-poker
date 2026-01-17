@@ -2,6 +2,7 @@ import {
   useMemo,
   useEffect,
   useState,
+  useCallback,
 } from 'react';
 import {useParams} from 'react-router-dom';
 import {
@@ -45,9 +46,9 @@ export function Game() {
     }
   }, [name, setName]);
 
-  const handleUserIdChange = (newUserId: string) => {
+  const handleUserIdChange = useCallback((newUserId: string) => {
     setUserId(newUserId);
-  };
+  }, [setUserId]);
 
   const game = useGame(gameId, name ?? '', userId ?? '', handleUserIdChange);
 

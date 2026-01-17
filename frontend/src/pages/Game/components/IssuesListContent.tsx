@@ -3,7 +3,7 @@ import {
   VStack,
   HStack,
   Text,
-  Input,
+  Textarea,
   Button,
   IconButton,
   Card,
@@ -13,18 +13,20 @@ import {
   Dialog,
   Menu,
   Portal,
+  Tooltip,
 } from '@chakra-ui/react';
 import {
-  Plus, Trash2, ExternalLink, BarChart3, MoreHorizontal,
+  Trash2, ExternalLink, BarChart3, MoreHorizontal, CircleHelp,
 } from 'lucide-react';
 import {type Issue, MAX_ISSUES} from '@planning-poker/shared';
+import {parseIssueInput} from '../../../utils/issueInputParser';
 import {IssueDetailDialog} from './IssueDetailDialog';
 import {VotingResultsModal} from './VotingResultsModal';
 
 type IssuesListContentProps = {
   issues: Issue[];
   activeIssueId: string | undefined;
-  onAddIssue: (title: string) => void;
+  onAddIssue: (title: string, description?: string, url?: string) => void;
   onRemoveIssue: (issueId: string) => void;
   onSetActiveIssue: (issueId: string) => void;
   onUpdateIssue: (issue: Issue) => void;
@@ -53,7 +55,12 @@ export function IssuesListContent({
       return;
     }
 
-    onAddIssue(newIssueTitle);
+    const parsedIssues = parseIssueInput(newIssueTitle);
+
+    for (const issue of parsedIssues) {
+      onAddIssue(issue.title, undefined, issue.url);
+    }
+
     setNewIssueTitle('');
   };
 
@@ -122,36 +129,48 @@ export function IssuesListContent({
         </HStack>
       </HStack>
 
-      {/* Add Issue Form - Fixed at top */}
       <VStack gap={3} align='stretch' p={4} borderBottomWidth='1px' bg='white'>
-        <Text fontWeight='bold'>Add new issue</Text>
+        <HStack gap={2} align='center'>
+          <Text fontWeight='bold'>Add new issue</Text>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <CircleHelp size={14} color='gray' />
+            </Tooltip.Trigger>
+            <Tooltip.Positioner>
+              <Tooltip.Content maxW='xs' fontSize='xs'>
+                You can add multiple issues at once by entering them on separate lines.
+                Supports Markdown list format (e.g. - [Title](URL))
+              </Tooltip.Content>
+            </Tooltip.Positioner>
+          </Tooltip.Root>
+        </HStack>
         {issues.length >= MAX_ISSUES && (
           <Text color='red.500' fontSize='sm'>
             Maximum of {MAX_ISSUES} issues reached. Please remove some issues before adding more.
           </Text>
         )}
-        <HStack>
-          <Input
-            placeholder='Issue title'
-            value={newIssueTitle}
-            onChange={event => {
-              setNewIssueTitle(event.target.value);
-            }}
-            onKeyDown={event => {
-              if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
-                handleAddIssue();
-              }
-            }}
-            disabled={issues.length >= MAX_ISSUES}
-          />
-          <Button
-            colorPalette='blue'
-            onClick={handleAddIssue}
-            disabled={!newIssueTitle.trim() || issues.length >= MAX_ISSUES}
-          >
-            <Plus size={16} />
-          </Button>
-        </HStack>
+        <Textarea
+          placeholder='Issue title'
+          value={newIssueTitle}
+          onChange={event => {
+            setNewIssueTitle(event.target.value);
+          }}
+          onKeyDown={event => {
+            if (event.key === 'Enter' && event.metaKey && !event.nativeEvent.isComposing) {
+              handleAddIssue();
+            }
+          }}
+          disabled={issues.length >= MAX_ISSUES}
+          rows={3}
+        />
+        <Button
+          colorPalette='blue'
+          onClick={handleAddIssue}
+          disabled={!newIssueTitle.trim() || issues.length >= MAX_ISSUES}
+          width='full'
+        >
+          Add Issue
+        </Button>
       </VStack>
 
       {/* Scrollable Issues List */}

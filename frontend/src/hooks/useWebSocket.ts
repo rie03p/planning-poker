@@ -36,6 +36,22 @@ export function useWebSocket({
   onError,
 }: UseWebSocketOptions): UseWebSocketReturn {
   const wsRef = useRef<WebSocket | undefined>(undefined);
+  const onMessageRef = useRef(onMessage);
+  const onOpenRef = useRef(onOpen);
+  const onCloseRef = useRef(onClose);
+  const onErrorRef = useRef(onError);
+  const nameRef = useRef(name);
+  const initialUserIdRef = useRef(initialUserId);
+
+  // Keep refs up to date
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+    onOpenRef.current = onOpen;
+    onCloseRef.current = onClose;
+    onErrorRef.current = onError;
+    nameRef.current = name;
+    initialUserIdRef.current = initialUserId;
+  });
 
   const send = useCallback((message: ClientMessage) => {
     const ws = wsRef.current;
@@ -70,7 +86,7 @@ export function useWebSocket({
           return;
         }
 
-        onMessage(result.data);
+        onMessageRef.current(result.data);
       } catch (error) {
         console.error('Error parsing message:', error);
       }
@@ -83,22 +99,31 @@ export function useWebSocket({
     wsRef.current = ws;
 
     ws.addEventListener('open', () => {
-      send({type: 'join', name, clientId: initialUserId || undefined});
-      onOpen?.();
+      const joinMessage: ClientMessage = {
+        type: 'join',
+        name: nameRef.current,
+        clientId: initialUserIdRef.current || undefined,
+      };
+      const result = clientMessageSchema.safeParse(joinMessage);
+      if (result.success) {
+        ws.send(JSON.stringify(result.data));
+      }
+
+      onOpenRef.current?.();
     });
 
     ws.addEventListener('message', handleMessage);
     ws.addEventListener('close', () => {
-      onClose?.();
+      onCloseRef.current?.();
     });
     ws.addEventListener('error', error => {
-      onError?.(error);
+      onErrorRef.current?.(error);
     });
 
     return () => {
       ws.close();
     };
-  }, [gameId, name, initialUserId, send, onMessage, onOpen, onClose, onError]);
+  }, [gameId]);
 
   return {send, disconnect};
 }
