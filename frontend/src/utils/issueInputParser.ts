@@ -61,18 +61,11 @@ export function parseIssueInput(input: string): ParsedIssue[] {
     // Parse markdown links and return issues with URLs
     return lines
       .map(line => parseMarkdownLink(line))
-      .filter((issue): issue is ParsedIssue => issue !== null);
+      .filter((issue): issue is ParsedIssue => issue !== undefined);
   }
 
-  if (lines.length > 1) {
-    // Multiple plain lines - each line is a separate issue
-    return lines.map(line => ({
-      title: line.slice(0, MAX_TITLE_LENGTH),
-    }));
-  }
-
-  // Single issue
-  return [{
-    title: trimmedInput.slice(0, MAX_TITLE_LENGTH),
-  }];
+  // If not all lines are markdown links, treat each non-empty line as a plain issue title.
+  return lines.map(line => ({
+    title: line.slice(0, MAX_TITLE_LENGTH),
+  }));
 }
