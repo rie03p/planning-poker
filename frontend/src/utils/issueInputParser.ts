@@ -13,7 +13,7 @@ const MAX_TITLE_LENGTH = 100;
 
 /**
  * Parse a single markdown link line
- * Example: "- [SRS-1947: Task title](https://example.com)"
+ * Example: "- [Task title](https://example.com)"
  */
 export function parseMarkdownLink(line: string): ParsedIssue | undefined {
   const match = MARKDOWN_LINK_REGEX.exec(line);
@@ -24,7 +24,7 @@ export function parseMarkdownLink(line: string): ParsedIssue | undefined {
   const title = match[1];
   const url = match[2];
 
-  // Extract just the title without the prefix (e.g., "SRS-1947: ")
+  // Extract just the title without the prefix (e.g., "Hoge: ")
   const cleanTitle = title.replace(ISSUE_PREFIX_REGEX, '').trim().slice(0, MAX_TITLE_LENGTH);
 
   return {

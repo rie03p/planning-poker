@@ -5,7 +5,7 @@ describe('issueInputParser', () => {
   describe('isMarkdownLink', () => {
     it('should return true for valid markdown links', () => {
       expect(isMarkdownLink('- [Title](https://example.com)')).toBe(true);
-      expect(isMarkdownLink('- [SRS-1947: Task title](https://linear.app/issue/123)')).toBe(true);
+      expect(isMarkdownLink('- [Task title](https://linear.app/issue/123)')).toBe(true);
     });
 
     it('should return false for invalid markdown links', () => {
@@ -25,7 +25,7 @@ describe('issueInputParser', () => {
     });
 
     it('should remove issue prefix from title', () => {
-      const result = parseMarkdownLink('- [SRS-1947: Task description](https://linear.app)');
+      const result = parseMarkdownLink('- [Task description](https://linear.app)');
       expect(result).toEqual({
         title: 'Task description',
         url: 'https://linear.app',
@@ -39,13 +39,13 @@ describe('issueInputParser', () => {
 
     it('should truncate long titles to 100 characters', () => {
       const longTitle = 'A'.repeat(150);
-      const result = parseMarkdownLink(`- [SRS-123: ${longTitle}](https://example.com)`);
+      const result = parseMarkdownLink(`- [${longTitle}](https://example.com)`);
       expect(result?.title.length).toBe(100);
     });
 
     it('should return null for invalid markdown links', () => {
-      expect(parseMarkdownLink('Plain text')).toBeNull();
-      expect(parseMarkdownLink('[No dash](url)')).toBeNull();
+      expect(parseMarkdownLink('Plain text')).toBeUndefined();
+      expect(parseMarkdownLink('[No dash](url)')).toBeUndefined();
     });
 
     it('should handle titles without prefix', () => {
@@ -80,7 +80,7 @@ Third issue`;
     });
 
     it('should parse single markdown link', () => {
-      const input = '- [SRS-1947: Task title](https://linear.app/issue/123)';
+      const input = '- [Task title](https://linear.app/issue/123)';
       const result = parseIssueInput(input);
       expect(result).toEqual([
         {
@@ -91,9 +91,9 @@ Third issue`;
     });
 
     it('should parse multiple markdown links', () => {
-      const input = `- [SRS-1947: First task](https://linear.app/1)
-- [SRS-1948: Second task](https://linear.app/2)
-- [SRS-1949: Third task](https://linear.app/3)`;
+      const input = `- [First task](https://linear.app/1)
+- [Second task](https://linear.app/2)
+- [Third task](https://linear.app/3)`;
       const result = parseIssueInput(input);
       expect(result).toEqual([
         {title: 'First task', url: 'https://linear.app/1'},
@@ -143,12 +143,12 @@ Third issue`;
 
     it('should not mix markdown links with plain text', () => {
       // If some lines are markdown and some are not, treat all as plain text
-      const input = `- [SRS-1947: Task](https://linear.app)
+      const input = `- [Task](https://linear.app)
 Plain text issue`;
       const result = parseIssueInput(input);
       // Should treat as plain text since not ALL lines are markdown
       expect(result).toEqual([
-        {title: '- [SRS-1947: Task](https://linear.app)'},
+        {title: '- [Task](https://linear.app)'},
         {title: 'Plain text issue'},
       ]);
     });
