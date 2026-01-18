@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/rie03p/planning-poker/compare/v1.2.0...v1.3.0) (2026-01-18)
+
+
+### Features
+
+* Active issue in the Game header is now clickable when it has a URL ([#79](https://github.com/rie03p/planning-poker/issues/79)) ([9217da9](https://github.com/rie03p/planning-poker/commit/9217da9f6f1029659f322b7ef766ffd63db2a8e4))
+* add issues in bulk ([#83](https://github.com/rie03p/planning-poker/issues/83)) ([8f54106](https://github.com/rie03p/planning-poker/commit/8f54106d38cfa3c47212320fad17511d45f7402c))
+
 ## [1.2.0](https://github.com/rie03p/planning-poker/compare/v1.1.1...v1.2.0) (2026-01-12)
 
 
