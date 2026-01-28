@@ -40,7 +40,6 @@ export function useWebSocket({
   const onOpenRef = useRef(onOpen);
   const onCloseRef = useRef(onClose);
   const onErrorRef = useRef(onError);
-  const nameRef = useRef(name);
   const initialUserIdRef = useRef(initialUserId);
 
   // Keep refs up to date
@@ -49,7 +48,6 @@ export function useWebSocket({
     onOpenRef.current = onOpen;
     onCloseRef.current = onClose;
     onErrorRef.current = onError;
-    nameRef.current = name;
     initialUserIdRef.current = initialUserId;
   });
 
@@ -76,6 +74,11 @@ export function useWebSocket({
   }, []);
 
   useEffect(() => {
+    // Don't connect if name is not set
+    if (!name) {
+      return;
+    }
+
     const handleMessage = (event: MessageEvent) => {
       try {
         const rawData = JSON.parse(event.data);
@@ -101,7 +104,7 @@ export function useWebSocket({
     ws.addEventListener('open', () => {
       const joinMessage: ClientMessage = {
         type: 'join',
-        name: nameRef.current,
+        name,
         clientId: initialUserIdRef.current || undefined,
       };
       const result = clientMessageSchema.safeParse(joinMessage);
@@ -123,7 +126,7 @@ export function useWebSocket({
     return () => {
       ws.close();
     };
-  }, [gameId]);
+  }, [gameId, name]);
 
   return {send, disconnect};
 }
