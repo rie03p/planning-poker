@@ -76,6 +76,11 @@ export function useWebSocket({
   }, []);
 
   useEffect(() => {
+    // Don't connect if name is not set
+    if (!name) {
+      return;
+    }
+
     const handleMessage = (event: MessageEvent) => {
       try {
         const rawData = JSON.parse(event.data);
@@ -123,7 +128,7 @@ export function useWebSocket({
     return () => {
       ws.close();
     };
-  }, [gameId]);
+  }, [gameId, name]);
 
   return {send, disconnect};
 }
