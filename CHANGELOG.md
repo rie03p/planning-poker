@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/rie03p/planning-poker/compare/v1.3.0...v1.3.1) (2026-01-28)
+
+
+### Bug Fixes
+
+* loading never finishes when registering a name ([#85](https://github.com/rie03p/planning-poker/issues/85)) ([4acaebe](https://github.com/rie03p/planning-poker/commit/4acaebe54b1f411a2c82e4cc0cf7e8df7d30cee0))
+
 ## [1.3.0](https://github.com/rie03p/planning-poker/compare/v1.2.0...v1.3.0) (2026-01-18)
 
 
