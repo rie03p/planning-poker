@@ -220,6 +220,7 @@ export function useGame(
     if (nextIsSpectator) {
       setMyVote(undefined);
     }
+
     send({type: 'toggle-spectator'});
   }, [isSpectator, send]);
 
