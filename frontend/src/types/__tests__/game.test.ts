@@ -12,6 +12,7 @@ describe('game types', () => {
       activeIssueId: undefined,
       notFound: false,
       roomFull: false,
+      isSpectator: false,
     };
 
     expect(gameState).toBeDefined();
@@ -52,6 +53,9 @@ describe('game types', () => {
       disconnect() {
         /* no-op */
       },
+      toggleSpectator() {
+        /* no-op */
+      },
     };
 
     expect(gameActions.vote).toBeInstanceOf(Function);
@@ -70,6 +74,7 @@ describe('game types', () => {
       activeIssueId: undefined,
       notFound: false,
       roomFull: false,
+      isSpectator: false,
       // GameActions methods
       vote() {
         /* no-op */
@@ -99,6 +104,9 @@ describe('game types', () => {
         /* no-op */
       },
       disconnect() {
+        /* no-op */
+      },
+      toggleSpectator() {
         /* no-op */
       },
     };
