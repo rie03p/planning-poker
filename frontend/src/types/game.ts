@@ -9,6 +9,7 @@ export type GameState = {
   activeIssueId: string | undefined;
   notFound: boolean;
   roomFull: boolean;
+  isSpectator: boolean;
 };
 
 export type GameActions = {
@@ -22,6 +23,7 @@ export type GameActions = {
   updateIssue: (issue: Issue) => void;
   removeAllIssues: () => void;
   disconnect: () => void;
+  toggleSpectator: () => void;
 };
 
 export type UseGameReturn = GameState & GameActions;

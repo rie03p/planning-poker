@@ -67,6 +67,7 @@ export const participantSchema = z.object({
   id: z.string(),
   name: z.string().min(1).max(20).trim(),
   vote: votingCardSchema.optional(),
+  isSpectator: z.boolean().optional(),
 });
 
 // WebSocket message schemas
@@ -87,6 +88,7 @@ export const clientMessageSchema = z.discriminatedUnion('type', [
     issue: issueSchema,
   }),
   z.object({type: z.literal('remove-all-issues')}),
+  z.object({type: z.literal('toggle-spectator')}),
 ]);
 
 export const serverMessageSchema = z.discriminatedUnion('type', [

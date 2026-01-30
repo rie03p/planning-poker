@@ -28,6 +28,7 @@ export function useGame(
   const [votingSystem, setVotingSystem] = useState<VotingSystem | undefined>(undefined);
   const [issues, setIssues] = useState<Issue[]>([]);
   const [activeIssueId, setActiveIssueId] = useState<string | undefined>(undefined);
+  const [isSpectator, setIsSpectator] = useState<boolean>(false);
   const [notFound, setNotFound] = useState<boolean>(false);
   const [roomFull, setRoomFull] = useState<boolean>(false);
 
@@ -91,6 +92,7 @@ export function useGame(
         // Sync myVote with the server state based on userId
         const me = data.participants.find(p => p.id === data.userId);
         setMyVote(me?.vote);
+        setIsSpectator(me?.isSpectator ?? false);
         break;
       }
 
@@ -105,6 +107,7 @@ export function useGame(
         // Sync myVote with the server state based on userId
         const me = data.participants.find(p => p.id === userIdRef.current);
         setMyVote(me?.vote);
+        setIsSpectator(me?.isSpectator ?? false);
         break;
       }
 
@@ -203,6 +206,24 @@ export function useGame(
     send({type: 'remove-all-issues'});
   }, [send]);
 
+  const toggleSpectator = useCallback(() => {
+    const nextIsSpectator = !isSpectator;
+    const userId = userIdRef.current;
+    setIsSpectator(nextIsSpectator);
+    setParticipants(current => current.map(p => (p.id === userId
+      ? {
+        ...p,
+        isSpectator: nextIsSpectator,
+        vote: nextIsSpectator ? undefined : p.vote,
+      }
+      : p)));
+    if (nextIsSpectator) {
+      setMyVote(undefined);
+    }
+
+    send({type: 'toggle-spectator'});
+  }, [isSpectator, send]);
+
   return {
     participants,
     revealed,
@@ -222,5 +243,7 @@ export function useGame(
     disconnect,
     notFound,
     roomFull,
+    toggleSpectator,
+    isSpectator,
   };
 }
