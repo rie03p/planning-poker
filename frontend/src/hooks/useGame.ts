@@ -207,24 +207,21 @@ export function useGame(
   }, [send]);
 
   const toggleSpectator = useCallback(() => {
-    setIsSpectator(previous => {
-      const next = !previous;
-      const userId = userIdRef.current;
-      setParticipants(current => current.map(p => (p.id === userId
-        ? {
-          ...p,
-          isSpectator: next,
-          vote: next ? undefined : p.vote,
-        }
-        : p)));
-      if (next) {
-        setMyVote(undefined);
+    const nextIsSpectator = !isSpectator;
+    const userId = userIdRef.current;
+    setIsSpectator(nextIsSpectator);
+    setParticipants(current => current.map(p => (p.id === userId
+      ? {
+        ...p,
+        isSpectator: nextIsSpectator,
+        vote: nextIsSpectator ? undefined : p.vote,
       }
-
-      return next;
-    });
+      : p)));
+    if (nextIsSpectator) {
+      setMyVote(undefined);
+    }
     send({type: 'toggle-spectator'});
-  }, [send]);
+  }, [isSpectator, send]);
 
   return {
     participants,
