@@ -70,6 +70,8 @@ export function Game() {
     voteNextIssue,
     updateIssue,
     removeAllIssues,
+    isSpectator,
+    toggleSpectator,
   } = game;
   const [isIssuesOpen, setIsIssuesOpen] = useState(false);
 
@@ -160,6 +162,8 @@ export function Game() {
           issues={issues}
           isIssuesOpen={isIssuesOpen}
           onToggleIssues={handleToggleIssues}
+          isSpectator={isSpectator}
+          onToggleSpectator={toggleSpectator}
         />
 
         {/* Main Content Area */}
@@ -202,6 +206,7 @@ export function Game() {
           onVote={handleVote}
           revealed={revealed}
           voteResults={currentVoteResults}
+          isSpectator={isSpectator}
         />
       </VStack>
 

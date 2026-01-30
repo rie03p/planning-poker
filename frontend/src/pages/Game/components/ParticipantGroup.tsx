@@ -24,6 +24,7 @@ export function ParticipantGroup({participants, revealed}: ParticipantGroupProps
           hasVoted={p.vote !== undefined}
           vote={p.vote}
           revealed={revealed}
+          isSpectator={p.isSpectator}
         />
       ))}
     </HStack>

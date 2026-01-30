@@ -1,7 +1,7 @@
 import {
   Box, HStack, Link, Text, Tooltip,
 } from '@chakra-ui/react';
-import {ExternalLink} from 'lucide-react';
+import {ExternalLink, Eye, User} from 'lucide-react';
 import {type Issue} from '@planning-poker/shared';
 import {CopyInviteBox} from './CopyInviteBox';
 import {IssuesMenuButton} from './IssuesMenuButton';
@@ -12,6 +12,8 @@ type GameHeaderProps = {
   issues: Issue[];
   isIssuesOpen: boolean;
   onToggleIssues: () => void;
+  isSpectator: boolean;
+  onToggleSpectator: () => void;
 };
 
 export function GameHeader({
@@ -20,6 +22,8 @@ export function GameHeader({
   issues,
   isIssuesOpen,
   onToggleIssues,
+  isSpectator,
+  onToggleSpectator,
 }: GameHeaderProps) {
   const activeIssue = issues.find(issue => issue.id === activeIssueId);
   const activeIssueUrl = activeIssue?.url?.trim();
@@ -102,6 +106,30 @@ export function GameHeader({
         </Box>
 
         <HStack w={{base: 'auto', md: '200px'}} justify='flex-end' gap={2} flexShrink={0}>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <Box
+                as='button'
+                onClick={onToggleSpectator}
+                p={2}
+                borderRadius='md'
+                bg={isSpectator ? 'purple.100' : 'gray.100'}
+                color={isSpectator ? 'purple.600' : 'gray.600'}
+                _hover={{bg: isSpectator ? 'purple.200' : 'gray.200'}}
+                transition='all 0.2s'
+                display='flex'
+                alignItems='center'
+                justifyContent='center'
+              >
+                {isSpectator ? <Eye size={20} /> : <User size={20} />}
+              </Box>
+            </Tooltip.Trigger>
+            <Tooltip.Positioner>
+              <Tooltip.Content>
+                {isSpectator ? 'Switch to Participant' : 'Switch to Spectator'}
+              </Tooltip.Content>
+            </Tooltip.Positioner>
+          </Tooltip.Root>
           <CopyInviteBox gameId={gameId} />
           <IssuesMenuButton isOpen={isIssuesOpen} onToggle={onToggleIssues} />
         </HStack>

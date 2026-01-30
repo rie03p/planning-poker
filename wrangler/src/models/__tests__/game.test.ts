@@ -954,4 +954,120 @@ describe('Game', () => {
       expect(broadcastSpy).not.toHaveBeenCalled();
     });
   });
+  describe('spectator mode', () => {
+    it('should toggle isSpectator flag and remove vote', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      // Join and Vote - get userId from server
+      const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
+      (game as any).sessionToUserId.set('session-1', userId);
+
+      await handleMessage('session-1', {
+        type: 'vote',
+        vote: '5',
+      });
+
+      expect(gameState.participants.get(userId).vote).toBe('5');
+      expect(gameState.participants.get(userId).isSpectator).toBeFalsy();
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+
+      // Act: Toggle Spectator (ON)
+      await handleMessage('session-1', {
+        type: 'toggle-spectator',
+      });
+
+      // Assert: Became spectator, vote removed
+      expect(gameState.participants.get(userId).isSpectator).toBe(true);
+      expect(gameState.participants.get(userId).vote).toBeUndefined();
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'update',
+        participants: expect.arrayContaining([
+          expect.objectContaining({
+            id: userId,
+            isSpectator: true,
+            vote: undefined,
+          }),
+        ]),
+      }));
+
+      // Act: Toggle Spectator (OFF)
+      await handleMessage('session-1', {
+        type: 'toggle-spectator',
+      });
+
+      // Assert: Became participant
+      expect(gameState.participants.get(userId).isSpectator).toBe(false);
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'update',
+        participants: expect.arrayContaining([
+          expect.objectContaining({
+            id: userId,
+            isSpectator: false,
+          }),
+        ]),
+      }));
+    });
+
+    it('should ignore votes from spectators', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
+      (game as any).sessionToUserId.set('session-1', userId);
+
+      await handleMessage('session-1', {
+        type: 'toggle-spectator',
+      });
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+      broadcastSpy.mockClear();
+
+      await handleMessage('session-1', {
+        type: 'vote',
+        vote: '5',
+      });
+
+      expect(gameState.participants.get(userId).vote).toBeUndefined();
+      expect(broadcastSpy).not.toHaveBeenCalled();
+    });
+
+    it('should update vote results when toggling spectator after reveal', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = (game as any);
+
+      const user1Id = await joinAndGetUserId('session-1', 'User 1', 'user-1');
+      const user2Id = await joinAndGetUserId('session-2', 'User 2', 'user-2');
+      (game as any).sessionToUserId.set('session-1', user1Id);
+      (game as any).sessionToUserId.set('session-2', user2Id);
+
+      await handleMessage('session-1', {
+        type: 'add-issue',
+        issue: {title: 'Test Issue', description: 'Test Description'},
+      });
+
+      await handleMessage('session-1', {type: 'vote', vote: '5'});
+      await handleMessage('session-2', {type: 'vote', vote: '8'});
+
+      await handleMessage('session-1', {type: 'reveal'});
+      expect(gameState.issues[0].voteResults).toEqual({5: 1, 8: 1});
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+      broadcastSpy.mockClear();
+
+      await handleMessage('session-2', {type: 'toggle-spectator'});
+
+      expect(gameState.issues[0].voteResults).toEqual({5: 1});
+      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'issue-updated',
+        issue: expect.objectContaining({
+          voteResults: {5: 1},
+        }),
+      }));
+    });
+  });
 });

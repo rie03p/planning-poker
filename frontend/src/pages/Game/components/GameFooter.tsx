@@ -1,5 +1,6 @@
 import {useState, useEffect} from 'react';
 import {Box} from '@chakra-ui/react';
+import {Eye} from 'lucide-react';
 import {type VoteResults} from '@planning-poker/shared';
 import {CardSelection} from './CardSelection';
 import {VotingResultsChart} from './VotingResultsChart';
@@ -10,6 +11,7 @@ type GameFooterProps = {
   onVote: (vote: string, selected: boolean) => void;
   revealed: boolean;
   voteResults: VoteResults | undefined;
+  isSpectator: boolean;
 };
 
 export function GameFooter({
@@ -18,6 +20,7 @@ export function GameFooter({
   onVote,
   revealed,
   voteResults,
+  isSpectator,
 }: GameFooterProps) {
   const showResults = revealed && voteResults !== undefined;
   const [displayedResults, setDisplayedResults] = useState<VoteResults | undefined>(voteResults);
@@ -54,12 +57,36 @@ export function GameFooter({
         transition='transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s'
         opacity={showResults ? 0 : 1}
         pointerEvents={showResults ? 'none' : 'auto'}
+        display='flex'
+        alignItems='center'
+        justifyContent='center'
       >
-        <CardSelection
-          cards={cards}
-          myVote={myVote}
-          onVote={onVote}
-        />
+        {isSpectator
+          ? (
+            <Box
+              bg='gray.50'
+              px={6}
+              py={3}
+              borderRadius='full'
+              color='gray.500'
+              fontWeight='medium'
+              borderWidth='1px'
+              borderColor='gray.200'
+              display='flex'
+              alignItems='center'
+              gap={2}
+            >
+              <Eye size={20} />
+              You are in spectator mode
+            </Box>
+          )
+          : (
+            <CardSelection
+              cards={cards}
+              myVote={myVote}
+              onVote={onVote}
+            />
+          )}
       </Box>
 
       {/* Voting Results - Slides up from bottom */}

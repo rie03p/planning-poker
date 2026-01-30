@@ -217,6 +217,10 @@ export class Game {
 
         const p = this.gameState.participants.get(userId);
         if (p) {
+          if (p.isSpectator) {
+            return;
+          }
+
           // Validate vote against current voting system
           const votingSystem = await this.getVotingSystem();
           const validCards = getCardsForVotingSystem(votingSystem);
@@ -243,12 +247,7 @@ export class Game {
 
         // Save vote results to active issue
         if (this.gameState.activeIssueId) {
-          const voteResults: Record<string, number> = {};
-          for (const p of this.gameState.participants.values()) {
-            if (p.vote) {
-              voteResults[p.vote] = (voteResults[p.vote] ?? 0) + 1;
-            }
-          }
+          const voteResults = this.buildVoteResults();
 
           const issueIndex = this.gameState.issues.findIndex(i => i.id === this.gameState.activeIssueId);
           if (issueIndex !== -1) {
@@ -387,6 +386,44 @@ export class Game {
         });
         break;
       }
+
+      case 'toggle-spectator': {
+        const userId = this.sessionToUserId.get(sessionId);
+        if (!userId) {
+          return;
+        }
+
+        const p = this.gameState.participants.get(userId);
+        if (p) {
+          p.isSpectator = !p.isSpectator;
+          if (p.isSpectator) {
+            p.vote = undefined;
+          }
+
+          if (this.gameState.revealed && this.gameState.activeIssueId) {
+            const issueIndex = this.gameState.issues.findIndex(i => i.id === this.gameState.activeIssueId);
+            if (issueIndex !== -1) {
+              this.gameState.issues[issueIndex] = {
+                ...this.gameState.issues[issueIndex],
+                voteResults: this.buildVoteResults(),
+              };
+              this.broadcast({
+                type: 'issue-updated',
+                issue: this.gameState.issues[issueIndex],
+              });
+            }
+          }
+
+          this.broadcast({
+            type: 'update',
+            participants: [...this.gameState.participants.values()],
+            revealed: this.gameState.revealed,
+            activeIssueId: this.gameState.activeIssueId,
+          });
+        }
+
+        break;
+      }
     }
   }
 
@@ -396,6 +433,21 @@ export class Game {
     for (const p of this.gameState.participants.values()) {
       p.vote = undefined;
     }
+  }
+
+  private buildVoteResults() {
+    const voteResults: Record<string, number> = {};
+    for (const p of this.gameState.participants.values()) {
+      if (p.isSpectator) {
+        continue;
+      }
+
+      if (p.vote) {
+        voteResults[p.vote] = (voteResults[p.vote] ?? 0) + 1;
+      }
+    }
+
+    return voteResults;
   }
 
   private setActiveIssue(issueId: string) {
