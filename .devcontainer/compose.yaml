@@ -8,4 +8,3 @@ services:
         target: /workspaces/planning-poker
         consistency: cached
     init: true
-

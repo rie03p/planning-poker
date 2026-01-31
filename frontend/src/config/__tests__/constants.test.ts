@@ -1,7 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {
-  toWebSocketUrl, BACKEND_URL, LOCAL_STORAGE_KEYS, DEFAULT_VOTING_SYSTEM,
-} from '../constants';
+import {toWebSocketUrl, BACKEND_URL, LOCAL_STORAGE_KEYS, DEFAULT_VOTING_SYSTEM} from '../constants';
 
 describe('constants', () => {
   describe('toWebSocketUrl', () => {

@@ -1,13 +1,10 @@
-import {
-  describe, it, expect, vi, beforeEach,
-} from 'vitest';
+import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {handleCreateGame} from '../create';
 import type {Env} from '../../../types';
 
 const createMockEnv = (): Env => {
   const mockRegistryInstance = {
-    fetch: vi.fn(async () =>
-      new Response('OK', {status: 200})),
+    fetch: vi.fn(async () => new Response('OK', {status: 200})),
   };
 
   return {
@@ -64,26 +61,25 @@ describe('handleCreateGame', () => {
     });
   });
 
-  it.each([
-    't-shirts',
-    'modified-fibonacci',
-    'powers-of-2',
-  ])('should create game with %s voting system', async votingSystem => {
-    const request = new Request('http://localhost/games', {
-      method: 'POST',
-      body: JSON.stringify({votingSystem}),
-    });
+  it.each(['t-shirts', 'modified-fibonacci', 'powers-of-2'])(
+    'should create game with %s voting system',
+    async votingSystem => {
+      const request = new Request('http://localhost/games', {
+        method: 'POST',
+        body: JSON.stringify({votingSystem}),
+      });
 
-    const response = await handleCreateGame(request, mockEnv, corsHeaders);
+      const response = await handleCreateGame(request, mockEnv, corsHeaders);
 
-    expect(response.status).toBe(201);
+      expect(response.status).toBe(201);
 
-    const data = await response.json();
-    expect(data).toEqual({
-      gameId: 'test-uuid-1234',
-      votingSystem,
-    });
-  });
+      const data = await response.json();
+      expect(data).toEqual({
+        gameId: 'test-uuid-1234',
+        votingSystem,
+      });
+    },
+  );
 
   it('should return 400 for invalid voting system', async () => {
     const request = new Request('http://localhost/games', {
@@ -113,8 +109,7 @@ describe('handleCreateGame', () => {
 
   it('should register game in registry', async () => {
     const mockRegistryInstance = {
-      fetch: vi.fn(async () =>
-        new Response('OK', {status: 200})),
+      fetch: vi.fn(async () => new Response('OK', {status: 200})),
     };
 
     mockEnv.REGISTRY.get = vi.fn(() => mockRegistryInstance) as any;
@@ -127,16 +122,13 @@ describe('handleCreateGame', () => {
     await handleCreateGame(request, mockEnv, corsHeaders);
 
     expect(mockEnv.REGISTRY.idFromName).toHaveBeenCalledWith('global');
-    expect(mockRegistryInstance.fetch).toHaveBeenCalledWith(
-      'http://registry/register',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          gameId: 'test-uuid-1234',
-          votingSystem: 't-shirts',
-        }),
-      },
-    );
+    expect(mockRegistryInstance.fetch).toHaveBeenCalledWith('http://registry/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        gameId: 'test-uuid-1234',
+        votingSystem: 't-shirts',
+      }),
+    });
   });
 
   it('should include CORS headers in response', async () => {

@@ -1,8 +1,6 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {
-  Button, Flex, Text, VStack,
-} from '@chakra-ui/react';
+import {Button, Flex, Text, VStack} from '@chakra-ui/react';
 import {createGameResponseSchema} from '@planning-poker/shared';
 import {BACKEND_URL, DEFAULT_VOTING_SYSTEM} from '../../config/constants';
 import {SelectVotingSystem} from './components/SelectVotingSystem';
@@ -65,11 +63,7 @@ export function Home() {
         >
           Start new game
         </Button>
-        {error && (
-          <Text color='red.500'>
-            {error}
-          </Text>
-        )}
+        {error && <Text color='red.500'>{error}</Text>}
       </VStack>
     </Flex>
   );

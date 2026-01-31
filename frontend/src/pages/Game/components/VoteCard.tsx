@@ -5,10 +5,7 @@ type VoteCardProps = {
   selected?: boolean;
 };
 
-export function VoteCard({
-  children,
-  selected,
-}: VoteCardProps) {
+export function VoteCard({children, selected}: VoteCardProps) {
   return (
     <Box
       w='56px'
