@@ -131,7 +131,10 @@ export function GameHeader({
             </Tooltip.Positioner>
           </Tooltip.Root>
           <CopyInviteBox gameId={gameId} />
-          <IssuesMenuButton isOpen={isIssuesOpen} onToggle={onToggleIssues} />
+          {/* SP: always show, PC: hide when panel is open (close button is in panel) */}
+          <Box display={{base: 'block', md: isIssuesOpen ? 'none' : 'block'}}>
+            <IssuesMenuButton isOpen={isIssuesOpen} onToggle={onToggleIssues} />
+          </Box>
         </HStack>
       </HStack>
     </Box>

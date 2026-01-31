@@ -20,6 +20,7 @@ import {GameTable} from './components/GameTable';
 import {GameFooter} from './components/GameFooter';
 import {ParticipantGroup} from './components/ParticipantGroup';
 import {IssuesDrawer} from './components/IssuesDrawer';
+import {IssuesPanel} from './components/IssuesPanel';
 
 export function Game() {
   const {gameId} = useParams<{gameId: string}>();
@@ -210,7 +211,21 @@ export function Game() {
         />
       </VStack>
 
-      {/* Issues Sidebar */}
+      {/* Issues Panel - PC only */}
+      <IssuesPanel
+        isOpen={isIssuesOpen}
+        onClose={handleCloseIssues}
+        issues={issues}
+        activeIssueId={activeIssueId}
+        onAddIssue={addIssue}
+        onRemoveIssue={removeIssue}
+        onSetActiveIssue={setActiveIssue}
+        onUpdateIssue={updateIssue}
+        onRemoveAllIssues={removeAllIssues}
+        cards={cards}
+      />
+
+      {/* Issues Drawer - Mobile only */}
       <IssuesDrawer
         isOpen={isIssuesOpen}
         onClose={handleCloseIssues}
@@ -222,6 +237,7 @@ export function Game() {
         onUpdateIssue={updateIssue}
         onRemoveAllIssues={removeAllIssues}
         cards={cards}
+        isMobileOnly
       />
     </HStack>
   );
