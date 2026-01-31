@@ -23,13 +23,7 @@ export function ActionArea({
 
   if (!revealed) {
     return (
-      <Button
-        colorPalette='orange'
-        size='lg'
-        borderRadius='full'
-        onClick={reveal}
-        px={8}
-      >
+      <Button colorPalette='orange' size='lg' borderRadius='full' onClick={reveal} px={8}>
         Reveal votes
       </Button>
     );
@@ -38,13 +32,7 @@ export function ActionArea({
   // Revealed state
   if (onVoteNext) {
     return (
-      <Button
-        colorPalette='blue'
-        size='lg'
-        borderRadius='full'
-        onClick={onVoteNext}
-        px={8}
-      >
+      <Button colorPalette='blue' size='lg' borderRadius='full' onClick={onVoteNext} px={8}>
         Vote next issue
       </Button>
     );

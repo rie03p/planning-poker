@@ -1,16 +1,18 @@
 import type {Env} from './types';
 
 function getAllowedOrigins(env: Env): Set<string> {
-  const envOrigins = env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(o => o.length > 0);
+  const envOrigins = env.ALLOWED_ORIGINS.split(',')
+    .map(o => o.trim())
+    .filter(o => o.length > 0);
   return new Set(envOrigins);
 }
 
 export function getCorsHeaders(origin: string | undefined, env: Env): Headers | undefined {
   const allowedOrigins = getAllowedOrigins(env);
-  const isAllowedOrigin
-    = origin
-      && (allowedOrigins.has(origin)
-        || /https:\/\/[a-z\d]+\.planning-poker-ba3\.pages\.dev$/.test(origin));
+  const isAllowedOrigin =
+    origin &&
+    (allowedOrigins.has(origin) ||
+      /https:\/\/[a-z\d]+\.planning-poker-ba3\.pages\.dev$/.test(origin));
 
   if (!isAllowedOrigin) {
     return undefined;

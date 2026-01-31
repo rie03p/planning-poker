@@ -1,21 +1,19 @@
-import {
-  describe, it, expect, vi, beforeEach,
-} from 'vitest';
+import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {handleGameWebSocket} from '../gameWebSocket';
 import type {Env} from '../../types';
 
 const createMockEnv = (): Env => {
   const mockGameInstance = {
-    fetch: vi.fn(async (_request: Request) =>
-      new Response('OK', {status: 200})),
+    fetch: vi.fn(async (_request: Request) => new Response('OK', {status: 200})),
   };
 
   const mockRegistryInstance = {
-    fetch: vi.fn(async () =>
-      new Response(
-        JSON.stringify({exists: true, votingSystem: 'fibonacci'}),
-        {headers: {'Content-Type': 'application/json'}},
-      )),
+    fetch: vi.fn(
+      async () =>
+        new Response(JSON.stringify({exists: true, votingSystem: 'fibonacci'}), {
+          headers: {'Content-Type': 'application/json'},
+        }),
+    ),
   };
 
   return {
@@ -74,11 +72,12 @@ describe('handleGameWebSocket', () => {
 
   it('should return 404 if game does not exist', async () => {
     const mockRegistryInstance = {
-      fetch: vi.fn(async () =>
-        new Response(
-          JSON.stringify({exists: false, votingSystem: 'fibonacci'}),
-          {headers: {'Content-Type': 'application/json'}},
-        )),
+      fetch: vi.fn(
+        async () =>
+          new Response(JSON.stringify({exists: false, votingSystem: 'fibonacci'}), {
+            headers: {'Content-Type': 'application/json'},
+          }),
+      ),
     };
 
     mockEnv.REGISTRY.get = vi.fn(() => mockRegistryInstance) as any;
@@ -96,8 +95,7 @@ describe('handleGameWebSocket', () => {
 
   it('should forward request to game durable object for existing game', async () => {
     const mockGameInstance = {
-      fetch: vi.fn(async () =>
-        new Response('OK', {status: 200})),
+      fetch: vi.fn(async () => new Response('OK', {status: 200})),
     };
 
     mockEnv.GAME.get = vi.fn(() => mockGameInstance) as any;

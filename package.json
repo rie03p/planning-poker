@@ -15,15 +15,19 @@
     "lint": "oxlint .",
     "lint:frontend": "oxlint frontend",
     "lint:backend": "oxlint wrangler",
-    "format": "oxlint --fix .",
-    "format:frontend": "oxlint --fix frontend",
-    "format:backend": "oxlint --fix wrangler"
+    "lint:fix": "oxlint --fix .",
+    "lint:fix:frontend": "oxlint --fix frontend",
+    "lint:fix:backend": "oxlint --fix wrangler",
+    "format": "prettier --write .",
+    "format:frontend": "prettier --write frontend",
+    "format:backend": "prettier --write wrangler"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "packageManager": "pnpm@10.25.0",
   "devDependencies": {
-    "oxlint": "^1.9.0"
+    "oxlint": "^1.9.0",
+    "prettier": "^3.6.2"
   }
 }

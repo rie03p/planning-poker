@@ -10,12 +10,7 @@ type ErrorMessageProps = {
 /**
  * Error message component with optional retry button
  */
-export function ErrorMessage({
-  title,
-  message,
-  onRetry,
-  retryLabel = '再試行',
-}: ErrorMessageProps) {
+export function ErrorMessage({title, message, onRetry, retryLabel = '再試行'}: ErrorMessageProps) {
   return (
     <VStack minH='100vh' justify='center' align='center' gap={4} p={4}>
       <Text fontSize='2xl' fontWeight='bold'>
@@ -34,4 +29,3 @@ export function ErrorMessage({
     </VStack>
   );
 }
-

@@ -1,6 +1,4 @@
-import {
-  Box, Container, Flex, Heading, Link, Spacer,
-} from '@chakra-ui/react';
+import {Box, Container, Flex, Heading, Link, Spacer} from '@chakra-ui/react';
 import github from '../assets/github.svg';
 
 export const Header = () => (

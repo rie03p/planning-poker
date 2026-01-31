@@ -1,13 +1,6 @@
-import {
-  useMemo,
-  useEffect,
-  useState,
-  useCallback,
-} from 'react';
+import {useMemo, useEffect, useState, useCallback} from 'react';
 import {useParams} from 'react-router-dom';
-import {
-  VStack, HStack, Text,
-} from '@chakra-ui/react';
+import {VStack, HStack, Text} from '@chakra-ui/react';
 import {getCardsForVotingSystem, MAX_PARTICIPANTS, participantSchema} from '@planning-poker/shared';
 import {LOCAL_STORAGE_KEYS} from '../../config/constants';
 import {useLocalStorage} from '../../hooks/useLocalStorage';
@@ -28,15 +21,12 @@ export function Game() {
     throw new TypeError('gameId is required');
   }
 
-  const {
-    value: name,
-    setValue: setName,
-  } = useLocalStorage<string>(LOCAL_STORAGE_KEYS.NAME, '');
+  const {value: name, setValue: setName} = useLocalStorage<string>(LOCAL_STORAGE_KEYS.NAME, '');
 
-  const {
-    value: userId,
-    setValue: setUserId,
-  } = useLocalStorage<string>(LOCAL_STORAGE_KEYS.USER_ID, '');
+  const {value: userId, setValue: setUserId} = useLocalStorage<string>(
+    LOCAL_STORAGE_KEYS.USER_ID,
+    '',
+  );
 
   useEffect(() => {
     if (name) {
@@ -47,9 +37,12 @@ export function Game() {
     }
   }, [name, setName]);
 
-  const handleUserIdChange = useCallback((newUserId: string) => {
-    setUserId(newUserId);
-  }, [setUserId]);
+  const handleUserIdChange = useCallback(
+    (newUserId: string) => {
+      setUserId(newUserId);
+    },
+    [setUserId],
+  );
 
   const game = useGame(gameId, name ?? '', userId ?? '', handleUserIdChange);
 
@@ -76,10 +69,7 @@ export function Game() {
   } = game;
   const [isIssuesOpen, setIsIssuesOpen] = useState(false);
 
-  const hasAnyVotes = useMemo(
-    () => participants.some(p => p.vote !== undefined),
-    [participants],
-  );
+  const hasAnyVotes = useMemo(() => participants.some(p => p.vote !== undefined), [participants]);
 
   const currentVoteResults = useMemo(() => {
     // If active issue has saved results, use them
@@ -118,9 +108,7 @@ export function Game() {
         <Text fontSize='2xl' fontWeight='bold'>
           Room is full
         </Text>
-        <Text>
-          This room has reached the maximum capacity ({MAX_PARTICIPANTS} participants).
-        </Text>
+        <Text>This room has reached the maximum capacity ({MAX_PARTICIPANTS} participants).</Text>
       </VStack>
     );
   }
@@ -148,14 +136,7 @@ export function Game() {
   };
 
   return (
-    <HStack
-      align='stretch'
-      minH='100vh'
-      maxW='100vw'
-      overflowX='hidden'
-      gap={0}
-      bg='gray.50'
-    >
+    <HStack align='stretch' minH='100vh' maxW='100vw' overflowX='hidden' gap={0} bg='gray.50'>
       <VStack flex={1} width='100%' gap={0}>
         <GameHeader
           gameId={gameId}
@@ -168,14 +149,7 @@ export function Game() {
         />
 
         {/* Main Content Area */}
-        <VStack
-          flex={1}
-          w='full'
-          justify='center'
-          gap={12}
-          p={8}
-          overflowY='auto'
-        >
+        <VStack flex={1} w='full' justify='center' gap={12} p={8} overflowY='auto'>
           {/* Participants - Top Group */}
           <ParticipantGroup
             participants={participants.slice(Math.ceil(participants.length / 2))}

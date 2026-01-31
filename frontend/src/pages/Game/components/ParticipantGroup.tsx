@@ -9,14 +9,7 @@ type ParticipantGroupProps = {
 
 export function ParticipantGroup({participants, revealed}: ParticipantGroupProps) {
   return (
-    <HStack
-      gap={8}
-      justify='center'
-      flexWrap='wrap'
-      minH='120px'
-      align='center'
-      px={4}
-    >
+    <HStack gap={8} justify='center' flexWrap='wrap' minH='120px' align='center' px={4}>
       {participants.map(p => (
         <ParticipantCard
           key={p.id}

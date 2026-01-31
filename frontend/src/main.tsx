@@ -11,8 +11,10 @@ if (!root) {
   throw new Error('Root element not found');
 }
 
-createRoot(root).render(<StrictMode>
-  <ChakraProvider value={system}>
-    <App />
-  </ChakraProvider>
-</StrictMode>);
+createRoot(root).render(
+  <StrictMode>
+    <ChakraProvider value={system}>
+      <App />
+    </ChakraProvider>
+  </StrictMode>,
+);

@@ -1,13 +1,5 @@
 import {useState, useRef} from 'react';
-import {
-  Button,
-  Input,
-  VStack,
-  Text,
-  Textarea,
-  Dialog,
-  Field,
-} from '@chakra-ui/react';
+import {Button, Input, VStack, Text, Textarea, Dialog, Field} from '@chakra-ui/react';
 import {type Issue, issueSchema} from '@planning-poker/shared';
 
 type IssueDetailDialogProps = {
@@ -18,12 +10,7 @@ type IssueDetailDialogProps = {
   onUpdateIssue: (issue: Issue) => void;
 };
 
-export function IssueDetailDialog({
-  isOpen,
-  onClose,
-  issue,
-  onUpdateIssue,
-}: IssueDetailDialogProps) {
+export function IssueDetailDialog({isOpen, onClose, issue, onUpdateIssue}: IssueDetailDialogProps) {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
@@ -90,11 +77,15 @@ export function IssueDetailDialog({
   }
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={event => {
-      if (!event.open) {
-        onClose();
-      }
-    }} placement='center'>
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={event => {
+        if (!event.open) {
+          onClose();
+        }
+      }}
+      placement='center'
+    >
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
@@ -106,7 +97,9 @@ export function IssueDetailDialog({
           <Dialog.Body>
             <VStack gap={4} align='stretch'>
               <Field.Root invalid={errors.title ? true : undefined}>
-                <Field.Label fontWeight='medium' fontSize='sm'>Title</Field.Label>
+                <Field.Label fontWeight='medium' fontSize='sm'>
+                  Title
+                </Field.Label>
                 <Input
                   value={title}
                   onChange={event => {
@@ -117,12 +110,16 @@ export function IssueDetailDialog({
                   }}
                   placeholder='Issue title'
                 />
-                <Text fontSize='xs' color='gray.500'>{title.length}/100</Text>
+                <Text fontSize='xs' color='gray.500'>
+                  {title.length}/100
+                </Text>
                 {errors.title && <Field.ErrorText>{errors.title}</Field.ErrorText>}
               </Field.Root>
 
               <Field.Root invalid={errors.url ? true : undefined}>
-                <Field.Label fontWeight='medium' fontSize='sm'>Link</Field.Label>
+                <Field.Label fontWeight='medium' fontSize='sm'>
+                  Link
+                </Field.Label>
                 <Input
                   value={url}
                   onChange={event => {
@@ -133,12 +130,16 @@ export function IssueDetailDialog({
                   }}
                   placeholder='Link URL (optional)'
                 />
-                <Text fontSize='xs' color='gray.500'>{url.length}/200</Text>
+                <Text fontSize='xs' color='gray.500'>
+                  {url.length}/200
+                </Text>
                 {errors.url && <Field.ErrorText>{errors.url}</Field.ErrorText>}
               </Field.Root>
 
               <Field.Root invalid={errors.description ? true : undefined}>
-                <Field.Label fontWeight='medium' fontSize='sm'>Description</Field.Label>
+                <Field.Label fontWeight='medium' fontSize='sm'>
+                  Description
+                </Field.Label>
                 <Textarea
                   value={description}
                   onChange={event => {
@@ -150,7 +151,9 @@ export function IssueDetailDialog({
                   placeholder='Add a description...'
                   rows={4}
                 />
-                <Text fontSize='xs' color='gray.500'>{description.length}/1000</Text>
+                <Text fontSize='xs' color='gray.500'>
+                  {description.length}/1000
+                </Text>
                 {errors.description && <Field.ErrorText>{errors.description}</Field.ErrorText>}
               </Field.Root>
             </VStack>
@@ -158,9 +161,13 @@ export function IssueDetailDialog({
 
           <Dialog.Footer>
             <Dialog.ActionTrigger asChild>
-              <Button variant='outline' onClick={onClose}>Cancel</Button>
+              <Button variant='outline' onClick={onClose}>
+                Cancel
+              </Button>
             </Dialog.ActionTrigger>
-            <Button colorPalette='blue' onClick={handleSave}>Save</Button>
+            <Button colorPalette='blue' onClick={handleSave}>
+              Save
+            </Button>
           </Dialog.Footer>
         </Dialog.Content>
       </Dialog.Positioner>

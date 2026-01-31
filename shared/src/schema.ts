@@ -19,7 +19,7 @@ export const VOTING_SYSTEMS = {
   'powers-of-2': ['0', '1', '2', '4', '8', '16', '32', '64', '?', '☕'],
 } as const satisfies Record<VotingSystem, readonly string[]>;
 
-export type VotingCard = typeof VOTING_SYSTEMS[VotingSystem][number];
+export type VotingCard = (typeof VOTING_SYSTEMS)[VotingSystem][number];
 
 // Helper function to get all valid cards across all voting systems
 const getAllValidCards = (): string[] => [...new Set(Object.values(VOTING_SYSTEMS).flat())];
@@ -72,7 +72,11 @@ export const participantSchema = z.object({
 
 // WebSocket message schemas
 export const clientMessageSchema = z.discriminatedUnion('type', [
-  z.object({type: z.literal('join'), name: participantSchema.shape.name, clientId: participantSchema.shape.id.optional()}),
+  z.object({
+    type: z.literal('join'),
+    name: participantSchema.shape.name,
+    clientId: participantSchema.shape.id.optional(),
+  }),
   z.object({type: z.literal('vote'), vote: votingCardSchema.optional()}),
   z.object({type: z.literal('reveal')}),
   z.object({type: z.literal('reset')}),

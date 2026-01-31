@@ -15,9 +15,7 @@ import {
   Portal,
   Tooltip,
 } from '@chakra-ui/react';
-import {
-  Trash2, ExternalLink, BarChart3, MoreHorizontal, CircleHelp,
-} from 'lucide-react';
+import {Trash2, ExternalLink, BarChart3, MoreHorizontal, CircleHelp} from 'lucide-react';
 import {type Issue, MAX_ISSUES} from '@planning-poker/shared';
 import {parseIssueInput} from '../../../utils/issueInputParser';
 import {IssueDetailDialog} from './IssueDetailDialog';
@@ -81,13 +79,7 @@ export function IssuesListContent({
   return (
     <Box height='100%' display='flex' flexDirection='column' bg='white'>
       {/* Header */}
-      <HStack
-        p={4}
-        borderBottomWidth='1px'
-        justify='space-between'
-        align='center'
-        bg='white'
-      >
+      <HStack p={4} borderBottomWidth='1px' justify='space-between' align='center' bg='white'>
         <Text fontWeight='bold' fontSize='lg'>
           Issues ({issues.length}/{MAX_ISSUES})
         </Text>
@@ -95,22 +87,12 @@ export function IssuesListContent({
           {issues.length > 0 && (
             <Menu.Root positioning={{placement: 'bottom-end', offset: {mainAxis: 8}}}>
               <Menu.Trigger asChild>
-                <IconButton
-                  aria-label='Options'
-                  variant='ghost'
-                  size='sm'
-                  colorPalette='gray'
-                >
+                <IconButton aria-label='Options' variant='ghost' size='sm' colorPalette='gray'>
                   <MoreHorizontal />
                 </IconButton>
               </Menu.Trigger>
               <Menu.Positioner zIndex='popover'>
-                <Menu.Content
-                  p={2}
-                  borderRadius='xl'
-                  boxShadow='lg'
-                  minW='220px'
-                >
+                <Menu.Content p={2} borderRadius='xl' boxShadow='lg' minW='220px'>
                   <Menu.Item
                     value='delete-all'
                     color='red.500'
@@ -140,8 +122,8 @@ export function IssuesListContent({
             </Tooltip.Trigger>
             <Tooltip.Positioner>
               <Tooltip.Content maxW='xs' fontSize='xs'>
-                You can add multiple issues at once by entering them on separate lines.
-                Supports Markdown list format (e.g. - [Title](URL))
+                You can add multiple issues at once by entering them on separate lines. Supports
+                Markdown list format (e.g. - [Title](URL))
               </Tooltip.Content>
             </Tooltip.Positioner>
           </Tooltip.Root>
@@ -178,118 +160,114 @@ export function IssuesListContent({
       {/* Scrollable Issues List */}
       <Box flex={1} overflowY='auto' p={4}>
         <VStack gap={3} align='stretch'>
-          {issues.length === 0
-            ? (
-              <Text color='gray.500' textAlign='center' py={4}>
-                No issues registered yet.
-              </Text>
-            )
-            : (
-              issues.map(issue => {
-                const isActive = issue.id === activeIssueId;
-                return (
-                  <Card.Root
-                    key={issue.id}
-                    variant={isActive ? 'subtle' : 'outline'}
-                    colorPalette={isActive ? 'blue' : undefined}
-                    onClick={() => {
-                      setEditingIssue(issue);
-                    }}
-                    cursor='pointer'
-                    _hover={{borderColor: 'blue.400'}}
-                  >
-                    <Card.Body p={3}>
-                      <VStack align='stretch' gap={2}>
-                        <HStack justify='space-between' align='center'>
-                          <Text fontWeight='medium' truncate flex={1}>
-                            {issue.title}
-                          </Text>
-                          {issue.voteResults && Object.keys(issue.voteResults).length > 0 && (
-                            <IconButton
-                              aria-label='View voting results'
-                              size='sm'
-                              colorPalette='blue'
-                              variant='ghost'
-                              onClick={event => {
-                                event.stopPropagation();
-                                setViewingResultsIssue(issue);
-                              }}
-                            >
-                              <BarChart3 size={16} />
-                            </IconButton>
-                          )}
+          {issues.length === 0 ? (
+            <Text color='gray.500' textAlign='center' py={4}>
+              No issues registered yet.
+            </Text>
+          ) : (
+            issues.map(issue => {
+              const isActive = issue.id === activeIssueId;
+              return (
+                <Card.Root
+                  key={issue.id}
+                  variant={isActive ? 'subtle' : 'outline'}
+                  colorPalette={isActive ? 'blue' : undefined}
+                  onClick={() => {
+                    setEditingIssue(issue);
+                  }}
+                  cursor='pointer'
+                  _hover={{borderColor: 'blue.400'}}
+                >
+                  <Card.Body p={3}>
+                    <VStack align='stretch' gap={2}>
+                      <HStack justify='space-between' align='center'>
+                        <Text fontWeight='medium' truncate flex={1}>
+                          {issue.title}
+                        </Text>
+                        {issue.voteResults && Object.keys(issue.voteResults).length > 0 && (
                           <IconButton
-                            aria-label='Remove issue'
+                            aria-label='View voting results'
                             size='sm'
-                            colorPalette='red'
+                            colorPalette='blue'
                             variant='ghost'
                             onClick={event => {
                               event.stopPropagation();
-                              setDeletingIssueId(issue.id);
+                              setViewingResultsIssue(issue);
                             }}
                           >
-                            <Trash2 size={16} />
+                            <BarChart3 size={16} />
                           </IconButton>
-                        </HStack>
-
-                        {issue.url && (
-                          <Link
-                            href={issue.url}
-                            target='_blank'
-                            fontSize='sm'
-                            colorPalette='blue'
-                            onClick={event => {
-                              event.stopPropagation();
-                            }}
-                            width='fit-content'
-                          >
-                            <HStack gap={1}>
-                              <Text maxW='200px' truncate>
-                                {issue.url}
-                              </Text>
-                              <ExternalLink
-                                size={14}
-                                style={{margin: '0 2px'}}
-                              />
-                            </HStack>
-                          </Link>
                         )}
+                        <IconButton
+                          aria-label='Remove issue'
+                          size='sm'
+                          colorPalette='red'
+                          variant='ghost'
+                          onClick={event => {
+                            event.stopPropagation();
+                            setDeletingIssueId(issue.id);
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </IconButton>
+                      </HStack>
 
-                        <Box pt={2} onClick={event => {
+                      {issue.url && (
+                        <Link
+                          href={issue.url}
+                          target='_blank'
+                          fontSize='sm'
+                          colorPalette='blue'
+                          onClick={event => {
+                            event.stopPropagation();
+                          }}
+                          width='fit-content'
+                        >
+                          <HStack gap={1}>
+                            <Text maxW='200px' truncate>
+                              {issue.url}
+                            </Text>
+                            <ExternalLink size={14} style={{margin: '0 2px'}} />
+                          </HStack>
+                        </Link>
+                      )}
+
+                      <Box
+                        pt={2}
+                        onClick={event => {
                           event.stopPropagation();
-                        }}>
-                          {isActive
-                            ? (
-                              <Button
-                                size='sm'
-                                colorPalette='blue'
-                                width='full'
-                                variant='solid'
-                                disabled
-                                _disabled={{opacity: 1, cursor: 'default'}}
-                              >
-                                Voting now...
-                              </Button>
-                            )
-                            : (
-                              <Button
-                                size='sm'
-                                variant='subtle'
-                                width='full'
-                                onClick={() => {
-                                  onSetActiveIssue(issue.id);
-                                }}
-                              >
-                                Vote this issue
-                              </Button>
-                            )}
-                        </Box>
-                      </VStack>
-                    </Card.Body>
-                  </Card.Root>
-                );
-              })
-            )}
+                        }}
+                      >
+                        {isActive ? (
+                          <Button
+                            size='sm'
+                            colorPalette='blue'
+                            width='full'
+                            variant='solid'
+                            disabled
+                            _disabled={{opacity: 1, cursor: 'default'}}
+                          >
+                            Voting now...
+                          </Button>
+                        ) : (
+                          <Button
+                            size='sm'
+                            variant='subtle'
+                            width='full'
+                            onClick={() => {
+                              onSetActiveIssue(issue.id);
+                            }}
+                          >
+                            Vote this issue
+                          </Button>
+                        )}
+                      </Box>
+                    </VStack>
+                  </Card.Body>
+                </Card.Root>
+              );
+            })
+          )}
         </VStack>
       </Box>
 
@@ -321,8 +299,7 @@ export function IssuesListContent({
                 <Dialog.Title>Delete Issue</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body>
-                Are you sure you want to delete this issue? This action cannot be
-                undone.
+                Are you sure you want to delete this issue? This action cannot be undone.
               </Dialog.Body>
               <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
@@ -360,8 +337,7 @@ export function IssuesListContent({
                 <Dialog.Title>Delete All Issues</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body>
-                Are you sure you want to delete ALL issues? This action cannot be
-                undone.
+                Are you sure you want to delete ALL issues? This action cannot be undone.
               </Dialog.Body>
               <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
