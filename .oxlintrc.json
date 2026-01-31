@@ -1,0 +1,10 @@
+{
+  "ignorePatterns": [
+    "node_modules",
+    ".next",
+    "out",
+    "public",
+    "dist",
+    "coverage"
+  ]
+}

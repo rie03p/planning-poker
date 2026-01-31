@@ -6,7 +6,7 @@ import type {Env} from '../../types';
 
 const createMockEnv = (): Env => {
   const mockGameInstance = {
-    fetch: vi.fn(async (request: Request) =>
+    fetch: vi.fn(async (_request: Request) =>
       new Response('OK', {status: 200})),
   };
 
