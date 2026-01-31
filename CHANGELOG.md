@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/rie03p/planning-poker/compare/v1.3.1...v1.4.0) (2026-01-31)
+
+
+### Features
+
+* keep the Issues tab visible on PC ([#89](https://github.com/rie03p/planning-poker/issues/89)) ([0f3dfa6](https://github.com/rie03p/planning-poker/commit/0f3dfa6bd52b4bd10959ea4ed157a82e7629bb18))
+* spectator mode ([#87](https://github.com/rie03p/planning-poker/issues/87)) ([c75bcce](https://github.com/rie03p/planning-poker/commit/c75bccef04954a911092beb56b8695794c6df4cf))
+
 ## [1.3.1](https://github.com/rie03p/planning-poker/compare/v1.3.0...v1.3.1) (2026-01-28)
 
 
