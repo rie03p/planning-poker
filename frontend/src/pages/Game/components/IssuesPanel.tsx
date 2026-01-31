@@ -43,21 +43,19 @@ export function IssuesPanel({
         bg='white'
         h='100%'
       >
-        {isOpen && (
-          <Box w='380px' h='100%'>
-            <IssuesListContent
-              issues={issues}
-              activeIssueId={activeIssueId}
-              onAddIssue={onAddIssue}
-              onRemoveIssue={onRemoveIssue}
-              onSetActiveIssue={onSetActiveIssue}
-              onUpdateIssue={onUpdateIssue}
-              onRemoveAllIssues={onRemoveAllIssues}
-              onClose={onClose}
-              cards={cards}
-            />
-          </Box>
-        )}
+        <Box w='380px' h='100%'>
+          <IssuesListContent
+            issues={issues}
+            activeIssueId={activeIssueId}
+            onAddIssue={onAddIssue}
+            onRemoveIssue={onRemoveIssue}
+            onSetActiveIssue={onSetActiveIssue}
+            onUpdateIssue={onUpdateIssue}
+            onRemoveAllIssues={onRemoveAllIssues}
+            onClose={onClose}
+            cards={cards}
+          />
+        </Box>
       </Box>
     </Box>
   );
