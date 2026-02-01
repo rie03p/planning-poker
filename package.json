@@ -2,6 +2,9 @@
   "name": "planning-poker",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "license": "MIT",
+  "author": "",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -12,18 +15,17 @@
     "test:wrangler": "pnpm --filter wrangler test",
     "test:coverage:frontend": "pnpm --filter frontend test:coverage",
     "test:coverage:wrangler": "pnpm --filter wrangler test:coverage",
-    "lint": "xo",
-    "lint:frontend": "xo frontend",
-    "lint:backend": "xo wrangler",
-    "format": "xo --fix",
-    "format:frontend": "xo frontend --fix",
-    "format:backend": "xo wrangler --fix"
+    "lint": "oxlint .",
+    "lint:frontend": "oxlint frontend",
+    "lint:backend": "oxlint wrangler",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "format:frontend": "oxfmt frontend",
+    "format:backend": "oxfmt wrangler"
   },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "packageManager": "pnpm@10.25.0",
   "devDependencies": {
-    "xo": "^1.2.3"
-  }
+    "oxfmt": "^0.27.0",
+    "oxlint": "^1.9.0"
+  },
+  "packageManager": "pnpm@10.25.0"
 }

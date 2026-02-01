@@ -18,8 +18,8 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.2025.0",
     "@vitest/coverage-v8": "^4.0.16",
-    "vitest": "^4.0.16",
     "typescript": "^5.9.3",
+    "vitest": "^4.0.16",
     "wrangler": "^4.54.0"
   }
 }

@@ -1,15 +1,12 @@
-import {
-  describe, it, expect, vi, beforeEach, afterEach,
-} from 'vitest';
+import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import {renderHook} from '@testing-library/react';
 import {useGame} from '../useGame';
 
 describe('useGame', () => {
   beforeEach(() => {
-    globalThis.fetch = vi.fn(async () => new Response(
-      JSON.stringify({exists: true}),
-      {status: 200},
-    ));
+    globalThis.fetch = vi.fn(
+      async () => new Response(JSON.stringify({exists: true}), {status: 200}),
+    );
     globalThis.console.error = vi.fn();
   });
 
@@ -25,7 +22,9 @@ describe('useGame', () => {
     const ws = getWs();
     ws.emitOpen();
 
-    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({type: 'join', name: 'Alice', clientId: 'user-id-alice'}));
+    expect(ws.send).toHaveBeenCalledWith(
+      JSON.stringify({type: 'join', name: 'Alice', clientId: 'user-id-alice'}),
+    );
   });
 
   it('updates participants when joined message is received', async () => {
@@ -118,7 +117,9 @@ describe('useGame', () => {
     const getWs = mockWebSocket();
     const onUserIdChange = vi.fn();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', onUserIdChange));
+    const {result} = renderHook(() =>
+      useGame('test-game', 'Alice', 'user-id-alice', onUserIdChange),
+    );
 
     const ws = getWs();
     ws.emitOpen();
@@ -215,10 +216,9 @@ describe('useGame', () => {
   });
 
   it('sets notFound when game does not exist', async () => {
-    globalThis.fetch = vi.fn(async () => new Response(
-      JSON.stringify({exists: false}),
-      {status: 200},
-    ));
+    globalThis.fetch = vi.fn(
+      async () => new Response(JSON.stringify({exists: false}), {status: 200}),
+    );
 
     const getWs = mockWebSocket();
 
@@ -233,10 +233,7 @@ describe('useGame', () => {
   });
 
   it('sets notFound when fetch fails', async () => {
-    globalThis.fetch = vi.fn(async () => new Response(
-      null,
-      {status: 404},
-    ));
+    globalThis.fetch = vi.fn(async () => new Response(null, {status: 404}));
 
     const getWs = mockWebSocket();
 
@@ -273,7 +270,9 @@ describe('useGame', () => {
     const getWs = mockWebSocket();
     const onUserIdChange = vi.fn();
 
-    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', onUserIdChange));
+    const {result} = renderHook(() =>
+      useGame('test-game', 'Alice', 'user-id-alice', onUserIdChange),
+    );
 
     const ws = getWs();
     ws.emitOpen();
@@ -383,9 +382,7 @@ describe('useGame', () => {
     // Server sends update message without Alice
     ws.emitMessage({
       type: 'update',
-      participants: [
-        {id: '2', name: 'Bob', vote: '8'},
-      ],
+      participants: [{id: '2', name: 'Bob', vote: '8'}],
       revealed: false,
       issues: [],
       activeIssueId: 'issue-1',
@@ -405,10 +402,12 @@ describe('useGame', () => {
 
     result.current.addIssue('New Issue', 'Description', 'http://example.com');
 
-    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
-      type: 'add-issue',
-      issue: {title: 'New Issue', description: 'Description', url: 'http://example.com'},
-    }));
+    expect(ws.send).toHaveBeenCalledWith(
+      JSON.stringify({
+        type: 'add-issue',
+        issue: {title: 'New Issue', description: 'Description', url: 'http://example.com'},
+      }),
+    );
   });
 
   it('sends remove-issue message', () => {
@@ -419,10 +418,12 @@ describe('useGame', () => {
 
     result.current.removeIssue('issue-1');
 
-    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
-      type: 'remove-issue',
-      issueId: 'issue-1',
-    }));
+    expect(ws.send).toHaveBeenCalledWith(
+      JSON.stringify({
+        type: 'remove-issue',
+        issueId: 'issue-1',
+      }),
+    );
   });
 
   it('sends set-active-issue message', () => {
@@ -433,10 +434,12 @@ describe('useGame', () => {
 
     result.current.setActiveIssue('issue-2');
 
-    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
-      type: 'set-active-issue',
-      issueId: 'issue-2',
-    }));
+    expect(ws.send).toHaveBeenCalledWith(
+      JSON.stringify({
+        type: 'set-active-issue',
+        issueId: 'issue-2',
+      }),
+    );
   });
 
   it('sends vote-next-issue message', () => {
@@ -447,9 +450,11 @@ describe('useGame', () => {
 
     result.current.voteNextIssue();
 
-    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
-      type: 'vote-next-issue',
-    }));
+    expect(ws.send).toHaveBeenCalledWith(
+      JSON.stringify({
+        type: 'vote-next-issue',
+      }),
+    );
   });
 
   it('sends update-issue message', () => {
@@ -459,14 +464,19 @@ describe('useGame', () => {
     ws.emitOpen();
 
     const issue = {
-      id: 'issue-1', title: 'Updated Title', description: 'Updated Desc', url: 'http://updated.com',
+      id: 'issue-1',
+      title: 'Updated Title',
+      description: 'Updated Desc',
+      url: 'http://updated.com',
     };
     result.current.updateIssue(issue);
 
-    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
-      type: 'update-issue',
-      issue,
-    }));
+    expect(ws.send).toHaveBeenCalledWith(
+      JSON.stringify({
+        type: 'update-issue',
+        issue,
+      }),
+    );
   });
 
   it('sets roomFull when room-full message is received', async () => {
@@ -611,9 +621,11 @@ describe('useGame', () => {
 
     result.current.removeAllIssues();
 
-    expect(ws.send).toHaveBeenCalledWith(JSON.stringify({
-      type: 'remove-all-issues',
-    }));
+    expect(ws.send).toHaveBeenCalledWith(
+      JSON.stringify({
+        type: 'remove-all-issues',
+      }),
+    );
   });
 
   it('calls onUserIdChange when userId changes', async () => {
@@ -694,9 +706,11 @@ function mockWebSocket() {
         emitMessage: (data: unknown) => {
           if (this.listeners.message) {
             for (const cb of this.listeners.message) {
-              cb(new MessageEvent('message', {
-                data: JSON.stringify(data),
-              }));
+              cb(
+                new MessageEvent('message', {
+                  data: JSON.stringify(data),
+                }),
+              );
             }
           }
         },

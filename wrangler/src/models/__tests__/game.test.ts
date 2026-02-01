@@ -1,6 +1,4 @@
-import {
-  describe, it, expect, vi, beforeEach,
-} from 'vitest';
+import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {Game} from '../game';
 
 // Mock DurableObjectState
@@ -28,27 +26,31 @@ const createMockState = () => {
 };
 
 // Mock Env
-const createMockEnv = () => ({
-  GAME: {
-    idFromName: vi.fn((name: string) => ({name})),
-    get: vi.fn(),
-  },
-  REGISTRY: {
-    idFromName: vi.fn((name: string) => ({name})),
-    get: vi.fn(() => ({
-      fetch: vi.fn(async () =>
-        new Response('ok', {status: 200})),
-    })),
-  },
-} as any);
+const createMockEnv = () =>
+  ({
+    GAME: {
+      idFromName: vi.fn((name: string) => ({name})),
+      get: vi.fn(),
+    },
+    REGISTRY: {
+      idFromName: vi.fn((name: string) => ({name})),
+      get: vi.fn(() => ({
+        fetch: vi.fn(async () => new Response('ok', {status: 200})),
+      })),
+    },
+  }) as any;
 
 describe('Game', () => {
   let game: Game;
   let mockState: any;
   let mockEnv: any;
 
-  const joinAndGetUserId = async (sessionId: string, name: string, clientId?: string): Promise<string> => {
-    const {sessions} = (game as any);
+  const joinAndGetUserId = async (
+    sessionId: string,
+    name: string,
+    clientId?: string,
+  ): Promise<string> => {
+    const {sessions} = game as any;
     const mockWs = {
       send: vi.fn(),
       close: vi.fn(),
@@ -132,7 +134,9 @@ describe('Game', () => {
         vote: 'XL', // This is valid for t-shirts but not fibonacci
       });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Invalid vote "XL" for voting system "fibonacci"');
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Invalid vote "XL" for voting system "fibonacci"',
+      );
 
       consoleErrorSpy.mockRestore();
     });
@@ -182,7 +186,9 @@ describe('Game', () => {
         vote: '13', // This is valid for fibonacci but not t-shirts
       });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Invalid vote "13" for voting system "t-shirts"');
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Invalid vote "13" for voting system "t-shirts"',
+      );
 
       consoleErrorSpy.mockRestore();
     });
@@ -257,7 +263,7 @@ describe('Game', () => {
 
     it('should generate new userId on reconnection if participant was removed', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // First join - get server-assigned ID
       const userId = await joinAndGetUserId('session-1', 'Test User', 'any-id');
@@ -286,8 +292,8 @@ describe('Game', () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
 
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {sessions} = (game as any);
-      const {gameState} = (game as any);
+      const {sessions} = game as any;
+      const {gameState} = game as any;
 
       // Add 14 participants to game state and sessions (with individual mocks)
       for (let i = 0; i < 14; i++) {
@@ -331,7 +337,7 @@ describe('Game', () => {
     it('should allow join when under limit', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
 
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Add 13 participants using joinAndGetUserId
       const joinPromises = Array.from({length: 13}, async (_, i) => {
@@ -367,7 +373,7 @@ describe('Game', () => {
     it('should update issue details and broadcast update', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join participant
       await handleMessage('session-1', {
@@ -399,14 +405,16 @@ describe('Game', () => {
 
       expect(gameState.issues[0].title).toBe('New Title');
       expect(gameState.issues[0].description).toBe('New Description');
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'issue-updated',
-        issue: expect.objectContaining({
-          id: issueId,
-          title: 'New Title',
-          description: 'New Description',
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'issue-updated',
+          issue: expect.objectContaining({
+            id: issueId,
+            title: 'New Title',
+            description: 'New Description',
+          }),
         }),
-      }));
+      );
     });
   });
 
@@ -414,7 +422,7 @@ describe('Game', () => {
     it('should remove participant and broadcast update', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleDisconnect = (game as any).handleDisconnect.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join participant and get assigned userId
       const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
@@ -429,10 +437,12 @@ describe('Game', () => {
 
       // Assert
       expect(gameState.participants.has(userId)).toBe(false);
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'update',
-        participants: [],
-      }));
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'update',
+          participants: [],
+        }),
+      );
     });
 
     it('should set alarm if room becomes empty', async () => {
@@ -459,7 +469,7 @@ describe('Game', () => {
     it('should set revealed to true and broadcast', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join participant
       await handleMessage('session-1', {
@@ -477,16 +487,18 @@ describe('Game', () => {
 
       // Assert
       expect(gameState.revealed).toBe(true);
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'update',
-        revealed: true,
-      }));
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'update',
+          revealed: true,
+        }),
+      );
     });
 
     it('should save vote results to active issue when revealed', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join participants
       const user1Id = await joinAndGetUserId('session-1', 'User 1', 'user-1');
@@ -521,20 +533,22 @@ describe('Game', () => {
         5: 2,
         8: 1,
       });
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'issue-updated',
-        issue: expect.objectContaining({
-          id: issueId,
-          title: 'Test Issue',
-          voteResults: {5: 2, 8: 1},
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'issue-updated',
+          issue: expect.objectContaining({
+            id: issueId,
+            title: 'Test Issue',
+            voteResults: {5: 2, 8: 1},
+          }),
         }),
-      }));
+      );
     });
 
     it('should handle reveal without active issue', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join participants
       const user1Id = await joinAndGetUserId('session-1', 'User 1', 'user-1');
@@ -552,16 +566,18 @@ describe('Game', () => {
       expect(gameState.revealed).toBe(true);
       expect(gameState.issues).toHaveLength(0);
       // Should not throw error or crash
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'update',
-        revealed: true,
-      }));
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'update',
+          revealed: true,
+        }),
+      );
     });
 
     it('should handle reveal with no votes', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join participants
       await joinAndGetUserId('session-1', 'User 1', 'user-1');
@@ -581,13 +597,15 @@ describe('Game', () => {
       // Assert
       expect(gameState.revealed).toBe(true);
       expect(gameState.issues[0].voteResults).toEqual({});
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'issue-updated',
-        issue: expect.objectContaining({
-          id: issueId,
-          voteResults: {},
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'issue-updated',
+          issue: expect.objectContaining({
+            id: issueId,
+            voteResults: {},
+          }),
         }),
-      }));
+      );
     });
   });
 
@@ -595,7 +613,7 @@ describe('Game', () => {
     it('should reset state and broadcast', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join and vote - get userId from server
       const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
@@ -620,12 +638,14 @@ describe('Game', () => {
       expect(gameState.revealed).toBe(false);
       expect(gameState.activeIssueId).toBeUndefined();
       expect(gameState.participants.get(userId).vote).toBeUndefined();
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'reset',
-        activeIssueId: undefined,
-        issues: expect.any(Array),
-        participants: expect.any(Array),
-      }));
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'reset',
+          activeIssueId: undefined,
+          issues: expect.any(Array),
+          participants: expect.any(Array),
+        }),
+      );
     });
   });
 
@@ -633,7 +653,7 @@ describe('Game', () => {
     it('should add issue and set as active if first', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join
       await handleMessage('session-1', {type: 'join', name: 'User', clientId: 'user-1'});
@@ -650,23 +670,27 @@ describe('Game', () => {
       expect(gameState.issues).toHaveLength(1);
       expect(gameState.issues[0].title).toBe('Issue 1');
       expect(gameState.activeIssueId).toBe(gameState.issues[0].id);
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'issue-added',
-        issue: expect.objectContaining({
-          id: gameState.issues[0].id,
-          title: 'Issue 1',
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'issue-added',
+          issue: expect.objectContaining({
+            id: gameState.issues[0].id,
+            title: 'Issue 1',
+          }),
         }),
-      }));
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'update',
-        activeIssueId: gameState.issues[0].id,
-      }));
+      );
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'update',
+          activeIssueId: gameState.issues[0].id,
+        }),
+      );
     });
 
     it('should remove issue and unset active if it matches', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join
       await handleMessage('session-1', {type: 'join', name: 'User', clientId: 'user-1'});
@@ -692,7 +716,7 @@ describe('Game', () => {
     it('should set active issue and reset votes/revealed', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join and Vote - get userId from server
       const userId = await joinAndGetUserId('session-1', 'User', 'user-1');
@@ -722,7 +746,7 @@ describe('Game', () => {
     it('should vote next issue', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join
       await handleMessage('session-1', {type: 'join', name: 'User', clientId: 'user-1'});
@@ -746,7 +770,7 @@ describe('Game', () => {
     it('should remove all issues and reset game state', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join and vote - get userId from server
       const userId = await joinAndGetUserId('session-1', 'User', 'user-1');
@@ -776,19 +800,21 @@ describe('Game', () => {
       expect(gameState.activeIssueId).toBeUndefined();
       expect(gameState.revealed).toBe(false);
       expect(gameState.participants.get(userId).vote).toBeUndefined();
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'reset',
-        issues: [],
-        activeIssueId: undefined,
-        participants: expect.any(Array),
-      }));
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'reset',
+          issues: [],
+          activeIssueId: undefined,
+          participants: expect.any(Array),
+        }),
+      );
     });
   });
 
   describe('broadcast', () => {
     it('should send message to all sessions except excluded one', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
-      const {sessions} = (game as any);
+      const {sessions} = game as any;
 
       const mockWs1 = {send: vi.fn(), close: vi.fn()};
       const mockWs2 = {send: vi.fn(), close: vi.fn()};
@@ -801,12 +827,15 @@ describe('Game', () => {
       const broadcast = (game as any).broadcast.bind(game);
 
       // Act: Broadcast, excluding session-2
-      broadcast({
-        type: 'update',
-        participants: [],
-        revealed: false,
-        activeIssueId: undefined,
-      }, 'session-2');
+      broadcast(
+        {
+          type: 'update',
+          participants: [],
+          revealed: false,
+          activeIssueId: undefined,
+        },
+        'session-2',
+      );
 
       // Assert
       expect(mockWs1.send).toHaveBeenCalledTimes(1);
@@ -816,7 +845,7 @@ describe('Game', () => {
 
     it('should handle send errors gracefully', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
-      const {sessions} = (game as any);
+      const {sessions} = game as any;
 
       const mockWs1 = {
         send: vi.fn(() => {
@@ -839,7 +868,10 @@ describe('Game', () => {
       });
 
       // Assert: Should log error but not throw
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to send message to session', expect.any(Error));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Failed to send message to session',
+        expect.any(Error),
+      );
 
       consoleErrorSpy.mockRestore();
     });
@@ -849,7 +881,7 @@ describe('Game', () => {
     it('should not update if same issue is already active', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join
       await handleMessage('session-1', {type: 'join', name: 'User', clientId: 'user-1'});
@@ -877,7 +909,7 @@ describe('Game', () => {
     it('should not remove participant if they have other active sessions', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleDisconnect = (game as any).handleDisconnect.bind(game);
-      const {gameState, sessions} = (game as any);
+      const {gameState, sessions} = game as any;
 
       // Join with first session and get server-assigned userId
       const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
@@ -905,7 +937,7 @@ describe('Game', () => {
     it('should remove participant only when all sessions disconnect', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleDisconnect = (game as any).handleDisconnect.bind(game);
-      const {gameState, sessions} = (game as any);
+      const {gameState, sessions} = game as any;
 
       // Join with first session
       const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
@@ -929,17 +961,19 @@ describe('Game', () => {
 
       // Assert: Now participant should be removed
       expect(gameState.participants.has(userId)).toBe(false);
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'update',
-        participants: [],
-      }));
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'update',
+          participants: [],
+        }),
+      );
       expect(mockState.storage.setAlarm).toHaveBeenCalled();
     });
 
     it('should not broadcast if disconnected session was never a participant', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleDisconnect = (game as any).handleDisconnect.bind(game);
-      const {sessions} = (game as any);
+      const {sessions} = game as any;
 
       // Create a session without joining as a participant
       const mockWs = {send: vi.fn(), close: vi.fn()};
@@ -958,7 +992,7 @@ describe('Game', () => {
     it('should toggle isSpectator flag and remove vote', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       // Join and Vote - get userId from server
       const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
@@ -982,16 +1016,18 @@ describe('Game', () => {
       // Assert: Became spectator, vote removed
       expect(gameState.participants.get(userId).isSpectator).toBe(true);
       expect(gameState.participants.get(userId).vote).toBeUndefined();
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'update',
-        participants: expect.arrayContaining([
-          expect.objectContaining({
-            id: userId,
-            isSpectator: true,
-            vote: undefined,
-          }),
-        ]),
-      }));
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'update',
+          participants: expect.arrayContaining([
+            expect.objectContaining({
+              id: userId,
+              isSpectator: true,
+              vote: undefined,
+            }),
+          ]),
+        }),
+      );
 
       // Act: Toggle Spectator (OFF)
       await handleMessage('session-1', {
@@ -1000,21 +1036,23 @@ describe('Game', () => {
 
       // Assert: Became participant
       expect(gameState.participants.get(userId).isSpectator).toBe(false);
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'update',
-        participants: expect.arrayContaining([
-          expect.objectContaining({
-            id: userId,
-            isSpectator: false,
-          }),
-        ]),
-      }));
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'update',
+          participants: expect.arrayContaining([
+            expect.objectContaining({
+              id: userId,
+              isSpectator: false,
+            }),
+          ]),
+        }),
+      );
     });
 
     it('should ignore votes from spectators', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       const userId = await joinAndGetUserId('session-1', 'Test User', 'user-1');
       (game as any).sessionToUserId.set('session-1', userId);
@@ -1038,7 +1076,7 @@ describe('Game', () => {
     it('should update vote results when toggling spectator after reveal', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);
-      const {gameState} = (game as any);
+      const {gameState} = game as any;
 
       const user1Id = await joinAndGetUserId('session-1', 'User 1', 'user-1');
       const user2Id = await joinAndGetUserId('session-2', 'User 2', 'user-2');
@@ -1062,12 +1100,14 @@ describe('Game', () => {
       await handleMessage('session-2', {type: 'toggle-spectator'});
 
       expect(gameState.issues[0].voteResults).toEqual({5: 1});
-      expect(broadcastSpy).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'issue-updated',
-        issue: expect.objectContaining({
-          voteResults: {5: 1},
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'issue-updated',
+          issue: expect.objectContaining({
+            voteResults: {5: 1},
+          }),
         }),
-      }));
+      );
     });
   });
 });

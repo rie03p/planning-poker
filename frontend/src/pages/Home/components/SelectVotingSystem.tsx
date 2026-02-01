@@ -1,9 +1,4 @@
-import {
-  Menu,
-  Button,
-  Text,
-  VStack,
-} from '@chakra-ui/react';
+import {Menu, Button, Text, VStack} from '@chakra-ui/react';
 import {ChevronDown} from 'lucide-react';
 
 export type VotingSystemOption = {
@@ -13,7 +8,10 @@ export type VotingSystemOption = {
 
 const DEFAULT_OPTIONS: VotingSystemOption[] = [
   {id: 'fibonacci', label: 'Fibonacci (0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ?, ☕)'},
-  {id: 'modified-fibonacci', label: 'Modified Fibonacci ( 0, ½, 1, 2, 3, 5, 8, 13, 20, 40, 100, ?, ☕ )'},
+  {
+    id: 'modified-fibonacci',
+    label: 'Modified Fibonacci ( 0, ½, 1, 2, 3, 5, 8, 13, 20, 40, 100, ?, ☕ )',
+  },
   {id: 't-shirts', label: 'T-shirts (XS, S, M, L, XL, ?, ☕ )'},
   {id: 'powers-of-2', label: 'Powers of 2 ( 0, 1, 2, 4, 8, 16, 32, 64, ?, ☕ )'},
 ];
@@ -24,13 +22,8 @@ type Props = {
   options?: VotingSystemOption[];
 };
 
-export function SelectVotingSystem({
-  value,
-  onChange,
-  options = DEFAULT_OPTIONS,
-}: Props) {
-  const selectedOption
-    = options.find(o => o.id === value) ?? options[0];
+export function SelectVotingSystem({value, onChange, options = DEFAULT_OPTIONS}: Props) {
+  const selectedOption = options.find(o => o.id === value) ?? options[0];
 
   return (
     <Menu.Root positioning={{sameWidth: true}}>
@@ -46,11 +39,7 @@ export function SelectVotingSystem({
             <Text fontSize='sm' color='gray.500'>
               Voting system
             </Text>
-            <Text
-              width='100%'
-              fontWeight='semibold'
-              truncate
-            >
+            <Text width='100%' fontWeight='semibold' truncate>
               {selectedOption.label}
             </Text>
           </VStack>

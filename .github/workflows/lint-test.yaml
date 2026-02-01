@@ -23,8 +23,11 @@ jobs:
       - name: Install dependencies (root)
         run: pnpm install --frozen-lockfile
 
+      - name: Format check
+        run: pnpm format:check
+
       - name: Lint
-        run: pnpm xo --no-fix
+        run: pnpm lint
 
       - name: Run tests with coverage
         run: pnpm test:coverage

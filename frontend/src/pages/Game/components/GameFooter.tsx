@@ -61,32 +61,26 @@ export function GameFooter({
         alignItems='center'
         justifyContent='center'
       >
-        {isSpectator
-          ? (
-            <Box
-              bg='gray.50'
-              px={6}
-              py={3}
-              borderRadius='full'
-              color='gray.500'
-              fontWeight='medium'
-              borderWidth='1px'
-              borderColor='gray.200'
-              display='flex'
-              alignItems='center'
-              gap={2}
-            >
-              <Eye size={20} />
-              You are in spectator mode
-            </Box>
-          )
-          : (
-            <CardSelection
-              cards={cards}
-              myVote={myVote}
-              onVote={onVote}
-            />
-          )}
+        {isSpectator ? (
+          <Box
+            bg='gray.50'
+            px={6}
+            py={3}
+            borderRadius='full'
+            color='gray.500'
+            fontWeight='medium'
+            borderWidth='1px'
+            borderColor='gray.200'
+            display='flex'
+            alignItems='center'
+            gap={2}
+          >
+            <Eye size={20} />
+            You are in spectator mode
+          </Box>
+        ) : (
+          <CardSelection cards={cards} myVote={myVote} onVote={onVote} />
+        )}
       </Box>
 
       {/* Voting Results - Slides up from bottom */}

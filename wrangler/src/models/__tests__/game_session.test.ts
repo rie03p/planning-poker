@@ -1,7 +1,4 @@
-
-import {
-  describe, it, expect, vi, beforeEach,
-} from 'vitest';
+import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {Game} from '../game';
 
 // Mock DurableObjectState - simplified from game.test.ts
@@ -29,19 +26,19 @@ const createMockState = () => {
 };
 
 // Mock Env
-const createMockEnv = () => ({
-  GAME: {
-    idFromName: vi.fn((name: string) => ({name})),
-    get: vi.fn(),
-  },
-  REGISTRY: {
-    idFromName: vi.fn((name: string) => ({name})),
-    get: vi.fn(() => ({
-      fetch: vi.fn(async () =>
-        new Response('ok', {status: 200})),
-    })),
-  },
-} as any);
+const createMockEnv = () =>
+  ({
+    GAME: {
+      idFromName: vi.fn((name: string) => ({name})),
+      get: vi.fn(),
+    },
+    REGISTRY: {
+      idFromName: vi.fn((name: string) => ({name})),
+      get: vi.fn(() => ({
+        fetch: vi.fn(async () => new Response('ok', {status: 200})),
+      })),
+    },
+  }) as any;
 
 describe('Game Session Management', () => {
   let game: Game;
@@ -60,8 +57,8 @@ describe('Game Session Management', () => {
     // Access private members via any
     const handleMessage = (game as any).handleMessage.bind(game);
     const handleDisconnect = (game as any).handleDisconnect.bind(game);
-    const {gameState} = (game as any);
-    const {sessionToUserId, sessions} = (game as any);
+    const {gameState} = game as any;
+    const {sessionToUserId, sessions} = game as any;
 
     const sessionA = 'session-A';
     const sessionB = 'session-B';
@@ -179,7 +176,7 @@ describe('Game Session Management', () => {
     await mockState.storage.put('votingSystem', 'fibonacci');
 
     const handleMessage = (game as any).handleMessage.bind(game);
-    const {gameState, sessions} = (game as any);
+    const {gameState, sessions} = game as any;
 
     const sessionA = 'session-A';
     const mockWsA = {send: vi.fn(), close: vi.fn()};

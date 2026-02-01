@@ -9,12 +9,7 @@ type VotingResultsModalProps = {
   cards?: readonly string[];
 };
 
-export function VotingResultsModal({
-  isOpen,
-  onClose,
-  issue,
-  cards,
-}: VotingResultsModalProps) {
+export function VotingResultsModal({isOpen, onClose, issue, cards}: VotingResultsModalProps) {
   if (!issue?.voteResults) {
     return null;
   }
@@ -34,10 +29,7 @@ export function VotingResultsModal({
       <Dialog.Positioner>
         <Dialog.Content>
           <Dialog.Header>
-            <Dialog.Title
-              wordBreak='break-word'
-              overflowWrap='break-word'
-            >
+            <Dialog.Title wordBreak='break-word' overflowWrap='break-word'>
               {issue.title}
             </Dialog.Title>
           </Dialog.Header>

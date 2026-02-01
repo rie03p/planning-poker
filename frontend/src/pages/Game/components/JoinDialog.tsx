@@ -1,7 +1,5 @@
 import {useState} from 'react';
-import {
-  Button, Dialog, Input, Field,
-} from '@chakra-ui/react';
+import {Button, Dialog, Input, Field} from '@chakra-ui/react';
 import {participantSchema} from '@planning-poker/shared';
 
 type Props = {
@@ -73,12 +71,7 @@ export function JoinDialog({isOpen, onJoin}: Props) {
           </Dialog.Body>
 
           <Dialog.Footer>
-            <Button
-              w='full'
-              colorPalette='blue'
-              disabled={!draftName.trim()}
-              onClick={handleJoin}
-            >
+            <Button w='full' colorPalette='blue' disabled={!draftName.trim()} onClick={handleJoin}>
               Join game
             </Button>
           </Dialog.Footer>

@@ -62,9 +62,7 @@ describe('issueInputParser', () => {
 
     it('should parse a single plain text issue', () => {
       const result = parseIssueInput('Single issue title');
-      expect(result).toEqual([
-        {title: 'Single issue title'},
-      ]);
+      expect(result).toEqual([{title: 'Single issue title'}]);
     });
 
     it('should parse multiple plain text lines', () => {
@@ -120,10 +118,7 @@ Third issue`;
       const input = `  First issue  
   Second issue  `;
       const result = parseIssueInput(input);
-      expect(result).toEqual([
-        {title: 'First issue'},
-        {title: 'Second issue'},
-      ]);
+      expect(result).toEqual([{title: 'First issue'}, {title: 'Second issue'}]);
     });
 
     it('should truncate long plain text titles to 100 characters', () => {

@@ -1,6 +1,4 @@
-import {
-  Box, HStack, Text, VStack,
-} from '@chakra-ui/react';
+import {Box, HStack, Text, VStack} from '@chakra-ui/react';
 import {type VoteResults} from '@planning-poker/shared';
 
 type VotingResultsChartProps = {
@@ -46,14 +44,7 @@ export function VotingResultsChart({voteResults, cards}: VotingResultsChartProps
       <Text fontSize='sm' color='gray.600' textAlign='center'>
         Total votes: {totalVotes}
       </Text>
-      <HStack
-        gap={4}
-        flex={1}
-        align='flex-end'
-        justify='center'
-        w='full'
-        px={4}
-      >
+      <HStack gap={4} flex={1} align='flex-end' justify='center' w='full' px={4}>
         {entries.map(([card, countValue]) => {
           const count = countValue as number;
           const percentage = (count / maxVotes) * 100;

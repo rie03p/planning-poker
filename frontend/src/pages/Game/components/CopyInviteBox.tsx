@@ -30,11 +30,14 @@ export function CopyInviteBox({gameId}: CopyInviteBoxProps) {
     }, 1500);
   };
 
-  useEffect(() => () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    },
+    [],
+  );
 
   return (
     <Tooltip.Root>
@@ -49,9 +52,7 @@ export function CopyInviteBox({gameId}: CopyInviteBoxProps) {
         </IconButton>
       </Tooltip.Trigger>
       <Tooltip.Positioner>
-        <Tooltip.Content>
-          {copied ? 'Copied!' : 'Copy invitation link'}
-        </Tooltip.Content>
+        <Tooltip.Content>{copied ? 'Copied!' : 'Copy invitation link'}</Tooltip.Content>
       </Tooltip.Positioner>
     </Tooltip.Root>
   );

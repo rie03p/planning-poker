@@ -28,16 +28,17 @@ export class GameRegistry {
     // GET /exists?gameId=xxx
     if (url.pathname === '/exists' && request.method === 'GET') {
       const gameId = url.searchParams.get('gameId');
-      const data = gameId
-        ? await this.state.storage.get<{votingSystem: string}>(gameId)
-        : null;
+      const data = gameId ? await this.state.storage.get<{votingSystem: string}>(gameId) : null;
 
-      return new Response(JSON.stringify({
-        exists: Boolean(data),
-        votingSystem: data?.votingSystem,
-      }), {
-        headers: {'Content-Type': 'application/json'},
-      });
+      return new Response(
+        JSON.stringify({
+          exists: Boolean(data),
+          votingSystem: data?.votingSystem,
+        }),
+        {
+          headers: {'Content-Type': 'application/json'},
+        },
+      );
     }
 
     return new Response('Not found', {status: 404});
