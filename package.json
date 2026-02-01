@@ -15,15 +15,16 @@
     "lint": "oxlint .",
     "lint:frontend": "oxlint frontend",
     "lint:backend": "oxlint wrangler",
-    "format": "oxlint --fix .",
-    "format:frontend": "oxlint --fix frontend",
-    "format:backend": "oxlint --fix wrangler"
+    "format": "oxfmt",
+    "format:frontend": "oxfmt frontend",
+    "format:backend": "oxfmt wrangler"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "packageManager": "pnpm@10.25.0",
   "devDependencies": {
+    "oxfmt": "^0.27.0",
     "oxlint": "^1.9.0"
   }
 }
