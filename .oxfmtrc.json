@@ -6,5 +6,6 @@
   "semi": true,
   "trailingComma": "all",
   "bracketSpacing": false,
-  "arrowParens": "avoid"
+  "arrowParens": "avoid",
+  "ignorePatterns": ["CHANGELOG.md"]
 }
