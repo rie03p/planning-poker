@@ -16,6 +16,7 @@
     "lint:frontend": "oxlint frontend",
     "lint:backend": "oxlint wrangler",
     "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "format:frontend": "oxfmt frontend",
     "format:backend": "oxfmt wrangler"
   },
