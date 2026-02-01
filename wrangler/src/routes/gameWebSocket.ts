@@ -1,10 +1,7 @@
 import {registryExistsResponseSchema} from '@planning-poker/shared';
 import {type Env} from '../types';
 
-export async function handleGameWebSocket(
-  request: Request,
-  env: Env,
-): Promise<Response> {
+export async function handleGameWebSocket(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
 
   const gameId = url.pathname.split('/')[2];

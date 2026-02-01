@@ -28,11 +28,7 @@ export function IssuesPanel({
   cards,
 }: IssuesPanelProps) {
   return (
-    <Box
-      display={{base: 'none', md: 'flex'}}
-      h='100vh'
-      flexShrink={0}
-    >
+    <Box display={{base: 'none', md: 'flex'}} h='100vh' flexShrink={0}>
       {/* Panel Content */}
       <Box
         w={isOpen ? '380px' : '0px'}

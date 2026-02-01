@@ -42,12 +42,14 @@ Estimate story points collaboratively with live synchronization.
 ### Install
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/rie03p/planning-poker.git
 cd planning-poker
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
@@ -57,6 +59,7 @@ pnpm install
 #### Option 1: Using Docker Compose
 
 Start the frontend development server:
+
 ```bash
 docker compose up
 ```
@@ -64,6 +67,7 @@ docker compose up
 The frontend will be available at `http://localhost:5173`
 
 In a separate terminal, start the backend:
+
 ```bash
 cd wrangler
 pnpm dev
@@ -74,12 +78,14 @@ The backend will be available at `http://localhost:8787`
 #### Option 2: Direct Local Development
 
 1. Start the backend server:
+
 ```bash
 cd wrangler
 pnpm dev
 ```
 
 2. In a separate terminal, start the frontend:
+
 ```bash
 cd frontend
 pnpm dev
@@ -88,6 +94,7 @@ pnpm dev
 ### Environment Configuration
 
 Create a `.env` file in the `frontend` directory:
+
 ```env
 VITE_BACKEND_URL=http://localhost:8787
 ```
@@ -99,6 +106,7 @@ For production, update this to your deployed Cloudflare Workers URL.
 ### Frontend
 
 Build the frontend:
+
 ```bash
 cd frontend
 pnpm build
@@ -109,12 +117,14 @@ Deploy the `dist` folder to your preferred hosting service (Cloudflare Pages, Ve
 ### Backend
 
 Deploy to Cloudflare Workers:
+
 ```bash
 cd wrangler
 pnpm deploy
 ```
 
 Make sure you have configured your Cloudflare account with Wrangler:
+
 ```bash
 wrangler login
 ```
@@ -122,6 +132,7 @@ wrangler login
 ## Testing
 
 Run tests with coverage:
+
 ```bash
 pnpm test:coverage
 ```

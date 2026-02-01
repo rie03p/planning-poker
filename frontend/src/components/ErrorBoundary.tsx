@@ -1,10 +1,5 @@
 import {Component, type ReactNode, type ErrorInfo} from 'react';
-import {
-  VStack,
-  Text,
-  Button,
-  Box,
-} from '@chakra-ui/react';
+import {VStack, Text, Button, Box} from '@chakra-ui/react';
 
 type ErrorBoundaryProps = {
   children: ReactNode;

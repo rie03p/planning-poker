@@ -18,7 +18,10 @@ export class Game {
     activeIssueId: undefined,
   };
 
-  constructor(private readonly state: DurableObjectState, private readonly env: Env) {}
+  constructor(
+    private readonly state: DurableObjectState,
+    private readonly env: Env,
+  ) {}
 
   async fetch(request: Request) {
     if (request.headers.get('Upgrade') !== 'websocket') {
@@ -60,13 +63,10 @@ export class Game {
     }
 
     const registryId = this.env.REGISTRY.idFromName('global');
-    await this.env.REGISTRY.get(registryId).fetch(
-      'http://registry/unregister',
-      {
-        method: 'POST',
-        body: JSON.stringify({gameId}),
-      },
-    );
+    await this.env.REGISTRY.get(registryId).fetch('http://registry/unregister', {
+      method: 'POST',
+      body: JSON.stringify({gameId}),
+    });
 
     await this.state.storage.deleteAll();
     this.sessions.clear();
@@ -151,11 +151,13 @@ export class Game {
       case 'join': {
         const {clientId} = data;
 
-        const userId = clientId && this.gameState.participants.has(clientId)
-          ? clientId
-          : crypto.randomUUID();
+        const userId =
+          clientId && this.gameState.participants.has(clientId) ? clientId : crypto.randomUUID();
 
-        if (this.gameState.participants.size >= MAX_PARTICIPANTS && !this.gameState.participants.has(userId)) {
+        if (
+          this.gameState.participants.size >= MAX_PARTICIPANTS &&
+          !this.gameState.participants.has(userId)
+        ) {
           const ws = this.sessions.get(sessionId);
           if (ws) {
             try {
@@ -188,24 +190,29 @@ export class Game {
         const votingSystem = await this.getVotingSystem();
         const ws = this.sessions.get(sessionId);
         if (ws) {
-          ws.send(JSON.stringify({
-            type: 'joined',
-            userId,
-            participants: [...this.gameState.participants.values()],
-            revealed: this.gameState.revealed,
-            votingSystem,
-            issues: this.gameState.issues,
-            activeIssueId: this.gameState.activeIssueId,
-          }));
+          ws.send(
+            JSON.stringify({
+              type: 'joined',
+              userId,
+              participants: [...this.gameState.participants.values()],
+              revealed: this.gameState.revealed,
+              votingSystem,
+              issues: this.gameState.issues,
+              activeIssueId: this.gameState.activeIssueId,
+            }),
+          );
         }
 
         // Broadcast update to others
-        this.broadcast({
-          type: 'update',
-          participants: [...this.gameState.participants.values()],
-          revealed: this.gameState.revealed,
-          activeIssueId: this.gameState.activeIssueId,
-        }, sessionId);
+        this.broadcast(
+          {
+            type: 'update',
+            participants: [...this.gameState.participants.values()],
+            revealed: this.gameState.revealed,
+            activeIssueId: this.gameState.activeIssueId,
+          },
+          sessionId,
+        );
         break;
       }
 
@@ -249,7 +256,9 @@ export class Game {
         if (this.gameState.activeIssueId) {
           const voteResults = this.buildVoteResults();
 
-          const issueIndex = this.gameState.issues.findIndex(i => i.id === this.gameState.activeIssueId);
+          const issueIndex = this.gameState.issues.findIndex(
+            i => i.id === this.gameState.activeIssueId,
+          );
           if (issueIndex !== -1) {
             this.gameState.issues[issueIndex] = {
               ...this.gameState.issues[issueIndex],
@@ -346,7 +355,9 @@ export class Game {
       }
 
       case 'vote-next-issue': {
-        const currentIndex = this.gameState.issues.findIndex(i => i.id === this.gameState.activeIssueId);
+        const currentIndex = this.gameState.issues.findIndex(
+          i => i.id === this.gameState.activeIssueId,
+        );
         if (currentIndex !== -1 && currentIndex < this.gameState.issues.length - 1) {
           const nextIssue = this.gameState.issues[currentIndex + 1];
           this.setActiveIssue(nextIssue.id);
@@ -401,7 +412,9 @@ export class Game {
           }
 
           if (this.gameState.revealed && this.gameState.activeIssueId) {
-            const issueIndex = this.gameState.issues.findIndex(i => i.id === this.gameState.activeIssueId);
+            const issueIndex = this.gameState.issues.findIndex(
+              i => i.id === this.gameState.activeIssueId,
+            );
             if (issueIndex !== -1) {
               this.gameState.issues[issueIndex] = {
                 ...this.gameState.issues[issueIndex],

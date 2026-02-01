@@ -1,6 +1,4 @@
-import {
-  describe, it, expect, vi, beforeEach,
-} from 'vitest';
+import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {GameRegistry} from '../gameRegistry';
 
 // Mock DurableObjectState
@@ -45,10 +43,9 @@ describe('GameRegistry', () => {
 
       expect(response.status).toBe(200);
       expect(await response.text()).toBe('ok');
-      expect(mockState.storage.put).toHaveBeenCalledWith(
-        'test-game-123',
-        {votingSystem: 'fibonacci'},
-      );
+      expect(mockState.storage.put).toHaveBeenCalledWith('test-game-123', {
+        votingSystem: 'fibonacci',
+      });
     });
 
     it('should register a game with different voting system', async () => {
@@ -63,10 +60,9 @@ describe('GameRegistry', () => {
       const response = await registry.fetch(request);
 
       expect(response.status).toBe(200);
-      expect(mockState.storage.put).toHaveBeenCalledWith(
-        'test-game-456',
-        {votingSystem: 't-shirts'},
-      );
+      expect(mockState.storage.put).toHaveBeenCalledWith('test-game-456', {
+        votingSystem: 't-shirts',
+      });
     });
 
     it('should reject invalid register request - missing gameId', async () => {

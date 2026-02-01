@@ -15,9 +15,7 @@ export {
   MAX_ISSUES,
 } from './schema';
 
-export {
-  getCardsForVotingSystem,
-} from './votingSystems';
+export {getCardsForVotingSystem} from './votingSystems';
 
 export type {
   CreateGameRequest,

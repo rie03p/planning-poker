@@ -1,6 +1,8 @@
 {
   "name": "@planning-poker/shared",
   "version": "1.0.0",
+  "keywords": [],
+  "author": "",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -11,8 +13,6 @@
     "build": "tsc --noEmit",
     "watch": "tsc --watch"
   },
-  "keywords": [],
-  "author": "",
   "dependencies": {
     "zod": "^3.24.1"
   },

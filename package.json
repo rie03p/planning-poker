@@ -2,6 +2,9 @@
   "name": "planning-poker",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "license": "MIT",
+  "author": "",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -20,12 +23,9 @@
     "format:frontend": "oxfmt frontend",
     "format:backend": "oxfmt wrangler"
   },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "packageManager": "pnpm@10.25.0",
   "devDependencies": {
     "oxfmt": "^0.27.0",
     "oxlint": "^1.9.0"
-  }
+  },
+  "packageManager": "pnpm@10.25.0"
 }

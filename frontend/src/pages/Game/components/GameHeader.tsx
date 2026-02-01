@@ -1,6 +1,4 @@
-import {
-  Box, HStack, Link, Text, Tooltip,
-} from '@chakra-ui/react';
+import {Box, HStack, Link, Text, Tooltip} from '@chakra-ui/react';
 import {ExternalLink, Eye, User} from 'lucide-react';
 import {type Issue} from '@planning-poker/shared';
 import {CopyInviteBox} from './CopyInviteBox';
@@ -65,44 +63,33 @@ export function GameHeader({
           </Text>
         </Box>
 
-        <Box
-          flex={1}
-          justifyContent='center'
-          minW={0}
-          display={{base: 'none', md: 'flex'}}
-        >
-          {activeIssueId
-            ? (
-              <Tooltip.Root>
-                <Tooltip.Trigger asChild>
-                  {activeIssueUrl
-                    ? (
-                      <Link
-                        href={activeIssueUrl}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        color='inherit'
-                        _hover={{textDecoration: 'none'}}
-                      >
-                        <ActiveIssueBadge title={activeIssue?.title} />
-                      </Link>
-                    )
-                    : (
-                      <ActiveIssueBadge title={activeIssue?.title} />
-                    )}
-                </Tooltip.Trigger>
-                <Tooltip.Positioner>
-                  <Tooltip.Content maxW='sm'>
-                    {activeIssue?.title}
-                  </Tooltip.Content>
-                </Tooltip.Positioner>
-              </Tooltip.Root>
-            )
-            : (
-              <Text color='gray.400' fontWeight='medium'>
-                No active issue
-              </Text>
-            )}
+        <Box flex={1} justifyContent='center' minW={0} display={{base: 'none', md: 'flex'}}>
+          {activeIssueId ? (
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                {activeIssueUrl ? (
+                  <Link
+                    href={activeIssueUrl}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    color='inherit'
+                    _hover={{textDecoration: 'none'}}
+                  >
+                    <ActiveIssueBadge title={activeIssue?.title} />
+                  </Link>
+                ) : (
+                  <ActiveIssueBadge title={activeIssue?.title} />
+                )}
+              </Tooltip.Trigger>
+              <Tooltip.Positioner>
+                <Tooltip.Content maxW='sm'>{activeIssue?.title}</Tooltip.Content>
+              </Tooltip.Positioner>
+            </Tooltip.Root>
+          ) : (
+            <Text color='gray.400' fontWeight='medium'>
+              No active issue
+            </Text>
+          )}
         </Box>
 
         <HStack w={{base: 'auto', md: '200px'}} justify='flex-end' gap={2} flexShrink={0}>

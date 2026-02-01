@@ -7,17 +7,9 @@ type CardSelectionProps = {
   onVote: (vote: string, selected: boolean) => void;
 };
 
-export function CardSelection({
-  cards,
-  myVote,
-  onVote,
-}: CardSelectionProps) {
+export function CardSelection({cards, myVote, onVote}: CardSelectionProps) {
   return (
-    <Box
-      w='full'
-      overflowX='auto'
-      h='full'
-    >
+    <Box w='full' overflowX='auto' h='full'>
       <HStack
         w='fit-content'
         minW='full'
@@ -37,9 +29,7 @@ export function CardSelection({
             pb={1}
             cursor='pointer'
           >
-            <VoteCard selected={myVote === card}>
-              {card}
-            </VoteCard>
+            <VoteCard selected={myVote === card}>{card}</VoteCard>
           </Box>
         ))}
       </HStack>

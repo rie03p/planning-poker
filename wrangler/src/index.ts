@@ -30,10 +30,10 @@ const worker = {
     // GET /games/:gameId/exists
     const parts = url.pathname.split('/');
     if (
-      request.method === 'GET'
-      && parts.length === 4
-      && parts[1] === 'games'
-      && parts[3] === 'exists'
+      request.method === 'GET' &&
+      parts.length === 4 &&
+      parts[1] === 'games' &&
+      parts[3] === 'exists'
     ) {
       return handleGameExists(request, env, corsHeaders);
     }
