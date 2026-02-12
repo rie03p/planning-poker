@@ -1,5 +1,5 @@
-import {Box, HStack, Link, Text, Tooltip} from '@chakra-ui/react';
-import {ExternalLink, Eye, User} from 'lucide-react';
+import {Box, HStack, Link, Menu, Text, Tooltip} from '@chakra-ui/react';
+import {ExternalLink, Eye, Pencil, User} from 'lucide-react';
 import {type Issue} from '@planning-poker/shared';
 import {CopyInviteBox} from './CopyInviteBox';
 import {IssuesMenuButton} from './IssuesMenuButton';
@@ -12,6 +12,8 @@ type GameHeaderProps = {
   onToggleIssues: () => void;
   isSpectator: boolean;
   onToggleSpectator: () => void;
+  name: string;
+  onChangeName: () => void;
 };
 
 export function GameHeader({
@@ -22,6 +24,8 @@ export function GameHeader({
   onToggleIssues,
   isSpectator,
   onToggleSpectator,
+  name,
+  onChangeName,
 }: GameHeaderProps) {
   const activeIssue = issues.find(issue => issue.id === activeIssueId);
   const activeIssueUrl = activeIssue?.url?.trim();
@@ -93,11 +97,10 @@ export function GameHeader({
         </Box>
 
         <HStack w={{base: 'auto', md: '200px'}} justify='flex-end' gap={2} flexShrink={0}>
-          <Tooltip.Root>
-            <Tooltip.Trigger asChild>
+          <Menu.Root positioning={{placement: 'bottom-end', offset: {mainAxis: 8}}}>
+            <Menu.Trigger asChild>
               <Box
                 as='button'
-                onClick={onToggleSpectator}
                 p={2}
                 borderRadius='md'
                 bg={isSpectator ? 'purple.100' : 'gray.100'}
@@ -110,13 +113,25 @@ export function GameHeader({
               >
                 {isSpectator ? <Eye size={20} /> : <User size={20} />}
               </Box>
-            </Tooltip.Trigger>
-            <Tooltip.Positioner>
-              <Tooltip.Content>
-                {isSpectator ? 'Switch to Participant' : 'Switch to Spectator'}
-              </Tooltip.Content>
-            </Tooltip.Positioner>
-          </Tooltip.Root>
+            </Menu.Trigger>
+            <Menu.Positioner zIndex='popover'>
+              <Menu.Content p={2} borderRadius='xl' boxShadow='lg' minW='200px'>
+                <Box px={3} py={2} borderBottomWidth='1px' borderColor='gray.100' mb={1}>
+                  <Text fontSize='sm' color='gray.500'>
+                    {name}
+                  </Text>
+                </Box>
+                <Menu.Item value='change-name' gap={2} onClick={onChangeName}>
+                  <Pencil size={16} />
+                  Change name
+                </Menu.Item>
+                <Menu.Item value='toggle-spectator' gap={2} onClick={onToggleSpectator}>
+                  {isSpectator ? <User size={16} /> : <Eye size={16} />}
+                  {isSpectator ? 'Switch to Participant' : 'Switch to Spectator'}
+                </Menu.Item>
+              </Menu.Content>
+            </Menu.Positioner>
+          </Menu.Root>
           <CopyInviteBox gameId={gameId} />
           {/* SP: always show, PC: hide when panel is open (close button is in panel) */}
           <Box display={{base: 'block', md: isIssuesOpen ? 'none' : 'block'}}>

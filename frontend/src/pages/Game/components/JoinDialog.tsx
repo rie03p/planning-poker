@@ -1,15 +1,25 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Button, Dialog, Input, Field} from '@chakra-ui/react';
 import {participantSchema} from '@planning-poker/shared';
 
 type Props = {
   isOpen: boolean;
   onJoin: (name: string) => void;
+  initialName?: string;
+  onCancel?: () => void;
 };
 
-export function JoinDialog({isOpen, onJoin}: Props) {
-  const [draftName, setDraftName] = useState<string>('');
+export function JoinDialog({isOpen, onJoin, initialName, onCancel}: Props) {
+  const [draftName, setDraftName] = useState<string>(initialName ?? '');
   const [error, setError] = useState<string>('');
+  const isEditing = Boolean(initialName);
+
+  useEffect(() => {
+    if (isOpen) {
+      setDraftName(initialName ?? '');
+      setError('');
+    }
+  }, [isOpen, initialName]);
 
   const handleJoin = () => {
     const trimmedName = draftName.trim();
@@ -54,7 +64,9 @@ export function JoinDialog({isOpen, onJoin}: Props) {
       <Dialog.Positioner>
         <Dialog.Content>
           <Dialog.Header>
-            <Dialog.Title>Choose your display name</Dialog.Title>
+            <Dialog.Title>
+              {isEditing ? 'Change your display name' : 'Choose your display name'}
+            </Dialog.Title>
           </Dialog.Header>
 
           <Dialog.Body>
@@ -70,9 +82,14 @@ export function JoinDialog({isOpen, onJoin}: Props) {
             </Field.Root>
           </Dialog.Body>
 
-          <Dialog.Footer>
-            <Button w='full' colorPalette='blue' disabled={!draftName.trim()} onClick={handleJoin}>
-              Join game
+          <Dialog.Footer display='flex' gap={2} w='full'>
+            {isEditing && onCancel && (
+              <Button flex={1} variant='outline' onClick={onCancel}>
+                Cancel
+              </Button>
+            )}
+            <Button flex={1} colorPalette='blue' disabled={!draftName.trim()} onClick={handleJoin}>
+              {isEditing ? 'Change name' : 'Join game'}
             </Button>
           </Dialog.Footer>
         </Dialog.Content>

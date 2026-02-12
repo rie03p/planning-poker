@@ -68,6 +68,7 @@ export function Game() {
     toggleSpectator,
   } = game;
   const [isIssuesOpen, setIsIssuesOpen] = useState(false);
+  const [isChangingName, setIsChangingName] = useState(false);
 
   const hasAnyVotes = useMemo(() => participants.some(p => p.vote !== undefined), [participants]);
 
@@ -93,6 +94,11 @@ export function Game() {
 
     return undefined;
   }, [issues, activeIssueId, participants, revealed, hasAnyVotes]);
+
+  const handleChangeName = (newName: string) => {
+    setName(newName);
+    setIsChangingName(false);
+  };
 
   if (!name) {
     return <JoinDialog isOpen={true} onJoin={setName} />;
@@ -137,6 +143,12 @@ export function Game() {
 
   return (
     <HStack align='stretch' minH='100vh' maxW='100vw' overflowX='hidden' gap={0} bg='gray.50'>
+      <JoinDialog
+        isOpen={isChangingName}
+        onJoin={handleChangeName}
+        initialName={name}
+        onCancel={() => setIsChangingName(false)}
+      />
       <VStack flex={1} width='100%' gap={0}>
         <GameHeader
           gameId={gameId}
@@ -146,6 +158,8 @@ export function Game() {
           onToggleIssues={handleToggleIssues}
           isSpectator={isSpectator}
           onToggleSpectator={toggleSpectator}
+          name={name}
+          onChangeName={() => setIsChangingName(true)}
         />
 
         {/* Main Content Area */}
