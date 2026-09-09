@@ -41,6 +41,8 @@ export function useWebSocket({
   const onCloseRef = useRef(onClose);
   const onErrorRef = useRef(onError);
   const initialUserIdRef = useRef(initialUserId);
+  const nameRef = useRef(name);
+  const hasName = Boolean(name);
 
   // Keep refs up to date
   useEffect(() => {
@@ -49,6 +51,7 @@ export function useWebSocket({
     onCloseRef.current = onClose;
     onErrorRef.current = onError;
     initialUserIdRef.current = initialUserId;
+    nameRef.current = name;
   });
 
   const send = useCallback((message: ClientMessage) => {
@@ -73,9 +76,20 @@ export function useWebSocket({
     }
   }, []);
 
+  const join = useCallback(() => {
+    send({type: 'join', name: nameRef.current, clientId: initialUserIdRef.current || undefined});
+  }, [send]);
+
+  // Rejoining on the existing connection updates the name without removing the participant.
+  useEffect(() => {
+    if (name && wsRef.current?.readyState === WebSocket.OPEN) {
+      join();
+    }
+  }, [name, join]);
+
   useEffect(() => {
     // Don't connect if name is not set
-    if (!name) {
+    if (!hasName) {
       return;
     }
 
@@ -102,15 +116,7 @@ export function useWebSocket({
     wsRef.current = ws;
 
     ws.addEventListener('open', () => {
-      const joinMessage: ClientMessage = {
-        type: 'join',
-        name,
-        clientId: initialUserIdRef.current || undefined,
-      };
-      const result = clientMessageSchema.safeParse(joinMessage);
-      if (result.success) {
-        ws.send(JSON.stringify(result.data));
-      }
+      join();
 
       onOpenRef.current?.();
     });
@@ -126,7 +132,7 @@ export function useWebSocket({
     return () => {
       ws.close();
     };
-  }, [gameId, name]);
+  }, [gameId, hasName, join]);
 
   return {send, disconnect};
 }
