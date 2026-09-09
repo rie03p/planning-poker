@@ -953,6 +953,51 @@ describe('Game', () => {
   });
 
   describe('broadcast', () => {
+    it('preserves update recipients and only includes issues when explicitly requested', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {sessions, gameState} = game as any;
+      await joinAndGetUserId('session-1', 'Alice');
+      await handleMessage('session-1', {type: 'add-issue', issue: {title: 'First'}});
+      const alice = sessions.get('session-1');
+      alice.send.mockClear();
+
+      await joinAndGetUserId('session-2', 'Bob');
+      const bob = sessions.get('session-2');
+      expect(bob.send).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(bob.send.mock.lastCall[0])).toMatchObject({
+        type: 'joined',
+        issues: gameState.issues,
+      });
+      expect(alice.send).toHaveBeenCalledTimes(1);
+      const update = JSON.parse(alice.send.mock.lastCall[0]);
+      expect(update).toEqual({
+        type: 'update',
+        participants: expect.arrayContaining([
+          expect.objectContaining({name: 'Alice'}),
+          expect.objectContaining({name: 'Bob'}),
+        ]),
+        revealed: false,
+        activeIssueId: gameState.activeIssueId,
+      });
+      expect(update).not.toHaveProperty('issues');
+
+      await handleMessage('session-1', {type: 'vote', vote: '5'});
+      for (const ws of [alice, bob]) {
+        expect(JSON.parse(ws.send.mock.lastCall[0])).not.toHaveProperty('issues');
+      }
+      await handleMessage('session-1', {type: 'add-issue', issue: {title: 'Second'}});
+      await handleMessage('session-1', {type: 'set-active-issue', issueId: gameState.issues[1].id});
+      for (const ws of [alice, bob]) {
+        expect(JSON.parse(ws.send.mock.lastCall[0])).toMatchObject({
+          type: 'update',
+          issues: gameState.issues,
+          activeIssueId: gameState.issues[1].id,
+          revealed: false,
+        });
+      }
+    });
+
     it('should send message to all sessions except excluded one', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const {sessions} = game as any;

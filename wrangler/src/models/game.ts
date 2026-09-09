@@ -126,12 +126,7 @@ export class Game {
 
     // Only broadcast if the disconnected session was actually a participant
     if (wasParticipant) {
-      this.broadcast({
-        type: 'update',
-        participants: [...this.gameState.participants.values()],
-        revealed: this.gameState.revealed,
-        activeIssueId: this.gameState.activeIssueId,
-      });
+      this.broadcast(this.createUpdateMessage());
     }
 
     if (this.gameState.participants.size === 0) {
@@ -205,15 +200,7 @@ export class Game {
         }
 
         // Broadcast update to others
-        this.broadcast(
-          {
-            type: 'update',
-            participants: [...this.gameState.participants.values()],
-            revealed: this.gameState.revealed,
-            activeIssueId: this.gameState.activeIssueId,
-          },
-          sessionId,
-        );
+        this.broadcast(this.createUpdateMessage(), sessionId);
         break;
       }
 
@@ -239,12 +226,7 @@ export class Game {
           }
 
           p.vote = data.vote;
-          this.broadcast({
-            type: 'update',
-            participants: [...this.gameState.participants.values()],
-            revealed: this.gameState.revealed,
-            activeIssueId: this.gameState.activeIssueId,
-          });
+          this.broadcast(this.createUpdateMessage());
         }
 
         break;
@@ -273,12 +255,7 @@ export class Game {
           }
         }
 
-        this.broadcast({
-          type: 'update',
-          participants: [...this.gameState.participants.values()],
-          revealed: this.gameState.revealed,
-          activeIssueId: this.gameState.activeIssueId,
-        });
+        this.broadcast(this.createUpdateMessage());
         break;
       }
 
@@ -315,12 +292,7 @@ export class Game {
 
         // specific update for activeIssueId if it changed (first issue)
         if (isFirstIssue) {
-          this.broadcast({
-            type: 'update',
-            participants: [...this.gameState.participants.values()],
-            revealed: this.gameState.revealed,
-            activeIssueId: this.gameState.activeIssueId,
-          });
+          this.broadcast(this.createUpdateMessage());
         }
 
         break;
@@ -341,12 +313,7 @@ export class Game {
         });
 
         if (previousActiveIssueId !== this.gameState.activeIssueId) {
-          this.broadcast({
-            type: 'update',
-            participants: [...this.gameState.participants.values()],
-            revealed: this.gameState.revealed,
-            activeIssueId: this.gameState.activeIssueId,
-          });
+          this.broadcast(this.createUpdateMessage());
         }
 
         break;
@@ -373,13 +340,7 @@ export class Game {
 
         issues.splice(index, 0, issue);
         this.gameState.issues = issues;
-        this.broadcast({
-          type: 'update',
-          participants: [...this.gameState.participants.values()],
-          revealed: this.gameState.revealed,
-          activeIssueId: this.gameState.activeIssueId,
-          issues,
-        });
+        this.broadcast(this.createUpdateMessage(issues));
         break;
       }
 
@@ -463,12 +424,7 @@ export class Game {
             }
           }
 
-          this.broadcast({
-            type: 'update',
-            participants: [...this.gameState.participants.values()],
-            revealed: this.gameState.revealed,
-            activeIssueId: this.gameState.activeIssueId,
-          });
+          this.broadcast(this.createUpdateMessage());
         }
 
         break;
@@ -516,13 +472,17 @@ export class Game {
       p.vote = undefined;
     }
 
-    this.broadcast({
-      type: 'update',
+    this.broadcast(this.createUpdateMessage(this.gameState.issues));
+  }
+
+  private createUpdateMessage(issues?: GameState['issues']) {
+    return {
+      type: 'update' as const,
       participants: [...this.gameState.participants.values()],
       revealed: this.gameState.revealed,
       activeIssueId: this.gameState.activeIssueId,
-      issues: this.gameState.issues,
-    });
+      issues,
+    };
   }
 
   private broadcast(message: unknown, excludeSessionId?: string) {
