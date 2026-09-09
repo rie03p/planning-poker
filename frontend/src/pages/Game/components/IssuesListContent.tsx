@@ -109,7 +109,7 @@ export function IssuesListContent({
               </Menu.Positioner>
             </Menu.Root>
           )}
-          {onClose && <CloseButton onClick={onClose} />}
+          {onClose && <CloseButton aria-label='Close issues' onClick={onClose} />}
         </HStack>
       </HStack>
 
@@ -170,6 +170,8 @@ export function IssuesListContent({
               return (
                 <Card.Root
                   key={issue.id}
+                  role='group'
+                  aria-label={`Issue: ${issue.title}`}
                   variant={isActive ? 'subtle' : 'outline'}
                   colorPalette={isActive ? 'blue' : undefined}
                   onClick={() => {

@@ -31,6 +31,7 @@ export function IssuesPanel({
     <Box display={{base: 'none', md: 'flex'}} h='100vh' flexShrink={0}>
       {/* Panel Content */}
       <Box
+        inert={!isOpen}
         w={isOpen ? '380px' : '0px'}
         overflow='hidden'
         transition='width 0.3s ease'

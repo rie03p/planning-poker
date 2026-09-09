@@ -27,7 +27,7 @@ Estimate story points collaboratively with live synchronization.
 - **Frontend**: React, Vite, Chakra UI
 - **Backend**: Cloudflare Workers, Durable Objects, WebSockets
 - **Shared**: TypeScript, Zod
-- **Testing**: Vitest
+- **Testing**: Vitest, Playwright
 - **Package Manager**: pnpm
 
 ## Getting Started
@@ -136,6 +136,33 @@ Run tests with coverage:
 ```bash
 pnpm test:coverage
 ```
+
+### Browser happy paths (Playwright)
+
+```bash
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+Playwright starts local Vite and Wrangler servers on ports 5173 and 8787. Stop any
+existing servers on those ports first. Tests use the real Workers/Durable Objects
+backend and separate browser sessions, with no Cloudflare account or secrets.
+
+Desktop and mobile Chromium cover creating a game, joining via its link, managing
+issues, voting together, revealing results, advancing and resetting rounds, and all
+four voting systems. Every pull request runs the `Happy path (Playwright)` check.
+Configure that check as required in the repository's branch protection to block
+merges on failure. Fork pull requests may require a maintainer to approve the workflow.
+
+The CI artifact includes the HTML report, failure screenshots and traces (kept for
+7 days). To inspect a local run:
+
+```bash
+pnpm exec playwright show-report
+```
+
+The server lifecycle and CI setup follow the [Playwright documentation](https://playwright.dev/docs/test-webserver)
+and [CI guide](https://playwright.dev/docs/ci).
 
 ## License
 

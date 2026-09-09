@@ -22,6 +22,9 @@ export function CardSelection({cards, myVote, onVote}: CardSelectionProps) {
         {cards?.map(card => (
           <Box
             key={card}
+            as='button'
+            aria-label={`Vote ${card}`}
+            aria-pressed={myVote === card}
             flexShrink={0}
             onClick={() => {
               onVote(card, myVote === card);
