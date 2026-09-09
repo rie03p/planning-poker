@@ -61,9 +61,11 @@ export function IssuesListContent({
 }: IssuesListContentProps) {
   const [newIssueTitle, setNewIssueTitle] = useState('');
   const [editingIssue, setEditingIssue] = useState<Issue | undefined>(undefined);
-  const [deletingIssueId, setDeletingIssueId] = useState<string | undefined>(undefined);
+  const [deleteTarget, setDeleteTarget] = useState<{issueId: string} | 'all' | undefined>(
+    undefined,
+  );
   const [viewingResultsIssue, setViewingResultsIssue] = useState<Issue | undefined>(undefined);
-  const [isdeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
+  const isDeletingAll = deleteTarget === 'all';
   // Keep the drag's items stable while other participants edit the shared list.
   const [dragIssues, setDragIssues] = useState<Issue[] | null>(null);
   const displayedIssues = dragIssues ?? issues;
@@ -83,15 +85,13 @@ export function IssuesListContent({
   };
 
   const confirmDelete = () => {
-    if (deletingIssueId) {
-      onRemoveIssue(deletingIssueId);
-      setDeletingIssueId(undefined);
+    if (deleteTarget === 'all') {
+      onRemoveAllIssues();
+    } else if (deleteTarget) {
+      onRemoveIssue(deleteTarget.issueId);
     }
-  };
 
-  const confirmDeleteAll = () => {
-    onRemoveAllIssues();
-    setIsDeleteAllDialogOpen(false);
+    setDeleteTarget(undefined);
   };
 
   return (
@@ -117,7 +117,7 @@ export function IssuesListContent({
                     gap={2}
                     _hover={{bg: 'red.50', color: 'red.600'}}
                     onClick={() => {
-                      setIsDeleteAllDialogOpen(true);
+                      setDeleteTarget('all');
                     }}
                   >
                     <Trash2 size={16} />
@@ -239,7 +239,7 @@ export function IssuesListContent({
                             variant='ghost'
                             onClick={event => {
                               event.stopPropagation();
-                              setDeletingIssueId(issue.id);
+                              setDeleteTarget({issueId: issue.id});
                             }}
                           >
                             <Trash2 size={16} />
@@ -318,10 +318,10 @@ export function IssuesListContent({
 
       {/* Delete Confirmation Dialog */}
       <Dialog.Root
-        open={Boolean(deletingIssueId)}
+        open={deleteTarget !== undefined}
         onOpenChange={event => {
           if (!event.open) {
-            setDeletingIssueId(undefined);
+            setDeleteTarget(undefined);
           }
         }}
         placement='center'
@@ -331,62 +331,18 @@ export function IssuesListContent({
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header>
-                <Dialog.Title>Delete Issue</Dialog.Title>
+                <Dialog.Title>{isDeletingAll ? 'Delete All Issues' : 'Delete Issue'}</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body>
-                Are you sure you want to delete this issue? This action cannot be undone.
+                Are you sure you want to delete {isDeletingAll ? 'ALL issues' : 'this issue'}? This
+                action cannot be undone.
               </Dialog.Body>
               <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
-                  <Button
-                    variant='outline'
-                    onClick={() => {
-                      setDeletingIssueId(undefined);
-                    }}
-                  >
-                    Cancel
-                  </Button>
+                  <Button variant='outline'>Cancel</Button>
                 </Dialog.ActionTrigger>
                 <Button colorPalette='red' onClick={confirmDelete}>
-                  Delete
-                </Button>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
-
-      {/* Delete All Confirmation Dialog */}
-      <Dialog.Root
-        open={isdeleteAllDialogOpen}
-        onOpenChange={event => {
-          setIsDeleteAllDialogOpen(event.open);
-        }}
-        placement='center'
-      >
-        <Portal>
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content>
-              <Dialog.Header>
-                <Dialog.Title>Delete All Issues</Dialog.Title>
-              </Dialog.Header>
-              <Dialog.Body>
-                Are you sure you want to delete ALL issues? This action cannot be undone.
-              </Dialog.Body>
-              <Dialog.Footer>
-                <Dialog.ActionTrigger asChild>
-                  <Button
-                    variant='outline'
-                    onClick={() => {
-                      setIsDeleteAllDialogOpen(false);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </Dialog.ActionTrigger>
-                <Button colorPalette='red' onClick={confirmDeleteAll}>
-                  Delete All
+                  {isDeletingAll ? 'Delete All' : 'Delete'}
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>

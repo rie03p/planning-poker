@@ -88,11 +88,40 @@ test('two participants create, edit, vote, reveal, vote again, advance and delet
     await expect(results.getByText('M', {exact: true})).toHaveCount(0);
     await page.keyboard.press('Escape');
 
+    // Cancel and Escape must preserve all issues in both deletion modes.
+    for (const dismiss of ['Cancel', 'Escape']) {
+      for (const deleteAll of [false, true]) {
+        if (deleteAll) {
+          await page.getByRole('button', {name: 'Options', exact: true}).click();
+          await page.getByRole('menuitem', {name: 'Delete all issues'}).click();
+        } else {
+          await issue(page, 'Third issue').getByRole('button', {name: 'Remove issue'}).click();
+        }
+        const dialog = page.getByRole('dialog', {
+          name: deleteAll ? 'Delete All Issues' : 'Delete Issue',
+          exact: true,
+        });
+        await expect(dialog).toBeVisible();
+        await expect(dialog.getByText(/This action cannot be undone\./)).toBeVisible();
+        if (dismiss === 'Cancel') {
+          await dialog.getByRole('button', {name: 'Cancel', exact: true}).click();
+        } else {
+          await page.keyboard.press('Escape');
+        }
+        await expect(dialog).not.toBeVisible();
+        for (const participantPage of [page, guest]) {
+          await expect(participantPage.getByRole('group', {name: /^Issue:/})).toHaveCount(3);
+        }
+      }
+    }
+
     await issue(page, 'Third issue')
       .getByRole('button', {name: 'Remove issue', exact: true})
       .click();
     await page.getByRole('button', {name: 'Delete', exact: true}).click();
     await expect(issue(guest, 'Third issue')).toHaveCount(0);
+    await expect(issue(guest, 'First issue')).toBeVisible();
+    await expect(issue(guest, 'Second issue')).toBeVisible();
     await page.getByRole('button', {name: 'Options', exact: true}).click();
     await page.getByRole('menuitem', {name: 'Delete all issues'}).click();
     await page.getByRole('button', {name: 'Delete All', exact: true}).click();
