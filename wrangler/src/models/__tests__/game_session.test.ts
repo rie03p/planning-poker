@@ -1,44 +1,6 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {Game} from '../game';
-
-// Mock DurableObjectState - simplified from game.test.ts
-const createMockState = () => {
-  const storage = new Map<string, any>();
-  return {
-    id: {name: 'test-game', toString: () => 'test-game'},
-    storage: {
-      get: vi.fn(async (key: string) => storage.get(key)),
-      put: vi.fn(async (key: string, value: any) => {
-        storage.set(key, value);
-      }),
-      delete: vi.fn(async (key: string) => {
-        storage.delete(key);
-      }),
-      deleteAll: vi.fn(async () => {
-        storage.clear();
-      }),
-      setAlarm: vi.fn(),
-      deleteAlarm: vi.fn(),
-    },
-    waitUntil: vi.fn(),
-    blockConcurrencyWhile: vi.fn(),
-  } as any;
-};
-
-// Mock Env
-const createMockEnv = () =>
-  ({
-    GAME: {
-      idFromName: vi.fn((name: string) => ({name})),
-      get: vi.fn(),
-    },
-    REGISTRY: {
-      idFromName: vi.fn((name: string) => ({name})),
-      get: vi.fn(() => ({
-        fetch: vi.fn(async () => new Response('ok', {status: 200})),
-      })),
-    },
-  }) as any;
+import {createMockState, createMockEnv} from './mocks';
 
 describe('Game Session Management', () => {
   let game: Game;
