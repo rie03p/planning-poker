@@ -4,6 +4,7 @@ import {
   clientMessageSchema,
   serverMessageSchema,
   getCardsForVotingSystem,
+  getNextUnfinishedIssue,
   MAX_PARTICIPANTS,
 } from '@planning-poker/shared';
 import {type GameState, type Env} from '../types';
@@ -263,6 +264,7 @@ export class Game {
             this.gameState.issues[issueIndex] = {
               ...this.gameState.issues[issueIndex],
               voteResults,
+              votingCompleted: true,
             };
             this.broadcast({
               type: 'issue-updated',
@@ -296,6 +298,7 @@ export class Game {
         const newIssue = {
           id: crypto.randomUUID(),
           ...data.issue,
+          votingCompleted: false,
         };
         this.gameState.issues.push(newIssue);
 
@@ -386,11 +389,11 @@ export class Game {
       }
 
       case 'vote-next-issue': {
-        const currentIndex = this.gameState.issues.findIndex(
-          i => i.id === this.gameState.activeIssueId,
+        const nextIssue = getNextUnfinishedIssue(
+          this.gameState.issues,
+          this.gameState.activeIssueId,
         );
-        if (currentIndex !== -1 && currentIndex < this.gameState.issues.length - 1) {
-          const nextIssue = this.gameState.issues[currentIndex + 1];
+        if (nextIssue) {
           this.setActiveIssue(nextIssue.id);
         }
 
@@ -407,6 +410,8 @@ export class Game {
         this.gameState.issues[issueIndex] = {
           ...data.issue,
           id: existingIssue.id, // Ensure the ID cannot be changed by the client
+          voteResults: existingIssue.voteResults,
+          votingCompleted: existingIssue.votingCompleted,
         };
 
         this.broadcast({
@@ -495,11 +500,17 @@ export class Game {
   }
 
   private setActiveIssue(issueId: string) {
+    const issue = this.gameState.issues.find(i => i.id === issueId);
+    if (!issue) {
+      return;
+    }
+
     if (this.gameState.activeIssueId === issueId && !this.gameState.revealed) {
       return;
     }
 
     this.gameState.activeIssueId = issueId;
+    issue.votingCompleted = false;
     this.gameState.revealed = false;
     for (const p of this.gameState.participants.values()) {
       p.vote = undefined;
@@ -510,6 +521,7 @@ export class Game {
       participants: [...this.gameState.participants.values()],
       revealed: this.gameState.revealed,
       activeIssueId: this.gameState.activeIssueId,
+      issues: this.gameState.issues,
     });
   }
 

@@ -1,5 +1,5 @@
 import {Box} from '@chakra-ui/react';
-import {type Issue} from '@planning-poker/shared';
+import {type Issue, getNextUnfinishedIssue} from '@planning-poker/shared';
 import {ActionArea} from './ActionArea';
 
 type GameTableProps = {
@@ -21,14 +21,7 @@ export function GameTable({
   issues,
   voteNextIssue,
 }: GameTableProps) {
-  const handleVoteNext = (() => {
-    if (!activeIssueId) {
-      return undefined;
-    }
-
-    const index = issues.findIndex(i => i.id === activeIssueId);
-    return index !== -1 && index < issues.length - 1 ? voteNextIssue : undefined;
-  })();
+  const handleVoteNext = getNextUnfinishedIssue(issues, activeIssueId) ? voteNextIssue : undefined;
 
   return (
     <Box

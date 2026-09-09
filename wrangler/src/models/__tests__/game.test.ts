@@ -1,5 +1,6 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {Game} from '../game';
+import {getNextUnfinishedIssue, type Issue} from '@planning-poker/shared';
 
 // Mock DurableObjectState
 const createMockState = () => {
@@ -848,6 +849,63 @@ describe('Game', () => {
 
       // Assert
       expect(gameState.activeIssueId).toBe(gameState.issues[1].id);
+    });
+
+    it('skips completed rounds but includes an unfinished revote with saved results', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = game as any;
+      const userId = await joinAndGetUserId('session-1', 'Alice');
+      for (const title of ['First', 'Done', 'Empty results', 'Last']) {
+        await handleMessage('session-1', {type: 'add-issue', issue: {title}});
+      }
+      const [first, done, empty, last] = gameState.issues;
+      await handleMessage('session-1', {type: 'set-active-issue', issueId: done.id});
+      await handleMessage('session-1', {type: 'vote', vote: '5'});
+      expect(gameState.issues[1].votingCompleted).toBe(false);
+      await handleMessage('session-1', {type: 'reveal'});
+      // Editing a completed issue must preserve both completion and saved results.
+      await handleMessage('session-1', {
+        type: 'update-issue',
+        issue: {id: done.id, title: 'Edited'},
+      });
+      expect(gameState.issues[1]).toMatchObject({votingCompleted: true, voteResults: {'5': 1}});
+      await handleMessage('session-1', {type: 'set-active-issue', issueId: empty.id});
+      await handleMessage('session-1', {type: 'reveal'});
+      expect(gameState.issues[2]).toMatchObject({votingCompleted: true, voteResults: {}});
+      await handleMessage('session-1', {type: 'set-active-issue', issueId: first.id});
+      await handleMessage('session-1', {type: 'vote-next-issue'});
+      expect(gameState.activeIssueId).toBe(last.id);
+
+      await handleMessage('session-1', {type: 'vote', vote: '8'});
+      await handleMessage('session-1', {type: 'reveal'});
+      await handleMessage('session-1', {type: 'vote-next-issue'});
+      expect(gameState.activeIssueId).toBe(last.id);
+      expect(gameState.revealed).toBe(true);
+      expect(gameState.participants.get(userId).vote).toBe('8');
+
+      await handleMessage('session-1', {type: 'set-active-issue', issueId: done.id});
+      expect(gameState.issues[1]).toMatchObject({votingCompleted: false, voteResults: {'5': 1}});
+      await handleMessage('session-1', {type: 'set-active-issue', issueId: first.id});
+      await handleMessage('session-1', {type: 'vote-next-issue'});
+      expect(gameState.activeIssueId).toBe(done.id);
+      await handleMessage('session-1', {type: 'reveal'});
+      await handleMessage('session-1', {type: 'set-active-issue', issueId: first.id});
+      await handleMessage('session-1', {type: 'vote-next-issue'});
+      expect(gameState.activeIssueId).toBe(first.id);
+    });
+
+    it('finds only later unfinished issues, including older state without a completion flag', () => {
+      const issues: Issue[] = [
+        {id: 'first', title: 'First'},
+        {id: 'done', title: 'Done', voteResults: {'5': 1}},
+        {id: 'empty', title: 'Empty', voteResults: {}},
+        {id: 'revote', title: 'Revote', voteResults: {'8': 1}, votingCompleted: false},
+      ];
+      expect(getNextUnfinishedIssue(issues, 'first')?.id).toBe('revote');
+      expect(getNextUnfinishedIssue(issues, 'revote')).toBeUndefined();
+      expect(getNextUnfinishedIssue(issues, 'missing')).toBeUndefined();
+      expect(getNextUnfinishedIssue(issues, undefined)).toBeUndefined();
     });
 
     it('should remove all issues and reset game state', async () => {

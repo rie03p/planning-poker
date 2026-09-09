@@ -61,6 +61,7 @@ export const issueSchema = z.object({
   description: z.string().max(1000).optional(),
   url: z.string().url().max(200).optional().or(z.literal('')),
   voteResults: voteResultsSchema.optional(),
+  votingCompleted: z.boolean().optional(),
 });
 
 export const participantSchema = z.object({
