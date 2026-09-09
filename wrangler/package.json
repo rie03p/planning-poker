@@ -16,10 +16,10 @@
     "@planning-poker/shared": "workspace:*"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.2025.0",
-    "@vitest/coverage-v8": "^4.0.16",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.16",
-    "wrangler": "^4.54.0"
+    "@cloudflare/workers-types": "^5.20260902.1",
+    "@vitest/coverage-v8": "^4.1.11",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.128.0"
   }
 }

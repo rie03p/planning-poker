@@ -29,7 +29,7 @@ export function JoinDialog({isOpen, onJoin, initialName, onCancel}: Props) {
 
     const result = participantSchema.shape.name.safeParse(trimmedName);
     if (!result.success) {
-      const firstError = result.error.errors[0];
+      const firstError = result.error.issues[0];
       if (firstError?.code === 'too_small') {
         setError('Name must be at least 1 character');
       } else if (firstError?.code === 'too_big') {

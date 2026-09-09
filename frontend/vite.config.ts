@@ -1,22 +1,15 @@
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 import {defineConfig} from 'vite';
-import react from '@vitejs/plugin-react';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import react, {reactCompilerPreset} from '@vitejs/plugin-react';
+import babel from '@rolldown/plugin-babel';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    react({
-      babel: {
-        plugins: [['babel-plugin-react-compiler']],
-      },
-    }),
-  ],
+  plugins: [react(), babel({presets: [reactCompilerPreset()]})],
   resolve: {
-    alias: {
-      '@planning-poker/shared': path.resolve(__dirname, '../shared/src'),
-    },
+    tsconfigPaths: true,
+  },
+  build: {
+    // Preserve Vite 7's browser targets when upgrading to Vite 8.
+    target: ['chrome107', 'edge107', 'firefox104', 'safari16'],
   },
 });

@@ -41,8 +41,8 @@ export function IssueDetailDialog({isOpen, onClose, issue, onUpdateIssue}: Issue
 
     if (!result.success) {
       const newErrors: {title?: string; url?: string; description?: string} = {};
-      for (const error of result.error.errors) {
-        const field = error.path[0] as 'title' | 'url' | 'description';
+      for (const error of result.error.issues) {
+        const field = error.path[0];
         if (field === 'title' || field === 'url' || field === 'description') {
           newErrors[field] = error.message;
         }
