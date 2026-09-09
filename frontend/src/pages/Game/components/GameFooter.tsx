@@ -53,6 +53,7 @@ export function GameFooter({
         right={0}
         bottom={0}
         height='110px'
+        inert={revealed}
         transform={showResults ? 'translateY(100%)' : 'translateY(0)'}
         transition='transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s'
         opacity={showResults ? 0 : 1}
@@ -92,6 +93,7 @@ export function GameFooter({
         right={0}
         bottom={0}
         height='250px'
+        inert={!showResults}
         p={6}
         display='flex'
         alignItems='center'
