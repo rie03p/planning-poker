@@ -442,6 +442,35 @@ describe('useGame', () => {
     );
   });
 
+  it('sends a relative issue move and receives the shared order without resetting votes', async () => {
+    const getWs = mockWebSocket();
+    const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));
+    const ws = getWs();
+    ws.emitOpen();
+
+    result.current.moveIssue('issue-2', 'issue-1');
+    expect(ws.send).toHaveBeenCalledWith(
+      JSON.stringify({type: 'move-issue', issueId: 'issue-2', beforeIssueId: 'issue-1'}),
+    );
+    ws.emitMessage({
+      type: 'update',
+      participants: [{id: 'user-id-alice', name: 'Alice', vote: '5'}],
+      revealed: true,
+      activeIssueId: 'issue-1',
+      issues: [
+        {id: 'issue-2', title: 'Second'},
+        {id: 'issue-1', title: 'First'},
+      ],
+    });
+
+    await vi.waitFor(() => {
+      expect(result.current.issues.map(issue => issue.id)).toEqual(['issue-2', 'issue-1']);
+      expect(result.current.activeIssueId).toBe('issue-1');
+      expect(result.current.myVote).toBe('5');
+      expect(result.current.revealed).toBe(true);
+    });
+  });
+
   it('sends vote-next-issue message', () => {
     const getWs = mockWebSocket();
     const {result} = renderHook(() => useGame('test-game', 'Alice', 'user-id-alice', vi.fn()));

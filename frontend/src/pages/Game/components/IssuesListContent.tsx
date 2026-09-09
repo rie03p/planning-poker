@@ -1,4 +1,6 @@
-import {useState} from 'react';
+import {useState, type ReactNode} from 'react';
+import {DragDropProvider} from '@dnd-kit/react';
+import {useSortable, isSortable} from '@dnd-kit/react/sortable';
 import {
   VStack,
   HStack,
@@ -15,7 +17,14 @@ import {
   Portal,
   Tooltip,
 } from '@chakra-ui/react';
-import {Trash2, ExternalLink, BarChart3, MoreHorizontal, CircleHelp} from 'lucide-react';
+import {
+  Trash2,
+  ExternalLink,
+  BarChart3,
+  MoreHorizontal,
+  CircleHelp,
+  GripVertical,
+} from 'lucide-react';
 import {type Issue, MAX_ISSUES} from '@planning-poker/shared';
 import {parseIssueInput} from '../../../utils/issueInputParser';
 import {IssueDetailDialog} from './IssueDetailDialog';
@@ -27,10 +36,12 @@ type IssuesListContentProps = {
   activeIssueId: string | undefined;
   onAddIssue: (title: string, description?: string, url?: string) => void;
   onRemoveIssue: (issueId: string) => void;
+  onMoveIssue: (issueId: string, beforeIssueId: string | null) => void;
   onSetActiveIssue: (issueId: string) => void;
   onUpdateIssue: (issue: Issue) => void;
   onRemoveAllIssues: () => void;
   onClose?: () => void;
+  onDraggingChange?: (dragging: boolean) => void;
   cards?: readonly string[];
 };
 
@@ -40,10 +51,12 @@ export function IssuesListContent({
   activeIssueId,
   onAddIssue,
   onRemoveIssue,
+  onMoveIssue,
   onSetActiveIssue,
   onUpdateIssue,
   onRemoveAllIssues,
   onClose,
+  onDraggingChange,
   cards,
 }: IssuesListContentProps) {
   const [newIssueTitle, setNewIssueTitle] = useState('');
@@ -51,6 +64,9 @@ export function IssuesListContent({
   const [deletingIssueId, setDeletingIssueId] = useState<string | undefined>(undefined);
   const [viewingResultsIssue, setViewingResultsIssue] = useState<Issue | undefined>(undefined);
   const [isdeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
+  // Keep the drag's items stable while other participants edit the shared list.
+  const [dragIssues, setDragIssues] = useState<Issue[] | null>(null);
+  const displayedIssues = dragIssues ?? issues;
 
   const handleAddIssue = () => {
     if (!newIssueTitle.trim()) {
@@ -161,118 +177,133 @@ export function IssuesListContent({
 
       {/* Scrollable Issues List */}
       <Box flex={1} overflowY='auto' p={4}>
-        <VStack gap={3} align='stretch'>
-          {issues.length === 0 ? (
-            <Text color='gray.500' textAlign='center' py={4}>
-              No issues registered yet.
-            </Text>
-          ) : (
-            issues.map(issue => {
-              const isActive = issue.id === activeIssueId;
-              return (
-                <Card.Root
-                  key={issue.id}
-                  role='group'
-                  aria-label={`Issue: ${issue.title}`}
-                  variant={isActive ? 'subtle' : 'outline'}
-                  colorPalette={isActive ? 'blue' : undefined}
-                  onClick={() => {
-                    setEditingIssue(issue);
-                  }}
-                  cursor='pointer'
-                  _hover={{borderColor: 'blue.400'}}
-                >
-                  <Card.Body p={3}>
-                    <VStack align='stretch' gap={2}>
-                      <HStack justify='space-between' align='center'>
-                        <Text fontWeight='medium' truncate flex={1}>
-                          {issue.title}
-                        </Text>
-                        {issue.voteResults && Object.keys(issue.voteResults).length > 0 && (
+        <DragDropProvider
+          onDragStart={() => {
+            setDragIssues(issues);
+            onDraggingChange?.(true);
+          }}
+          onDragEnd={event => {
+            setDragIssues(null);
+            onDraggingChange?.(false);
+            const {source} = event.operation;
+            if (event.canceled || !isSortable(source) || source.index === source.initialIndex) {
+              return;
+            }
+
+            const remaining = displayedIssues.filter(issue => issue.id !== source.id);
+            onMoveIssue(String(source.id), remaining[source.index]?.id ?? null);
+          }}
+        >
+          <VStack gap={3} align='stretch'>
+            {displayedIssues.length === 0 ? (
+              <Text color='gray.500' textAlign='center' py={4}>
+                No issues registered yet.
+              </Text>
+            ) : (
+              displayedIssues.map((issue, index) => {
+                const isActive = issue.id === activeIssueId;
+                return (
+                  <SortableIssueCard
+                    key={issue.id}
+                    issue={issue}
+                    index={index}
+                    isActive={isActive}
+                    onEdit={() => {
+                      setEditingIssue(issue);
+                    }}
+                  >
+                    <Card.Body p={3}>
+                      <VStack align='stretch' gap={2}>
+                        <HStack justify='space-between' align='center'>
+                          <Text fontWeight='medium' truncate flex={1}>
+                            {issue.title}
+                          </Text>
+                          {issue.voteResults && Object.keys(issue.voteResults).length > 0 && (
+                            <IconButton
+                              aria-label='View voting results'
+                              size='sm'
+                              colorPalette='blue'
+                              variant='ghost'
+                              onClick={event => {
+                                event.stopPropagation();
+                                setViewingResultsIssue(issue);
+                              }}
+                            >
+                              <BarChart3 size={16} />
+                            </IconButton>
+                          )}
                           <IconButton
-                            aria-label='View voting results'
+                            aria-label='Remove issue'
                             size='sm'
-                            colorPalette='blue'
+                            colorPalette='red'
                             variant='ghost'
                             onClick={event => {
                               event.stopPropagation();
-                              setViewingResultsIssue(issue);
+                              setDeletingIssueId(issue.id);
                             }}
                           >
-                            <BarChart3 size={16} />
+                            <Trash2 size={16} />
                           </IconButton>
-                        )}
-                        <IconButton
-                          aria-label='Remove issue'
-                          size='sm'
-                          colorPalette='red'
-                          variant='ghost'
-                          onClick={event => {
-                            event.stopPropagation();
-                            setDeletingIssueId(issue.id);
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </IconButton>
-                      </HStack>
+                        </HStack>
 
-                      {issue.url && (
-                        <Link
-                          href={issue.url}
-                          target='_blank'
-                          fontSize='sm'
-                          colorPalette='blue'
-                          onClick={event => {
-                            event.stopPropagation();
-                          }}
-                          width='fit-content'
-                        >
-                          <HStack gap={1}>
-                            <Text maxW='200px' truncate>
-                              {issue.url}
-                            </Text>
-                            <ExternalLink size={14} style={{margin: '0 2px'}} />
-                          </HStack>
-                        </Link>
-                      )}
-
-                      <Box
-                        pt={2}
-                        onClick={event => {
-                          event.stopPropagation();
-                        }}
-                      >
-                        {isActive && !revealed ? (
-                          <Button
-                            size='sm'
+                        {issue.url && (
+                          <Link
+                            href={issue.url}
+                            target='_blank'
+                            fontSize='sm'
                             colorPalette='blue'
-                            width='full'
-                            variant='solid'
-                            disabled
-                            _disabled={{opacity: 1, cursor: 'default'}}
-                          >
-                            Voting now...
-                          </Button>
-                        ) : (
-                          <Button
-                            size='sm'
-                            variant='subtle'
-                            width='full'
-                            onClick={() => {
-                              onSetActiveIssue(issue.id);
+                            onClick={event => {
+                              event.stopPropagation();
                             }}
+                            width='fit-content'
                           >
-                            {isActive ? 'Vote again' : 'Vote this issue'}
-                          </Button>
+                            <HStack gap={1}>
+                              <Text maxW='200px' truncate>
+                                {issue.url}
+                              </Text>
+                              <ExternalLink size={14} style={{margin: '0 2px'}} />
+                            </HStack>
+                          </Link>
                         )}
-                      </Box>
-                    </VStack>
-                  </Card.Body>
-                </Card.Root>
-              );
-            })
-          )}
-        </VStack>
+
+                        <Box
+                          pt={2}
+                          onClick={event => {
+                            event.stopPropagation();
+                          }}
+                        >
+                          {isActive && !revealed ? (
+                            <Button
+                              size='sm'
+                              colorPalette='blue'
+                              width='full'
+                              variant='solid'
+                              disabled
+                              _disabled={{opacity: 1, cursor: 'default'}}
+                            >
+                              Voting now...
+                            </Button>
+                          ) : (
+                            <Button
+                              size='sm'
+                              variant='subtle'
+                              width='full'
+                              onClick={() => {
+                                onSetActiveIssue(issue.id);
+                              }}
+                            >
+                              {isActive ? 'Vote again' : 'Vote this issue'}
+                            </Button>
+                          )}
+                        </Box>
+                      </VStack>
+                    </Card.Body>
+                  </SortableIssueCard>
+                );
+              })
+            )}
+          </VStack>
+        </DragDropProvider>
       </Box>
 
       {/* Edit Dialog */}
@@ -373,5 +404,52 @@ export function IssuesListContent({
         cards={cards}
       />
     </Box>
+  );
+}
+
+function SortableIssueCard({
+  issue,
+  index,
+  isActive,
+  onEdit,
+  children,
+}: {
+  issue: Issue;
+  index: number;
+  isActive: boolean;
+  onEdit: () => void;
+  children: ReactNode;
+}) {
+  const {ref, handleRef} = useSortable({id: issue.id, index});
+
+  return (
+    <Card.Root
+      ref={ref}
+      role='group'
+      aria-label={`Issue: ${issue.title}`}
+      variant={isActive ? 'subtle' : 'outline'}
+      colorPalette={isActive ? 'blue' : undefined}
+      onClick={onEdit}
+      cursor='pointer'
+      _hover={{borderColor: 'blue.400'}}
+      pl={8}
+    >
+      <IconButton
+        ref={handleRef}
+        aria-label={`Reorder ${issue.title}`}
+        title='Drag to reorder, or use Space and arrow keys'
+        variant='ghost'
+        size='sm'
+        position='absolute'
+        left={1}
+        top={3}
+        cursor='grab'
+        touchAction='none'
+        onClick={event => event.stopPropagation()}
+      >
+        <GripVertical size={16} />
+      </IconButton>
+      {children}
+    </Card.Root>
   );
 }

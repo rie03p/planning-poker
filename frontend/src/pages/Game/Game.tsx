@@ -60,6 +60,7 @@ export function Game() {
     activeIssueId,
     addIssue,
     removeIssue,
+    moveIssue,
     setActiveIssue,
     voteNextIssue,
     updateIssue,
@@ -208,6 +209,7 @@ export function Game() {
         activeIssueId={activeIssueId}
         onAddIssue={addIssue}
         onRemoveIssue={removeIssue}
+        onMoveIssue={moveIssue}
         onSetActiveIssue={setActiveIssue}
         onUpdateIssue={updateIssue}
         onRemoveAllIssues={removeAllIssues}
@@ -223,6 +225,7 @@ export function Game() {
         activeIssueId={activeIssueId}
         onAddIssue={addIssue}
         onRemoveIssue={removeIssue}
+        onMoveIssue={moveIssue}
         onSetActiveIssue={setActiveIssue}
         onUpdateIssue={updateIssue}
         onRemoveAllIssues={removeAllIssues}

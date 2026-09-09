@@ -10,6 +10,7 @@ type IssuesPanelProps = {
   activeIssueId: string | undefined;
   onAddIssue: (title: string, description?: string, url?: string) => void;
   onRemoveIssue: (issueId: string) => void;
+  onMoveIssue: (issueId: string, beforeIssueId: string | null) => void;
   onSetActiveIssue: (issueId: string) => void;
   onUpdateIssue: (issue: Issue) => void;
   onRemoveAllIssues: () => void;
@@ -24,6 +25,7 @@ export function IssuesPanel({
   activeIssueId,
   onAddIssue,
   onRemoveIssue,
+  onMoveIssue,
   onSetActiveIssue,
   onUpdateIssue,
   onRemoveAllIssues,
@@ -49,6 +51,7 @@ export function IssuesPanel({
             activeIssueId={activeIssueId}
             onAddIssue={onAddIssue}
             onRemoveIssue={onRemoveIssue}
+            onMoveIssue={onMoveIssue}
             onSetActiveIssue={onSetActiveIssue}
             onUpdateIssue={onUpdateIssue}
             onRemoveAllIssues={onRemoveAllIssues}

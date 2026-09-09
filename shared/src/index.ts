@@ -16,6 +16,7 @@ export {
 } from './schema';
 
 export {getCardsForVotingSystem} from './votingSystems';
+export {getNextUnfinishedIssue} from './issues';
 
 export type {
   CreateGameRequest,

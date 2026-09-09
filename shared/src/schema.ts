@@ -61,6 +61,7 @@ export const issueSchema = z.object({
   description: z.string().max(1000).optional(),
   url: z.string().url().max(200).optional().or(z.literal('')),
   voteResults: voteResultsSchema.optional(),
+  votingCompleted: z.boolean().optional(),
 });
 
 export const participantSchema = z.object({
@@ -85,6 +86,11 @@ export const clientMessageSchema = z.discriminatedUnion('type', [
     issue: issueSchema.omit({id: true}),
   }),
   z.object({type: z.literal('remove-issue'), issueId: z.string()}),
+  z.object({
+    type: z.literal('move-issue'),
+    issueId: z.string().min(1),
+    beforeIssueId: z.string().min(1).nullable(),
+  }),
   z.object({type: z.literal('set-active-issue'), issueId: z.string()}),
   z.object({type: z.literal('vote-next-issue')}),
   z.object({

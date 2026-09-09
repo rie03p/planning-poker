@@ -104,6 +104,56 @@ test('two participants create, edit, vote, reveal, vote again, advance and delet
   }
 });
 
+test('next issue skips completed rounds and still includes unfinished revotes', async ({page}) => {
+  await page.goto('/');
+  await page.getByRole('button', {name: 'Start new game'}).click();
+  await join(page, 'Alice');
+  await openIssues(page);
+  await page.getByPlaceholder('Issue title').filter({visible: true}).fill('First\nDone\nLast');
+  await page.getByRole('button', {name: 'Add Issue', exact: true}).click();
+  await expect(issue(page, 'Last')).toBeVisible();
+  await closeIssues(page);
+
+  const selectIssue = async (title: string) => {
+    await openIssues(page);
+    await issue(page, title).getByRole('button', {name: 'Vote this issue', exact: true}).click();
+    await expect(issue(page, title).getByRole('button', {name: 'Voting now...'})).toBeDisabled();
+    await closeIssues(page);
+  };
+  const revealVote = async () => {
+    await page.getByRole('button', {name: 'Vote M', exact: true}).click();
+    await page.getByRole('button', {name: 'Reveal votes', exact: true}).click();
+    await expect(page.getByText('Total votes: 1', {exact: true})).toBeVisible();
+  };
+
+  await selectIssue('Done');
+  await revealVote();
+  await selectIssue('First');
+  await revealVote();
+  await page.getByRole('button', {name: 'Vote next issue', exact: true}).click();
+  await openIssues(page);
+  await expect(issue(page, 'Last').getByRole('button', {name: 'Voting now...'})).toBeDisabled();
+  await closeIssues(page);
+  await revealVote();
+
+  // A completed tail must not offer a next round or restart a completed issue.
+  await selectIssue('First');
+  await revealVote();
+  await expect(page.getByRole('button', {name: 'Vote next issue', exact: true})).toHaveCount(0);
+  await expect(page.getByRole('button', {name: 'Start new votes', exact: true})).toBeVisible();
+
+  // Reopen Done, then leave before revealing: saved results must not mark it complete.
+  await selectIssue('Done');
+  await selectIssue('First');
+  await revealVote();
+  await page.getByRole('button', {name: 'Vote next issue', exact: true}).click();
+  await openIssues(page);
+  await expect(issue(page, 'Done').getByRole('button', {name: 'Voting now...'})).toBeDisabled();
+  await expect(
+    issue(page, 'Done').getByRole('button', {name: 'View voting results'}),
+  ).toBeVisible();
+});
+
 for (const [system, card] of [
   ['Fibonacci', '5'],
   ['Modified Fibonacci', '½'],

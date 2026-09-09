@@ -18,6 +18,7 @@ export type GameActions = {
   reset: () => void;
   addIssue: (title: string, description?: string, url?: string) => void;
   removeIssue: (issueId: string) => void;
+  moveIssue: (issueId: string, beforeIssueId: string | null) => void;
   setActiveIssue: (issueId: string) => void;
   voteNextIssue: () => void;
   updateIssue: (issue: Issue) => void;
