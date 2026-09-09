@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.0](https://github.com/rie03p/planning-poker/compare/v1.4.0...v1.5.0) (2026-09-09)
+
+
+### Features
+
+* allow users to change their registered name ([#91](https://github.com/rie03p/planning-poker/issues/91)) ([a95ef5d](https://github.com/rie03p/planning-poker/commit/a95ef5d8c9b9be26d6febcf733f92453203c9359))
+* allow voting again on the active issue after reveal ([d4d94fc](https://github.com/rie03p/planning-poker/commit/d4d94fc8af1072b4851814a714a3ea473d7f2607))
+* reorder issues and skip completed rounds ([#98](https://github.com/rie03p/planning-poker/issues/98)) ([cbb584e](https://github.com/rie03p/planning-poker/commit/cbb584e3d51ef542861b1a44b92d98308761f7a6))
+
+
+### Bug Fixes
+
+* preserve participant state when changing display names ([#99](https://github.com/rie03p/planning-poker/issues/99)) ([e7c102e](https://github.com/rie03p/planning-poker/commit/e7c102ecdc25b5f267f56d841d99fdb818ce36d1))
+
 ## [1.4.0](https://github.com/rie03p/planning-poker/compare/v1.3.1...v1.4.0) (2026-01-31)
 
 
