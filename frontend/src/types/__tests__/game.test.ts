@@ -38,6 +38,9 @@ describe('game types', () => {
       removeIssue() {
         /* no-op */
       },
+      moveIssue() {
+        /* no-op */
+      },
       setActiveIssue() {
         /* no-op */
       },
@@ -89,6 +92,9 @@ describe('game types', () => {
         /* no-op */
       },
       removeIssue() {
+        /* no-op */
+      },
+      moveIssue() {
         /* no-op */
       },
       setActiveIssue() {

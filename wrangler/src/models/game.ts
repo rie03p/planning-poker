@@ -349,6 +349,37 @@ export class Game {
         break;
       }
 
+      case 'move-issue': {
+        if (!this.sessionToUserId.has(sessionId)) {
+          return;
+        }
+
+        const issue = this.gameState.issues.find(i => i.id === data.issueId);
+        if (!issue || data.issueId === data.beforeIssueId) {
+          return;
+        }
+
+        const issues = this.gameState.issues.filter(i => i.id !== data.issueId);
+        const index =
+          data.beforeIssueId === null
+            ? issues.length
+            : issues.findIndex(i => i.id === data.beforeIssueId);
+        if (index === -1) {
+          return;
+        }
+
+        issues.splice(index, 0, issue);
+        this.gameState.issues = issues;
+        this.broadcast({
+          type: 'update',
+          participants: [...this.gameState.participants.values()],
+          revealed: this.gameState.revealed,
+          activeIssueId: this.gameState.activeIssueId,
+          issues,
+        });
+        break;
+      }
+
       case 'set-active-issue': {
         this.setActiveIssue(data.issueId);
         break;

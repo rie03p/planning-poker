@@ -1,3 +1,4 @@
+import {useState} from 'react';
 import {Drawer, useBreakpointValue} from '@chakra-ui/react';
 import {type Issue} from '@planning-poker/shared';
 import {IssuesListContent} from './IssuesListContent';
@@ -10,6 +11,7 @@ type IssuesDrawerProps = {
   activeIssueId: string | undefined;
   onAddIssue: (title: string, description?: string, url?: string) => void;
   onRemoveIssue: (issueId: string) => void;
+  onMoveIssue: (issueId: string, beforeIssueId: string | null) => void;
   onSetActiveIssue: (issueId: string) => void;
   onUpdateIssue: (issue: Issue) => void;
   onRemoveAllIssues: () => void;
@@ -25,12 +27,14 @@ export function IssuesDrawer({
   activeIssueId,
   onAddIssue,
   onRemoveIssue,
+  onMoveIssue,
   onSetActiveIssue,
   onUpdateIssue,
   onRemoveAllIssues,
   cards,
   isMobileOnly = false,
 }: IssuesDrawerProps) {
+  const [isDragging, setIsDragging] = useState(false);
   const isMobile = useBreakpointValue({base: true, md: false}, {ssr: false});
 
   // On desktop, don't show the drawer when isMobileOnly is true
@@ -41,6 +45,8 @@ export function IssuesDrawer({
   return (
     <Drawer.Root
       open={isOpen}
+      closeOnEscape={!isDragging}
+      closeOnInteractOutside={!isDragging}
       onOpenChange={event => {
         if (!event.open) {
           onClose();
@@ -57,10 +63,12 @@ export function IssuesDrawer({
             activeIssueId={activeIssueId}
             onAddIssue={onAddIssue}
             onRemoveIssue={onRemoveIssue}
+            onMoveIssue={onMoveIssue}
             onSetActiveIssue={onSetActiveIssue}
             onUpdateIssue={onUpdateIssue}
             onRemoveAllIssues={onRemoveAllIssues}
             onClose={onClose}
+            onDraggingChange={setIsDragging}
             cards={cards}
           />
         </Drawer.Content>

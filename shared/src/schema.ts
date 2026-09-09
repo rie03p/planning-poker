@@ -85,6 +85,11 @@ export const clientMessageSchema = z.discriminatedUnion('type', [
     issue: issueSchema.omit({id: true}),
   }),
   z.object({type: z.literal('remove-issue'), issueId: z.string()}),
+  z.object({
+    type: z.literal('move-issue'),
+    issueId: z.string().min(1),
+    beforeIssueId: z.string().min(1).nullable(),
+  }),
   z.object({type: z.literal('set-active-issue'), issueId: z.string()}),
   z.object({type: z.literal('vote-next-issue')}),
   z.object({

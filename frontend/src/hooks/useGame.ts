@@ -197,6 +197,13 @@ export function useGame(
     [send],
   );
 
+  const moveIssue = useCallback(
+    (issueId: string, beforeIssueId: string | null) => {
+      send({type: 'move-issue', issueId, beforeIssueId});
+    },
+    [send],
+  );
+
   const setActiveIssue = useCallback(
     (issueId: string) => {
       send({type: 'set-active-issue', issueId});
@@ -256,6 +263,7 @@ export function useGame(
     reset,
     addIssue,
     removeIssue,
+    moveIssue,
     setActiveIssue,
     voteNextIssue,
     updateIssue,
