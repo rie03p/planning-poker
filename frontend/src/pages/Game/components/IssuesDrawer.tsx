@@ -1,38 +1,18 @@
 import {useState} from 'react';
 import {Drawer, useBreakpointValue} from '@chakra-ui/react';
-import {type Issue} from '@planning-poker/shared';
-import {IssuesListContent} from './IssuesListContent';
+import {IssuesListContent, type IssuesListContentProps} from './IssuesListContent';
 
-type IssuesDrawerProps = {
-  revealed: boolean;
+type IssuesDrawerProps = Omit<IssuesListContentProps, 'onDraggingChange'> & {
   isOpen: boolean;
   onClose: () => void;
-  issues: Issue[];
-  activeIssueId: string | undefined;
-  onAddIssue: (title: string, description?: string, url?: string) => void;
-  onRemoveIssue: (issueId: string) => void;
-  onMoveIssue: (issueId: string, beforeIssueId: string | null) => void;
-  onSetActiveIssue: (issueId: string) => void;
-  onUpdateIssue: (issue: Issue) => void;
-  onRemoveAllIssues: () => void;
-  cards?: readonly string[];
   isMobileOnly?: boolean;
 };
 
 export function IssuesDrawer({
-  revealed,
   isOpen,
   onClose,
-  issues,
-  activeIssueId,
-  onAddIssue,
-  onRemoveIssue,
-  onMoveIssue,
-  onSetActiveIssue,
-  onUpdateIssue,
-  onRemoveAllIssues,
-  cards,
   isMobileOnly = false,
+  ...contentProps
 }: IssuesDrawerProps) {
   const [isDragging, setIsDragging] = useState(false);
   const isMobile = useBreakpointValue({base: true, md: false}, {ssr: false});
@@ -57,20 +37,7 @@ export function IssuesDrawer({
       <Drawer.Backdrop />
       <Drawer.Positioner>
         <Drawer.Content rounded='none'>
-          <IssuesListContent
-            revealed={revealed}
-            issues={issues}
-            activeIssueId={activeIssueId}
-            onAddIssue={onAddIssue}
-            onRemoveIssue={onRemoveIssue}
-            onMoveIssue={onMoveIssue}
-            onSetActiveIssue={onSetActiveIssue}
-            onUpdateIssue={onUpdateIssue}
-            onRemoveAllIssues={onRemoveAllIssues}
-            onClose={onClose}
-            onDraggingChange={setIsDragging}
-            cards={cards}
-          />
+          <IssuesListContent {...contentProps} onClose={onClose} onDraggingChange={setIsDragging} />
         </Drawer.Content>
       </Drawer.Positioner>
     </Drawer.Root>

@@ -1,36 +1,12 @@
 import {Box} from '@chakra-ui/react';
-import {type Issue} from '@planning-poker/shared';
-import {IssuesListContent} from './IssuesListContent';
+import {IssuesListContent, type IssuesListContentProps} from './IssuesListContent';
 
-type IssuesPanelProps = {
-  revealed: boolean;
+type IssuesPanelProps = Omit<IssuesListContentProps, 'onDraggingChange'> & {
   isOpen: boolean;
   onClose: () => void;
-  issues: Issue[];
-  activeIssueId: string | undefined;
-  onAddIssue: (title: string, description?: string, url?: string) => void;
-  onRemoveIssue: (issueId: string) => void;
-  onMoveIssue: (issueId: string, beforeIssueId: string | null) => void;
-  onSetActiveIssue: (issueId: string) => void;
-  onUpdateIssue: (issue: Issue) => void;
-  onRemoveAllIssues: () => void;
-  cards?: readonly string[];
 };
 
-export function IssuesPanel({
-  revealed,
-  isOpen,
-  onClose,
-  issues,
-  activeIssueId,
-  onAddIssue,
-  onRemoveIssue,
-  onMoveIssue,
-  onSetActiveIssue,
-  onUpdateIssue,
-  onRemoveAllIssues,
-  cards,
-}: IssuesPanelProps) {
+export function IssuesPanel({isOpen, ...contentProps}: IssuesPanelProps) {
   return (
     <Box display={{base: 'none', md: 'flex'}} h='100vh' flexShrink={0}>
       {/* Panel Content */}
@@ -45,19 +21,7 @@ export function IssuesPanel({
         h='100%'
       >
         <Box w='380px' h='100%'>
-          <IssuesListContent
-            revealed={revealed}
-            issues={issues}
-            activeIssueId={activeIssueId}
-            onAddIssue={onAddIssue}
-            onRemoveIssue={onRemoveIssue}
-            onMoveIssue={onMoveIssue}
-            onSetActiveIssue={onSetActiveIssue}
-            onUpdateIssue={onUpdateIssue}
-            onRemoveAllIssues={onRemoveAllIssues}
-            onClose={onClose}
-            cards={cards}
-          />
+          <IssuesListContent {...contentProps} />
         </Box>
       </Box>
     </Box>

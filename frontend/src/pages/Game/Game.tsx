@@ -142,6 +142,21 @@ export function Game() {
     setIsIssuesOpen(false);
   };
 
+  const issueViewProps = {
+    revealed,
+    isOpen: isIssuesOpen,
+    onClose: handleCloseIssues,
+    issues,
+    activeIssueId,
+    onAddIssue: addIssue,
+    onRemoveIssue: removeIssue,
+    onMoveIssue: moveIssue,
+    onSetActiveIssue: setActiveIssue,
+    onUpdateIssue: updateIssue,
+    onRemoveAllIssues: removeAllIssues,
+    cards,
+  };
+
   return (
     <HStack align='stretch' minH='100vh' maxW='100vw' overflowX='hidden' gap={0} bg='gray.50'>
       <JoinDialog
@@ -201,37 +216,10 @@ export function Game() {
       </VStack>
 
       {/* Issues Panel - PC only */}
-      <IssuesPanel
-        revealed={revealed}
-        isOpen={isIssuesOpen}
-        onClose={handleCloseIssues}
-        issues={issues}
-        activeIssueId={activeIssueId}
-        onAddIssue={addIssue}
-        onRemoveIssue={removeIssue}
-        onMoveIssue={moveIssue}
-        onSetActiveIssue={setActiveIssue}
-        onUpdateIssue={updateIssue}
-        onRemoveAllIssues={removeAllIssues}
-        cards={cards}
-      />
+      <IssuesPanel {...issueViewProps} />
 
       {/* Issues Drawer - Mobile only */}
-      <IssuesDrawer
-        revealed={revealed}
-        isOpen={isIssuesOpen}
-        onClose={handleCloseIssues}
-        issues={issues}
-        activeIssueId={activeIssueId}
-        onAddIssue={addIssue}
-        onRemoveIssue={removeIssue}
-        onMoveIssue={moveIssue}
-        onSetActiveIssue={setActiveIssue}
-        onUpdateIssue={updateIssue}
-        onRemoveAllIssues={removeAllIssues}
-        cards={cards}
-        isMobileOnly
-      />
+      <IssuesDrawer {...issueViewProps} isMobileOnly />
     </HStack>
   );
 }

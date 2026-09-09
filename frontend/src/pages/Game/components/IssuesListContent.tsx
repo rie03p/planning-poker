@@ -30,7 +30,7 @@ import {parseIssueInput} from '../../../utils/issueInputParser';
 import {IssueDetailDialog} from './IssueDetailDialog';
 import {VotingResultsModal} from './VotingResultsModal';
 
-type IssuesListContentProps = {
+export type IssuesListContentProps = {
   revealed: boolean;
   issues: Issue[];
   activeIssueId: string | undefined;
