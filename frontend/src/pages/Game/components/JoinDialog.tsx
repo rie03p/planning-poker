@@ -46,7 +46,7 @@ export function JoinDialog({isOpen, onJoin, initialName, onCancel}: Props) {
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
       handleJoin();
     }
   };

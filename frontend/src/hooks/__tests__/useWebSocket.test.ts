@@ -7,6 +7,7 @@ type MockWsInstance = {
   send: ReturnType<typeof vi.fn>;
   close: ReturnType<typeof vi.fn>;
   emitOpen: () => void;
+  setReadyState: (state: number) => void;
   emitMessage: (data: unknown) => void;
   emitClose: () => void;
   emitError: (error?: unknown) => void;
@@ -28,8 +29,12 @@ function mockWebSocket() {
       instance = {
         send: this.send,
         close: this.close,
+        setReadyState: state => {
+          this.readyState = state;
+        },
 
         emitOpen: () => {
+          this.readyState = MockWebSocket.OPEN;
           if (this.listeners.open) {
             for (const cb of this.listeners.open) {
               cb(new Event('open'));
@@ -168,6 +173,44 @@ describe('useWebSocket', () => {
 
     expect(ws.send).toHaveBeenCalledWith(
       JSON.stringify({type: 'join', name: 'Alice', clientId: undefined}),
+    );
+  });
+
+  it('updates the name on the same connection using the current participant ID', () => {
+    const getWs = mockWebSocket();
+    const {rerender} = renderHook(
+      ({name, userId}) =>
+        useWebSocket({gameId: 'test-game', name, initialUserId: userId, onMessage: vi.fn()}),
+      {initialProps: {name: 'Alice', userId: ''}},
+    );
+    const ws = getWs();
+    ws.emitOpen();
+    rerender({name: 'Alice', userId: 'assigned-user-id'});
+    ws.send.mockClear();
+    rerender({name: 'Alicia', userId: 'assigned-user-id'});
+
+    expect(getWs()).toBe(ws);
+    expect(ws.close).not.toHaveBeenCalled();
+    expect(ws.send).toHaveBeenCalledExactlyOnceWith(
+      JSON.stringify({type: 'join', name: 'Alicia', clientId: 'assigned-user-id'}),
+    );
+  });
+
+  it('uses the latest name if it changes while the socket is connecting', () => {
+    const getWs = mockWebSocket();
+    const {rerender} = renderHook(
+      ({name}) =>
+        useWebSocket({gameId: 'test-game', name, initialUserId: 'user-123', onMessage: vi.fn()}),
+      {initialProps: {name: 'Alice'}},
+    );
+    const ws = getWs();
+    ws.setReadyState(0);
+    rerender({name: 'Alicia'});
+    expect(getWs()).toBe(ws);
+    expect(ws.send).not.toHaveBeenCalled();
+    ws.emitOpen();
+    expect(ws.send).toHaveBeenCalledExactlyOnceWith(
+      JSON.stringify({type: 'join', name: 'Alicia', clientId: 'user-123'}),
     );
   });
 

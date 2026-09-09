@@ -101,6 +101,8 @@ export function GameHeader({
             <Menu.Trigger asChild>
               <Box
                 as='button'
+                aria-label='Player settings'
+                title='Change name or spectator mode'
                 p={2}
                 borderRadius='md'
                 bg={isSpectator ? 'purple.100' : 'gray.100'}
