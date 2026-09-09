@@ -3,6 +3,7 @@ import {type Issue} from '@planning-poker/shared';
 import {IssuesListContent} from './IssuesListContent';
 
 type IssuesDrawerProps = {
+  revealed: boolean;
   isOpen: boolean;
   onClose: () => void;
   issues: Issue[];
@@ -17,6 +18,7 @@ type IssuesDrawerProps = {
 };
 
 export function IssuesDrawer({
+  revealed,
   isOpen,
   onClose,
   issues,
@@ -50,6 +52,7 @@ export function IssuesDrawer({
       <Drawer.Positioner>
         <Drawer.Content rounded='none'>
           <IssuesListContent
+            revealed={revealed}
             issues={issues}
             activeIssueId={activeIssueId}
             onAddIssue={onAddIssue}

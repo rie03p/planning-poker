@@ -201,6 +201,7 @@ export function Game() {
 
       {/* Issues Panel - PC only */}
       <IssuesPanel
+        revealed={revealed}
         isOpen={isIssuesOpen}
         onClose={handleCloseIssues}
         issues={issues}
@@ -215,6 +216,7 @@ export function Game() {
 
       {/* Issues Drawer - Mobile only */}
       <IssuesDrawer
+        revealed={revealed}
         isOpen={isIssuesOpen}
         onClose={handleCloseIssues}
         issues={issues}

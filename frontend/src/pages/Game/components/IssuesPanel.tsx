@@ -3,6 +3,7 @@ import {type Issue} from '@planning-poker/shared';
 import {IssuesListContent} from './IssuesListContent';
 
 type IssuesPanelProps = {
+  revealed: boolean;
   isOpen: boolean;
   onClose: () => void;
   issues: Issue[];
@@ -16,6 +17,7 @@ type IssuesPanelProps = {
 };
 
 export function IssuesPanel({
+  revealed,
   isOpen,
   onClose,
   issues,
@@ -42,6 +44,7 @@ export function IssuesPanel({
       >
         <Box w='380px' h='100%'>
           <IssuesListContent
+            revealed={revealed}
             issues={issues}
             activeIssueId={activeIssueId}
             onAddIssue={onAddIssue}
