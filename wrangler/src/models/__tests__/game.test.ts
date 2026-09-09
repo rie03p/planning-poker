@@ -878,6 +878,37 @@ describe('Game', () => {
   });
 
   describe('setActiveIssue (private method)', () => {
+    it('should restart a revealed issue and preserve votes on duplicate restart requests', async () => {
+      await mockState.storage.put('votingSystem', 'fibonacci');
+      const handleMessage = (game as any).handleMessage.bind(game);
+      const {gameState} = game as any;
+      const aliceId = await joinAndGetUserId('session-1', 'Alice');
+      const bobId = await joinAndGetUserId('session-2', 'Bob');
+      await handleMessage('session-1', {type: 'add-issue', issue: {title: 'Issue 1'}});
+      const issueId = gameState.activeIssueId;
+      await handleMessage('session-1', {type: 'vote', vote: '5'});
+      await handleMessage('session-2', {type: 'vote', vote: '8'});
+      await handleMessage('session-1', {type: 'reveal'});
+
+      const broadcastSpy = vi.spyOn(game as any, 'broadcast');
+      await handleMessage('session-1', {type: 'set-active-issue', issueId});
+
+      expect(gameState.activeIssueId).toBe(issueId);
+      expect(gameState.revealed).toBe(false);
+      expect(gameState.participants.get(aliceId).vote).toBeUndefined();
+      expect(gameState.participants.get(bobId).vote).toBeUndefined();
+      expect(gameState.issues[0].voteResults).toEqual({'5': 1, '8': 1});
+      expect(broadcastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({type: 'update', activeIssueId: issueId, revealed: false}),
+      );
+
+      await handleMessage('session-1', {type: 'vote', vote: '3'});
+      await handleMessage('session-2', {type: 'set-active-issue', issueId});
+      expect(gameState.participants.get(aliceId).vote).toBe('3');
+      await handleMessage('session-1', {type: 'reveal'});
+      expect(gameState.issues[0].voteResults).toEqual({'3': 1});
+    });
+
     it('should not update if same issue is already active', async () => {
       await mockState.storage.put('votingSystem', 'fibonacci');
       const handleMessage = (game as any).handleMessage.bind(game);

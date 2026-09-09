@@ -2,7 +2,7 @@ import {expect, test} from '@playwright/test';
 
 import {join, issue, openIssues, closeIssues} from './helpers';
 
-test('two participants create, edit, vote, reveal, advance and delete issues', async ({
+test('two participants create, edit, vote, reveal, vote again, advance and delete issues', async ({
   page,
   browser,
 }) => {
@@ -46,6 +46,32 @@ test('two participants create, edit, vote, reveal, advance and delete issues', a
     await expect(page.getByText('Total votes: 2', {exact: true})).toBeVisible();
     await expect(guest.getByText('Total votes: 2', {exact: true})).toBeVisible();
 
+    await openIssues(page);
+    await openIssues(guest);
+    await expect(
+      issue(guest, 'First issue').getByRole('button', {name: 'Vote again', exact: true}),
+    ).toBeEnabled();
+    await issue(page, 'First issue').getByRole('button', {name: 'Vote again', exact: true}).click();
+    for (const participantPage of [page, guest]) {
+      await expect(
+        issue(participantPage, 'First issue').getByRole('button', {name: 'Voting now...'}),
+      ).toBeDisabled();
+      await closeIssues(participantPage);
+      await expect(participantPage.getByText('Pick your cards!', {exact: true})).toBeVisible();
+      await expect(
+        participantPage.getByRole('button', {name: 'Vote M', exact: true}),
+      ).toHaveAttribute('aria-pressed', 'false');
+      await expect(
+        participantPage.getByRole('button', {name: 'Vote L', exact: true}),
+      ).toHaveAttribute('aria-pressed', 'false');
+    }
+    await page.getByRole('button', {name: 'Vote S', exact: true}).click();
+    await guest.getByRole('button', {name: 'Vote XL', exact: true}).click();
+    await expect(page.getByText('✓', {exact: true})).toHaveCount(2);
+    await page.getByRole('button', {name: 'Reveal votes', exact: true}).click();
+    await expect(page.getByText('Total votes: 2', {exact: true})).toBeVisible();
+    await expect(guest.getByText('Total votes: 2', {exact: true})).toBeVisible();
+
     await page.getByRole('button', {name: 'Vote next issue', exact: true}).click();
     await openIssues(page);
     await openIssues(guest);
@@ -56,8 +82,10 @@ test('two participants create, edit, vote, reveal, advance and delete issues', a
     await issue(page, 'First issue').getByRole('button', {name: 'View voting results'}).click();
     const results = page.getByRole('dialog', {name: 'First issue', exact: true});
     await expect(results.getByText('Total votes: 2', {exact: true})).toBeVisible();
-    await expect(results.getByText('L', {exact: true})).toBeVisible();
-    await expect(results.getByText('M', {exact: true})).toBeVisible();
+    await expect(results.getByText('S', {exact: true})).toBeVisible();
+    await expect(results.getByText('XL', {exact: true})).toBeVisible();
+    await expect(results.getByText('L', {exact: true})).toHaveCount(0);
+    await expect(results.getByText('M', {exact: true})).toHaveCount(0);
     await page.keyboard.press('Escape');
 
     await issue(page, 'Third issue')

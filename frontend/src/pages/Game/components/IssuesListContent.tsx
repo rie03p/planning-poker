@@ -22,6 +22,7 @@ import {IssueDetailDialog} from './IssueDetailDialog';
 import {VotingResultsModal} from './VotingResultsModal';
 
 type IssuesListContentProps = {
+  revealed: boolean;
   issues: Issue[];
   activeIssueId: string | undefined;
   onAddIssue: (title: string, description?: string, url?: string) => void;
@@ -34,6 +35,7 @@ type IssuesListContentProps = {
 };
 
 export function IssuesListContent({
+  revealed,
   issues,
   activeIssueId,
   onAddIssue,
@@ -240,7 +242,7 @@ export function IssuesListContent({
                           event.stopPropagation();
                         }}
                       >
-                        {isActive ? (
+                        {isActive && !revealed ? (
                           <Button
                             size='sm'
                             colorPalette='blue'
@@ -260,7 +262,7 @@ export function IssuesListContent({
                               onSetActiveIssue(issue.id);
                             }}
                           >
-                            Vote this issue
+                            {isActive ? 'Vote again' : 'Vote this issue'}
                           </Button>
                         )}
                       </Box>

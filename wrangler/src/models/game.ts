@@ -464,7 +464,7 @@ export class Game {
   }
 
   private setActiveIssue(issueId: string) {
-    if (this.gameState.activeIssueId === issueId) {
+    if (this.gameState.activeIssueId === issueId && !this.gameState.revealed) {
       return;
     }
 
