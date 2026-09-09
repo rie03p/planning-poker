@@ -996,9 +996,7 @@ describe('Game', () => {
       const {sessions} = game as any;
 
       const mockWs1 = {
-        send: vi.fn(() => {
-          throw new Error('Send failed');
-        }),
+        send: vi.fn().mockThrow(new Error('Send failed')),
         close: vi.fn(),
       };
 

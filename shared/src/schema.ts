@@ -21,10 +21,8 @@ export const VOTING_SYSTEMS = {
 
 export type VotingCard = (typeof VOTING_SYSTEMS)[VotingSystem][number];
 
-// Helper function to get all valid cards across all voting systems
-const getAllValidCards = (): string[] => [...new Set(Object.values(VOTING_SYSTEMS).flat())];
-
-export const votingCardSchema = z.enum(getAllValidCards() as [string, ...string[]]);
+const votingCards: string[] = [...new Set(Object.values(VOTING_SYSTEMS).flat())];
+export const votingCardSchema = z.enum(votingCards);
 
 // API Request/Response schemas
 export const createGameRequestSchema = z.object({

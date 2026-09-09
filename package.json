@@ -26,8 +26,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "oxfmt": "^0.27.0",
-    "oxlint": "^1.9.0"
+    "oxfmt": "^0.66.0",
+    "oxlint": "^1.81.0"
   },
   "packageManager": "pnpm@10.25.0"
 }

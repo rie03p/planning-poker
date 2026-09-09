@@ -29,6 +29,11 @@ test('two participants create, edit, vote, reveal, vote again, advance and delet
     await expect(issue(guest, 'Third issue')).toBeVisible();
 
     await issue(page, 'First issue').getByText('First issue', {exact: true}).click();
+    const editDialog = page.getByRole('dialog', {name: 'Edit Issue', exact: true});
+    await editDialog.getByPlaceholder('Link URL (optional)').fill('not-a-url');
+    await editDialog.getByRole('button', {name: 'Save', exact: true}).click();
+    await expect(editDialog.getByText('Invalid URL', {exact: true})).toBeVisible();
+    await editDialog.getByPlaceholder('Link URL (optional)').fill('');
     await page.getByPlaceholder('Add a description...').fill('An issue to estimate together.');
     await page.getByRole('button', {name: 'Save', exact: true}).click();
     await issue(guest, 'First issue').getByText('First issue', {exact: true}).click();
